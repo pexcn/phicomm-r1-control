@@ -6,26 +6,26 @@ function init() {
   head.appendChild(style);
   document.body.classList.add("body");
 
-  var temp_div = document.createElement("div");
-  temp_div.id = "temp_div";
-  temp_div.style =
+  var tempDiv = document.createElement("div");
+  tempDiv.id = "temp_div";
+  tempDiv.style =
     "position: fixed; text-align: center; left: 0px; top: 0px; width: 100%; height: 100%;";
-  document.body.appendChild(temp_div);
+  document.body.appendChild(tempDiv);
 
   var h3 = document.createElement("h3");
   h3.innerHTML = "页面加载中。";
-  temp_div.appendChild(h3);
+  tempDiv.appendChild(h3);
 
-  var btn = document.createElement("input");
-  btn.type = "button";
-  btn.classList.add("reload_btn");
-  btn.value = "刷新页面";
-  btn.onclick = function () {
+  var button = document.createElement("input");
+  button.type = "button";
+  button.classList.add("reload_btn");
+  button.value = "刷新页面";
+  button.onclick = function () {
     time = new Date().getTime();
     setCookie("time", time, 604800);
     location.reload();
   };
-  temp_div.appendChild(btn);
+  tempDiv.appendChild(button);
 
   var script = document.getElementById("refresh") || document.createElement("script");
   if (script.id !== "refresh") {
@@ -40,18 +40,18 @@ function init() {
 }
 
 function setCookie(cname, cvalue, exdays) {
-  var d = new Date();
-  d.setTime(d.getTime() + exdays * 1000);
-  var expires = "expires=" + d.toGMTString();
+  var date = new Date();
+  date.setTime(date.getTime() + exdays * 1000);
+  var expires = "expires=" + date.toGMTString();
   document.cookie = cname + "=" + cvalue + "; " + expires;
 }
 
 function getCookie(cname) {
   var name = cname + "=";
   var ca = document.cookie.split(";");
-  for (var i = 0; i < ca.length; i++) {
-    var c = ca[i].trim();
-    if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+  for (var index = 0; index < ca.length; index++) {
+    var text = ca[index].trim();
+    if (text.indexOf(name) == 0) return text.substring(name.length, text.length);
   }
   return "";
 }

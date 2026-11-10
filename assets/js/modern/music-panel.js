@@ -27,17 +27,17 @@
   var useState = React.useState,
     useEffect = React.useEffect,
     useRef = React.useRef;
-  var C = R1Core;
-  var toast = C.toast;
+  var r1Core = R1Core;
+  var toast = r1Core.toast;
 
-  var P = (global.R1Panels = global.R1Panels || {});
+  var r1Panels = (global.R1Panels = global.R1Panels || {});
 
-  var VOL_MAX = 30;
-  var VOL_WARN_THRESHOLD = 18;
-  var MUSIC_API = R1Config.musicApiUrl;
+  var vOLMAX = 30;
+  var vOLWARNTHRESHOLD = 18;
+  var mUSICAPI = R1Config.musicApiUrl;
 
   /* 发音人：设备用字符串码，展示用中文名（沿用原版映射） */
-  var TTS_SPEAKERS = [
+  var tTSSPEAKERS = [
     ["SWEET", "萱萱"],
     ["FEMALE", "小雯"],
     ["CHILDREN", "糖糖"],
@@ -45,9 +45,9 @@
     ["MALE", "小峰"],
     ["TIANTIAN", "天天"],
   ];
-  var TTS_LABEL = {};
-  TTS_SPEAKERS.forEach(function (s) {
-    TTS_LABEL[s[0]] = s[1];
+  var tTSLABEL = {};
+  tTSSPEAKERS.forEach(function (item) {
+    tTSLABEL[item[0]] = item[1];
   });
 
   var defaultCover =
@@ -113,18 +113,18 @@
         });*/
   }
 
-  function qCoverFetch(key, name, artist, src, cb) {
+  function qCoverFetch(key, name, artist, source, callback) {
     if (qCoverCache[key]) {
-      if (cb) cb(qCoverCache[key]);
+      if (callback) callback(qCoverCache[key]);
       return;
     }
     if (qCoverFail[key]) return;
     if (qCoverWaiters[key]) {
-      if (cb) qCoverWaiters[key].push(cb);
+      if (callback) qCoverWaiters[key].push(callback);
       return;
     }
-    qCoverWaiters[key] = cb ? [cb] : [];
-    qCoverBatch.push({ key: key, name: name, artist: artist, src: src });
+    qCoverWaiters[key] = callback ? [callback] : [];
+    qCoverBatch.push({ key: key, name: name, artist: artist, src: source });
     if (qCoverBatch.length >= 25) qCoverFlush();
     else if (!qCoverTimer) qCoverTimer = setTimeout(qCoverFlush, 120);
   }
@@ -132,13 +132,13 @@
   /* 队列行封面：有封面直接显示；没有则等滚动到可见（IO）再按需拉取 */
   function QueuePic(props) {
     var ref = useRef(null);
-    var _pic = useState(""),
-      pic = _pic[0],
-      setPic = _pic[1];
+    var picState = useState(""),
+      pic = picState[0],
+      setPic = picState[1];
     useEffect(function () {
       if (props.direct || qCoverCache[props.k]) return;
-      var el = ref.current;
-      if (!el) return;
+      var element = ref.current;
+      if (!element) return;
       var fire = function () {
         qCoverFetch(props.k, props.name, props.artist, props.src, function (url) {
           if (url) setPic(url);
@@ -148,8 +148,8 @@
       try {
         io = new IntersectionObserver(
           function (entries) {
-            for (var i = 0; i < entries.length; i++) {
-              if (entries[i].isIntersecting) {
+            for (var index = 0; index < entries.length; index++) {
+              if (entries[index].isIntersecting) {
                 io.disconnect();
                 fire();
                 return;
@@ -158,14 +158,14 @@
           },
           { root: (props.rootRef && props.rootRef.current) || null, rootMargin: "300px" },
         );
-        io.observe(el);
-      } catch (e) {
+        io.observe(element);
+      } catch (error) {
         fire();
       }
       return function () {
         try {
           io && io.disconnect();
-        } catch (e) {}
+        } catch (error) {}
       };
     }, []);
     var url = props.direct || qCoverCache[props.k] || pic;
@@ -179,9 +179,9 @@
         ? h("img", {
             src: url,
             alt: "",
-            onError: function (e) {
-              if (e.target.parentNode) e.target.parentNode.classList.add("no-pic");
-              e.target.style.display = "none";
+            onError: function (event) {
+              if (event.target.parentNode) event.target.parentNode.classList.add("no-pic");
+              event.target.style.display = "none";
             },
           })
         : h(Icon, { name: "music" }),
@@ -192,107 +192,107 @@
    * 音乐页
    * =================================================================== */
   function MusicPanel() {
-    var st = C.useStore();
+    var store = r1Core.useStore();
 
     /* --- 播放状态 --- */
-    var _playing = useState(false),
-      playing = _playing[0],
-      setPlaying = _playing[1];
-    var _song = useState({ title: "未在播放", artist: "", cover: "" }),
-      song = _song[0],
-      setSong = _song[1];
-    var _progress = useState(0),
-      progress = _progress[0],
-      setProgress = _progress[1];
-    var _duration = useState(0),
-      duration = _duration[0],
-      setDuration = _duration[1];
-    var _volume = useState(15),
-      volume = _volume[0],
-      setVolume = _volume[1];
-    var _mode = useState("list"),
-      mode = _mode[0],
-      setMode = _mode[1];
-    var _source = useState(2),
-      source = _source[0],
-      setSource = _source[1];
-    var _lyrics = useState([]),
-      lyrics = _lyrics[0],
-      setLyrics = _lyrics[1];
-    var _lrcIdx = useState(0),
-      lrcIdx = _lrcIdx[0],
-      setLrcIdx = _lrcIdx[1];
-    var _queue = useState([]),
-      queue = _queue[0],
-      setQueue = _queue[1];
-    var _tts = useState(""),
-      tts = _tts[0],
-      setTts = _tts[1];
-    var _collected = useState(function () {
+    var playingState = useState(false),
+      playing = playingState[0],
+      setPlaying = playingState[1];
+    var songState = useState({ title: "未在播放", artist: "", cover: "" }),
+      song = songState[0],
+      setSong = songState[1];
+    var progressState = useState(0),
+      progress = progressState[0],
+      setProgress = progressState[1];
+    var durationState = useState(0),
+      duration = durationState[0],
+      setDuration = durationState[1];
+    var volumeState = useState(15),
+      volume = volumeState[0],
+      setVolume = volumeState[1];
+    var modeState = useState("list"),
+      mode = modeState[0],
+      setMode = modeState[1];
+    var sourceState = useState(2),
+      source = sourceState[0],
+      setSource = sourceState[1];
+    var lyricsState = useState([]),
+      lyrics = lyricsState[0],
+      setLyrics = lyricsState[1];
+    var lrcIdxState = useState(0),
+      lrcIdx = lrcIdxState[0],
+      setLrcIdx = lrcIdxState[1];
+    var queueState = useState([]),
+      queue = queueState[0],
+      setQueue = queueState[1];
+    var ttsState = useState(""),
+      tts = ttsState[0],
+      setTts = ttsState[1];
+    var collectedState = useState(function () {
         try {
           return JSON.parse(localStorage.getItem("r1_collected") || "{}");
-        } catch (e) {
+        } catch (error) {
           return {};
         }
       }),
-      collected = _collected[0],
-      setCollected = _collected[1];
+      collected = collectedState[0],
+      setCollected = collectedState[1];
 
     /* --- 播放器 UI --- */
-    var _scale = useState(1),
-      scale = _scale[0],
-      setScale = _scale[1];
-    var _showLyrics = useState(false),
-      showLyrics = _showLyrics[0],
-      setShowLyrics = _showLyrics[1];
-    var _showVol = useState(false),
-      showVol = _showVol[0],
-      setShowVol = _showVol[1];
-    var _showQueue = useState(false),
-      showQueue = _showQueue[0],
-      setShowQueue = _showQueue[1];
-    var _queueFilter = useState(""),
-      queueFilter = _queueFilter[0],
-      setQueueFilter = _queueFilter[1];
-    var _showMore = useState(false),
-      showMore = _showMore[0],
-      setShowMore = _showMore[1];
-    var _askText = useState(""),
-      askText = _askText[0],
-      setAskText = _askText[1];
-    var _showAsk = useState(false),
-      showAsk = _showAsk[0],
-      setShowAsk = _showAsk[1];
-    var _showTts = useState(false),
-      showTts = _showTts[0],
-      setShowTts = _showTts[1];
-    var _showSrc = useState(false),
-      showSrc = _showSrc[0],
-      setShowSrc = _showSrc[1];
-    var _showLight = useState(false),
-      showLight = _showLight[0],
-      setShowLight = _showLight[1];
-    var _showHot = useState(false),
-      showHot = _showHot[0],
-      setShowHot = _showHot[1];
+    var scaleState = useState(1),
+      scale = scaleState[0],
+      setScale = scaleState[1];
+    var showLyricsState = useState(false),
+      showLyrics = showLyricsState[0],
+      setShowLyrics = showLyricsState[1];
+    var showVolState = useState(false),
+      showVol = showVolState[0],
+      setShowVol = showVolState[1];
+    var showQueueState = useState(false),
+      showQueue = showQueueState[0],
+      setShowQueue = showQueueState[1];
+    var queueFilterState = useState(""),
+      queueFilter = queueFilterState[0],
+      setQueueFilter = queueFilterState[1];
+    var showMoreState = useState(false),
+      showMore = showMoreState[0],
+      setShowMore = showMoreState[1];
+    var askTextState = useState(""),
+      askText = askTextState[0],
+      setAskText = askTextState[1];
+    var showAskState = useState(false),
+      showAsk = showAskState[0],
+      setShowAsk = showAskState[1];
+    var showTtsState = useState(false),
+      showTts = showTtsState[0],
+      setShowTts = showTtsState[1];
+    var showSrcState = useState(false),
+      showSrc = showSrcState[0],
+      setShowSrc = showSrcState[1];
+    var showLightState = useState(false),
+      showLight = showLightState[0],
+      setShowLight = showLightState[1];
+    var showHotState = useState(false),
+      showHot = showHotState[0],
+      setShowHot = showHotState[1];
     /* 歌词自动重试：正在播放却没歌词时每 4 秒重取一次，最多 5 次 */
-    var _retry = useState(0),
-      retryCount = _retry[0],
-      setRetryCount = _retry[1];
-    var _showSongs = useState(false),
-      showSongs = _showSongs[0],
-      setShowSongs = _showSongs[1];
-    var _songGroups = useState(null),
-      songGroups = _songGroups[0],
-      setSongGroups = _songGroups[1];
-    var _groupsBusy = useState(false),
-      groupsBusy = _groupsBusy[0],
-      setGroupsBusy = _groupsBusy[1];
+    var retryCountState = useState(0),
+      retryCount = retryCountState[0],
+      setRetryCount = retryCountState[1];
+    var showSongsState = useState(false),
+      showSongs = showSongsState[0],
+      setShowSongs = showSongsState[1];
+    var songGroupsState = useState(null),
+      songGroups = songGroupsState[0],
+      setSongGroups = songGroupsState[1];
+    var groupsBusyState = useState(false),
+      groupsBusy = groupsBusyState[0],
+      setGroupsBusy = groupsBusyState[1];
     /* 我的歌单音源：弹层内可切 QQ / 网易云 / 酷我，切换即向设备重新拉取该源歌单 */
-    var _songSrc = useState("netease"),
-      songSrc = _songSrc[0],
-      setSongSrc = _songSrc[1];
-    var _web = useState({
+    var songSrcState = useState("netease"),
+      songSrc = songSrcState[0],
+      setSongSrc = songSrcState[1];
+    var webState = useState({
       open: false,
       kw: "",
       src: "netease",
@@ -300,8 +300,8 @@
       busy: false,
       searched: false,
     });
-    var web = _web[0],
-      setWeb = _web[1];
+    var web = webState[0],
+      setWeb = webState[1];
 
     /* --- 拖动锁 --- */
     var seekingRef = useRef(false);
@@ -328,7 +328,7 @@
     /* 切歌检测：歌名变化即清空旧歌词（新歌词由 lrc 事件随后填入），
      * 避免新歌没歌词时界面残留上一首的歌词；同时重置自动重试计数 */
     var lastTitleRef = useRef("");
-    C.useR1Event("music_info", function (info) {
+    r1Core.useR1Event("music_info", function (info) {
       if (!info) return;
       if (info.title && info.title !== lastTitleRef.current) {
         lastTitleRef.current = info.title;
@@ -338,12 +338,12 @@
         setRetryCount(0);
       }
       if (info.title || info.artist || info.cover || info.albumUrl) {
-        setSong(function (p) {
-          return Object.assign({}, p, {
-            title: info.title != null ? info.title : p.title,
-            artist: info.artist != null ? info.artist : p.artist,
-            album: info.album != null ? info.album : p.album,
-            cover: info.cover || info.albumUrl || p.cover,
+        setSong(function (track) {
+          return Object.assign({}, track, {
+            title: info.title != null ? info.title : track.title,
+            artist: info.artist != null ? info.artist : track.artist,
+            album: info.album != null ? info.album : track.album,
+            cover: info.cover || info.albumUrl || track.cover,
           });
         });
       }
@@ -356,16 +356,20 @@
       if (info.ttsModelType !== undefined) setTts(info.ttsModelType);
       if (info.music_source !== undefined && info.music_source !== null) {
         var raw = info.music_source;
-        var num = typeof raw === "string" ? { qq: 1, netease: 2, kuwo: 3 }[raw] : raw;
-        if ((num === 1 || num === 2 || num === 3) && !sourceSwitchRef.current && num !== source) {
-          setSource(num);
+        var count = typeof raw === "string" ? { qq: 1, netease: 2, kuwo: 3 }[raw] : raw;
+        if (
+          (count === 1 || count === 2 || count === 3) &&
+          !sourceSwitchRef.current &&
+          count !== source
+        ) {
+          setSource(count);
           try {
-            localStorage.setItem("r1_music_source", String(num));
-          } catch (e) {}
+            localStorage.setItem("r1_music_source", String(count));
+          } catch (error) {}
         }
       }
       if (info.volume !== undefined && !volDragRef.current) {
-        setVolume(Math.max(0, Math.min(VOL_MAX, Number(info.volume))));
+        setVolume(Math.max(0, Math.min(vOLMAX, Number(info.volume))));
       }
       if (info.position !== undefined) {
         if (!seekingRef.current) setProgress(info.position / 1000);
@@ -378,7 +382,7 @@
       }
     });
 
-    C.useR1Event("lrc", function (data) {
+    r1Core.useR1Event("lrc", function (data) {
       if (!data) return;
       if (data.lyrics) {
         setProgress(0);
@@ -389,11 +393,11 @@
       if (data.currentIndex !== undefined) setLrcIdx(data.currentIndex);
     });
 
-    C.useR1Event("music_list", function (list) {
+    r1Core.useR1Event("music_list", function (list) {
       if (Array.isArray(list)) setQueue(list);
     });
 
-    C.useR1Event("song_list", function (data) {
+    r1Core.useR1Event("song_list", function (data) {
       setGroupsBusy(false);
       if (!data) {
         toast("歌单响应为空", "err");
@@ -408,7 +412,7 @@
       toast("歌单加载完成", "ok");
     });
 
-    C.useR1Event("collect_result", function (info) {
+    r1Core.useR1Event("collect_result", function (info) {
       if (info && info.msg) toast(info.msg, "info");
     });
 
@@ -437,14 +441,14 @@
                 hi = mid - 1;
               }
             }
-            setLrcIdx(function (cur) {
-              return cur === ans ? cur : ans;
+            setLrcIdx(function (current) {
+              return current === ans ? current : ans;
             });
           }
         }
-        var t = setInterval(tick, 100);
+        var intervalId = setInterval(tick, 100);
         return function () {
-          clearInterval(t);
+          clearInterval(intervalId);
         };
       },
       [playing, duration, lyrics],
@@ -455,26 +459,26 @@
       var saved = 2;
       try {
         saved = parseInt(localStorage.getItem("r1_music_source") || "2", 10) || 2;
-      } catch (e) {}
+      } catch (error) {}
       setSource(saved);
     }, []);
 
     /* ---------- 视口缩放（原版 --player-scale 逻辑，小屏防裁切、平板防空旷） ---------- */
     useEffect(function () {
       function calc() {
-        var w = window.innerWidth,
+        var innerWidth = window.innerWidth,
           hh = window.innerHeight,
-          s;
-        if (w <= 360) s = 0.85;
-        else if (w <= 414) s = 1;
-        else if (w <= 768) s = 1 + ((w - 414) / (768 - 414)) * 0.25;
-        else if (w <= 1024) {
-          var vmin = Math.min(w, hh) / 100;
-          s = Math.min(2.0, Math.max(1.5, vmin * 0.08));
-        } else s = 1;
-        if (hh < 600) s = Math.min(s, 0.9);
-        if (hh < 500) s = Math.min(s, 0.78);
-        setScale(parseFloat(s.toFixed(3)));
+          numericValue;
+        if (innerWidth <= 360) numericValue = 0.85;
+        else if (innerWidth <= 414) numericValue = 1;
+        else if (innerWidth <= 768) numericValue = 1 + ((innerWidth - 414) / (768 - 414)) * 0.25;
+        else if (innerWidth <= 1024) {
+          var vmin = Math.min(innerWidth, hh) / 100;
+          numericValue = Math.min(2.0, Math.max(1.5, vmin * 0.08));
+        } else numericValue = 1;
+        if (hh < 600) numericValue = Math.min(numericValue, 0.9);
+        if (hh < 500) numericValue = Math.min(numericValue, 0.78);
+        setScale(parseFloat(numericValue.toFixed(3)));
       }
       calc();
       window.addEventListener("resize", calc);
@@ -485,7 +489,7 @@
 
     /* ---------- 交互 ---------- */
     function guard() {
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return false;
       }
@@ -497,67 +501,69 @@
       setPlaying(next); /* 乐观更新，按下即响应 */
       try {
         next ? R1WS.musicResume() : R1WS.musicPause();
-      } catch (e) {}
+      } catch (error) {}
     }
     function step(action) {
       if (!guard()) return;
       try {
         R1WS.musicControl(action);
-      } catch (e) {}
+      } catch (error) {}
     }
     function changeMode() {
       if (!guard()) return;
-      var next = C.nextMode(mode);
+      var next = r1Core.nextMode(mode);
       setMode(next);
       try {
-        R1WS.wsSend({ type: "set_play_mode", mode: C.MODE_CODE[next] });
-      } catch (e) {}
-      toast(C.MODE_LABEL[next], "info", 1400);
+        R1WS.wsSend({ type: "set_play_mode", mode: r1Core.MODE_CODE[next] });
+      } catch (error) {}
+      toast(r1Core.MODE_LABEL[next], "info", 1400);
     }
-    function applyVolume(v) {
-      v = Math.max(0, Math.min(VOL_MAX, v));
-      setVolume(v);
+    function applyVolume(value) {
+      value = Math.max(0, Math.min(vOLMAX, value));
+      setVolume(value);
       volDragRef.current = false;
-      if (v > VOL_WARN_THRESHOLD && !volWarnRef.current) {
-        C.confirm({
-          title: "音量提醒",
-          desc: "音量超过 " + VOL_WARN_THRESHOLD + " 可能打扰他人，甚至损伤扬声器。确定继续吗？",
-          okText: "继续调大",
-          cancelText: "取消",
-        }).then(function (ok) {
-          if (ok) {
-            volWarnRef.current = true;
-            try {
-              R1WS.setVolume(v);
-            } catch (e) {}
-          } else setVolume(VOL_WARN_THRESHOLD);
-        });
+      if (value > vOLWARNTHRESHOLD && !volWarnRef.current) {
+        r1Core
+          .confirm({
+            title: "音量提醒",
+            desc: "音量超过 " + vOLWARNTHRESHOLD + " 可能打扰他人，甚至损伤扬声器。确定继续吗？",
+            okText: "继续调大",
+            cancelText: "取消",
+          })
+          .then(function (ok) {
+            if (ok) {
+              volWarnRef.current = true;
+              try {
+                R1WS.setVolume(value);
+              } catch (error) {}
+            } else setVolume(vOLWARNTHRESHOLD);
+          });
         return;
       }
       try {
-        R1WS.setVolume(v);
-      } catch (e) {}
+        R1WS.setVolume(value);
+      } catch (error) {}
     }
     function bumpVolume(delta) {
       applyVolume(volume + delta);
     }
-    function seekTo(v) {
+    function seekTo(value) {
       try {
-        R1WS.seekTo(v);
-      } catch (e) {}
+        R1WS.seekTo(value);
+      } catch (error) {}
       setTimeout(function () {
         seekingRef.current = false;
       }, 500);
     }
-    function playQueueItem(item, idx) {
+    function playQueueItem(item, index) {
       if (!guard()) return;
       var name = item.title || item.name || "";
       /* 点击的正是当前歌曲且在播放 → 不重复触发 */
       if (name && name === song.title && playing) return;
       try {
-        if (idx !== undefined && idx !== null) R1WS.playByIndex(idx);
+        if (index !== undefined && index !== null) R1WS.playByIndex(index);
         else R1WS.musicPlay(name);
-      } catch (e) {}
+      } catch (error) {}
       toast("正在播放：" + name, "ok", 1600);
     }
     function toggleCollect(item) {
@@ -567,23 +573,23 @@
       var has = !!next[key];
       try {
         has ? R1WS.cancelCollectSong(item) : R1WS.collectSong(item);
-      } catch (e) {}
+      } catch (error) {}
       if (has) delete next[key];
       else next[key] = true;
       setCollected(next);
       try {
         localStorage.setItem("r1_collected", JSON.stringify(next));
-      } catch (e) {}
+      } catch (error) {}
     }
     function openQueue() {
       setShowQueue(true);
       try {
         R1WS.requestMusicList();
-      } catch (e) {}
+      } catch (error) {}
     }
     function askPlay() {
-      var kw = (askText || "").trim();
-      if (!kw) {
+      var keyword2 = (askText || "").trim();
+      if (!keyword2) {
         toast("请输入歌曲名或歌手", "err");
         return;
       }
@@ -591,11 +597,11 @@
       var key = { 1: "qq", 2: "netease", 3: "kuwo" }[source];
       try {
         if (key) R1WS.setMusicSource(key);
-      } catch (e) {}
+      } catch (error) {}
       try {
-        R1WS.musicPlay(kw);
-      } catch (e) {}
-      toast("正在点播：" + kw, "ok");
+        R1WS.musicPlay(keyword2);
+      } catch (error) {}
+      toast("正在点播：" + keyword2, "ok");
       setAskText("");
       setShowAsk(false);
     }
@@ -604,17 +610,17 @@
       try {
         if (source) R1WS.setMusicSource({ 1: "qq", 2: "netease", 3: "kuwo" }[source]);
         R1WS.playCollection();
-      } catch (e) {}
+      } catch (error) {}
       toast("正在播放小讯收藏", "ok");
       setShowMore(false);
     }
-    function loadGroups(force, src) {
+    function loadGroups(force, source2) {
       if (!guard()) return;
       setGroupsBusy(true);
       setSongGroups(null);
       try {
-        R1WS.requestSongList(src != null ? src : source, force);
-      } catch (e) {
+        R1WS.requestSongList(source2 != null ? source2 : source, force);
+      } catch (error) {
         setGroupsBusy(false);
       }
       setTimeout(function () {
@@ -622,36 +628,37 @@
       }, 8000);
     }
     function doWebSearch() {
-      var kw = (web.kw || "").trim();
-      if (!kw) {
+      var keyword2 = (web.kw || "").trim();
+      if (!keyword2) {
         toast("请输入关键词", "err");
         return;
       }
       setWeb(Object.assign({}, web, { busy: true, searched: true, list: [] }));
       /* 静态部署使用可配置的 CORS 音乐接口，不依赖同源搜索后端。 */
-      fetch(MUSIC_API + "?source=" + web.src + "&page=1&keyword=" + encodeURIComponent(kw))
-        .then(function (r) {
-          return r.json();
+      fetch(mUSICAPI + "?source=" + web.src + "&page=1&keyword=" + encodeURIComponent(keyword2))
+        .then(function (result) {
+          return result.json();
         })
-        .then(function (d) {
-          if (d.code === 1 && d.data && d.data.list && d.data.list.length) {
-            var list = d.data.list;
+        .then(function (message) {
+          if (message.code === 1 && message.data && message.data.list && message.data.list.length) {
+            var list = message.data.list;
             if (web.src === "qq") {
               setWeb(Object.assign({}, web, { busy: false, list: list }));
               return;
             }
             Promise.all(
-              list.map(function (s) {
-                return fetch(MUSIC_API + "?info=" + encodeURIComponent(s.id))
-                  .then(function (r) {
-                    return r.json();
+              list.map(function (item) {
+                return fetch(mUSICAPI + "?info=" + encodeURIComponent(item.id))
+                  .then(function (result) {
+                    return result.json();
                   })
-                  .then(function (x) {
-                    if (x.code === 1 && x.data && x.data.pic) s.pic = x.data.pic;
-                    return s;
+                  .then(function (message2) {
+                    if (message2.code === 1 && message2.data && message2.data.pic)
+                      item.pic = message2.data.pic;
+                    return item;
                   })
                   .catch(function () {
-                    return s;
+                    return item;
                   });
               }),
             ).then(function (full) {
@@ -667,56 +674,58 @@
           toast("搜索失败，请检查网络", "err");
         });
     }
-    function playWebResult(s) {
+    function playWebResult(value) {
       if (!guard()) return;
       var STR2NUM = { qq: 1, netease: 2, kuwo: 3 };
-      var num = STR2NUM[web.src];
-      if (num && num !== source) {
-        setSource(num);
+      var count = STR2NUM[web.src];
+      if (count && count !== source) {
+        setSource(count);
         sourceSwitchRef.current = true;
         setTimeout(function () {
           sourceSwitchRef.current = false;
         }, 3000);
         try {
-          R1WS.setMusicSource({ 1: "qq", 2: "netease", 3: "kuwo" }[num]);
-        } catch (e) {}
+          R1WS.setMusicSource({ 1: "qq", 2: "netease", 3: "kuwo" }[count]);
+        } catch (error) {}
       }
       try {
-        R1WS.musicPlay((s.name || "") + " " + (s.artist || ""));
-      } catch (e) {}
-      toast("正在播放：" + s.name, "ok");
+        R1WS.musicPlay((value.name || "") + " " + (value.artist || ""));
+      } catch (error) {}
+      toast("正在播放：" + value.name, "ok");
       setWeb(Object.assign({}, web, { open: false }));
     }
-    function addNext(s) {
+    function addNext(value) {
       if (!guard()) return;
       try {
         R1WS.sendMessage({
           what: 65536,
           arg1: 0,
           arg2: 1,
-          obj: "web_添加" + (s.name || "") + " " + (s.artist || ""),
+          obj: "web_添加" + (value.name || "") + " " + (value.artist || ""),
         });
-      } catch (e) {}
+      } catch (error) {}
       toast("已加入播放队列", "ok");
     }
     function locatePlaying() {
-      var el = document.querySelector(".playlist-item.playing");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      var element = document.querySelector(".playlist-item.playing");
+      if (element) element.scrollIntoView({ behavior: "smooth", block: "center" });
       else toast("当前无正在播放的歌曲", "info");
     }
 
     /* ---------- 队列过滤（保留原始索引用于 playByIndex） ---------- */
-    var kw = queueFilter.trim().toLowerCase();
+    var keyword = queueFilter.trim().toLowerCase();
     var filteredQueue = queue
-      .map(function (s, i) {
-        return { song: s, idx: i };
+      .map(function (item, index) {
+        return { song: item, idx: index };
       })
       .filter(function (it) {
-        if (!kw) return true;
+        if (!keyword) return true;
         var name = (it.song.title || it.song.name || "").toLowerCase();
         var artist = (it.song.artist || it.song.singer || "").toLowerCase();
         return (
-          name.indexOf(kw) >= 0 || artist.indexOf(kw) >= 0 || String(it.idx + 1).indexOf(kw) >= 0
+          name.indexOf(keyword) >= 0 ||
+          artist.indexOf(keyword) >= 0 ||
+          String(it.idx + 1).indexOf(keyword) >= 0
         );
       });
 
@@ -727,12 +736,12 @@
       function () {
         [desktopLrcRef.current, mobileLrcRef.current].forEach(function (box) {
           if (!box) return;
-          var el = box.querySelector(".active");
-          if (!el) return;
-          var top = el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2;
+          var element = box.querySelector(".active");
+          if (!element) return;
+          var top = element.offsetTop - box.clientHeight / 2 + element.clientHeight / 2;
           try {
             box.scrollTo({ top: top, behavior: "smooth" });
-          } catch (e) {
+          } catch (error) {
             box.scrollTop = top;
           }
         });
@@ -745,14 +754,14 @@
       function () {
         if (lyrics.length || !playing || !song.title) return;
         if (retryCount >= 5) return;
-        var t = setTimeout(function () {
+        var timeoutId = setTimeout(function () {
           try {
             R1WS.requestMusicInfo();
-          } catch (e) {}
+          } catch (error) {}
           setRetryCount(retryCount + 1);
         }, 4000);
         return function () {
-          clearTimeout(t);
+          clearTimeout(timeoutId);
         };
       },
       [lyrics.length, playing, song.title, retryCount],
@@ -764,29 +773,30 @@
     useEffect(
       function () {
         if (!queue.length) return;
-        var src = { 1: "qq", 2: "netease", 3: "kuwo" }[source] || "netease";
+        var source2 = { 1: "qq", 2: "netease", 3: "kuwo" }[source] || "netease";
         var seen = {};
         var todo = [];
-        queue.forEach(function (s) {
-          var name = s.title || s.name || "";
+        queue.forEach(function (track) {
+          var name = track.title || track.name || "";
           if (!name) return;
-          var artist = s.artist || s.singer || "";
-          var k = name + "@@" + artist;
-          if (seen[k] || qCoverCache[k] || qCoverFail[k] || qCoverWaiters[k]) return;
-          seen[k] = 1;
-          todo.push({ key: k, name: name, artist: artist, src: src });
+          var artist = track.artist || track.singer || "";
+          var value = name + "@@" + artist;
+          if (seen[value] || qCoverCache[value] || qCoverFail[value] || qCoverWaiters[value])
+            return;
+          seen[value] = 1;
+          todo.push({ key: value, name: name, artist: artist, src: source2 });
         });
         if (!todo.length) return;
-        var i = 0;
+        var numericValue = 0;
         var timer = setInterval(function () {
-          if (i >= todo.length) {
+          if (numericValue >= todo.length) {
             clearInterval(timer);
             return;
           }
-          var batch = todo.slice(i, i + 25);
-          i += 25;
-          batch.forEach(function (t) {
-            qCoverFetch(t.key, t.name, t.artist, t.src, null);
+          var batch = todo.slice(numericValue, numericValue + 25);
+          numericValue += 25;
+          batch.forEach(function (image) {
+            qCoverFetch(image.key, image.name, image.artist, image.src, null);
           });
         }, 400);
         return function () {
@@ -797,17 +807,17 @@
     );
 
     function renderLrc(variant) {
-      var cls = variant === "mobile" ? "netease-lrc-line-mobile" : "netease-lrc-line";
-      return lyrics.map(function (line, i) {
+      var className = variant === "mobile" ? "netease-lrc-line-mobile" : "netease-lrc-line";
+      return lyrics.map(function (line, index) {
         return h(
           "div",
-          { key: i, className: cls + (i === lrcIdx ? " active" : "") },
+          { key: index, className: className + (index === lrcIdx ? " active" : "") },
           lrcText(line),
         );
       });
     }
 
-    var MORE_ITEMS = [
+    var mOREITEMS = [
       {
         icon: "music",
         label: "点播音乐",
@@ -831,9 +841,9 @@
         act: function () {
           setShowMore(false);
           setShowSongs(true);
-          var s = { 1: "qq", 2: "netease", 3: "kuwo" }[source] || "netease";
-          setSongSrc(s);
-          loadGroups(false, s);
+          var optionItem = { 1: "qq", 2: "netease", 3: "kuwo" }[source] || "netease";
+          setSongSrc(optionItem);
+          loadGroups(false, optionItem);
         },
       },
       {
@@ -940,7 +950,7 @@
                         try {
                           R1WS.requestMusicInfo();
                           toast("已请求重新获取歌词", "info");
-                        } catch (e) {}
+                        } catch (error) {}
                         setRetryCount(0);
                       },
                     },
@@ -1029,7 +1039,7 @@
           h(
             "div",
             { className: "progress-section" },
-            h("span", { className: "time-current" }, C.fmtTime(progress)),
+            h("span", { className: "time-current" }, r1Core.fmtTime(progress)),
             h(
               "div",
               { className: "progress-bar-wrap" },
@@ -1041,15 +1051,15 @@
                 showValue: false,
                 label: "播放进度",
                 className: "progress-slider",
-                onChange: function (v) {
+                onChange: function (value) {
                   seekingRef.current = true;
-                  setProgress(v);
-                  progressRef.current = v;
+                  setProgress(value);
+                  progressRef.current = value;
                 },
                 onCommit: seekTo,
               }),
             ),
-            h("span", { className: "time-total" }, C.fmtTime(duration)),
+            h("span", { className: "time-total" }, r1Core.fmtTime(duration)),
           ),
 
           h(
@@ -1060,8 +1070,8 @@
               { className: "controls-left" },
               h(
                 "button",
-                { className: "ctrl-btn", title: C.MODE_LABEL[mode], onClick: changeMode },
-                h(Icon, { name: C.MODE_ICON[mode] || "repeat" }),
+                { className: "ctrl-btn", title: r1Core.MODE_LABEL[mode], onClick: changeMode },
+                h(Icon, { name: r1Core.MODE_ICON[mode] || "repeat" }),
               ),
               h(
                 "div",
@@ -1111,20 +1121,20 @@
                       ),
                       h(Slider, {
                         min: 0,
-                        max: VOL_MAX,
+                        max: vOLMAX,
                         step: 1,
                         value: volume,
                         label: "音量",
                         showValue: false,
-                        onChange: function (v) {
+                        onChange: function (value) {
                           volDragRef.current = true;
-                          setVolume(v);
+                          setVolume(value);
                         },
-                        onCommit: function (v) {
-                          applyVolume(v);
+                        onCommit: function (value) {
+                          applyVolume(value);
                         },
                       }),
-                      h("span", { className: "vol-value" }, volume + " / " + VOL_MAX),
+                      h("span", { className: "vol-value" }, volume + " / " + vOLMAX),
                     )
                   : null,
               ),
@@ -1215,11 +1225,11 @@
           ? h(
               "div",
               { className: "playlist-scroll", ref: queueRef },
-              filteredQueue.map(function (it, i) {
-                var s = it.song;
-                var name = s.title || s.name || "";
-                var artist = s.artist || s.singer || "";
-                var isCur = !!s.playing || (song.title && song.title === name);
+              filteredQueue.map(function (it, index) {
+                var song2 = it.song;
+                var name = song2.title || song2.name || "";
+                var artist = song2.artist || song2.singer || "";
+                var isCur = !!song2.playing || (song.title && song.title === name);
                 var key = name + "@@" + artist;
                 return h(
                   "div",
@@ -1227,7 +1237,7 @@
                     key: it.idx,
                     className: "playlist-item" + (isCur ? " playing" : ""),
                     onClick: function () {
-                      playQueueItem(s, it.idx);
+                      playQueueItem(song2, it.idx);
                     },
                   },
                   h(QueuePic, {
@@ -1253,9 +1263,9 @@
                       {
                         className: "btn sm",
                         title: collected[key] ? "取消收藏" : "收藏",
-                        onClick: function (e) {
-                          e.stopPropagation();
-                          toggleCollect(s);
+                        onClick: function (event) {
+                          event.stopPropagation();
+                          toggleCollect(song2);
                         },
                       },
                       h(Icon, { name: collected[key] ? "heartFill" : "heart" }),
@@ -1266,8 +1276,8 @@
             )
           : h(Empty, {
               icon: "list",
-              title: kw ? "没有匹配的歌曲" : "队列为空",
-              desc: kw ? "换个关键词试试" : "点播或从歌单选歌后会出现在这里",
+              title: keyword ? "没有匹配的歌曲" : "队列为空",
+              desc: keyword ? "换个关键词试试" : "点播或从歌单选歌后会出现在这里",
             }),
       ),
 
@@ -1284,10 +1294,10 @@
         h(
           "div",
           { className: "netease-more-grid" },
-          MORE_ITEMS.map(function (it, i) {
+          mOREITEMS.map(function (it, index) {
             return h(
               "div",
-              { key: i, className: "netease-more-item", onClick: it.act },
+              { key: index, className: "netease-more-item", onClick: it.act },
               h("div", { className: "more-icon" }, h(Icon, { name: it.icon })),
               h("div", { className: "more-label" }, it.label),
             );
@@ -1325,14 +1335,14 @@
           onChange: setAskText,
           autoFocus: true,
           placeholder: "例如：安和桥 宋冬野",
-          onKeyDown: function (e) {
-            if (e.key === "Enter") askPlay();
+          onKeyDown: function (value) {
+            if (value.key === "Enter") askPlay();
           },
         }),
         h(
           "div",
           { className: "hint", style: { marginTop: "10px" } },
-          "当前音乐源：" + (C.SOURCE_LABEL[source] || "未设置"),
+          "当前音乐源：" + (r1Core.SOURCE_LABEL[source] || "未设置"),
         ),
       ),
 
@@ -1355,17 +1365,17 @@
             { k: "netease", l: "网易云" },
             { k: "qq", l: "QQ 音乐" },
             { k: "kuwo", l: "酷我" },
-          ].map(function (s) {
+          ].map(function (item) {
             return h(
               Chip,
               {
-                key: s.k,
-                on: web.src === s.k,
+                key: item.k,
+                on: web.src === item.k,
                 onClick: function () {
-                  setWeb(Object.assign({}, web, { src: s.k }));
+                  setWeb(Object.assign({}, web, { src: item.k }));
                 },
               },
-              s.l,
+              item.l,
             );
           }),
         ),
@@ -1375,11 +1385,11 @@
           h(Input, {
             value: web.kw,
             placeholder: "歌名 / 歌手",
-            onChange: function (v) {
-              setWeb(Object.assign({}, web, { kw: v }));
+            onChange: function (value) {
+              setWeb(Object.assign({}, web, { kw: value }));
             },
-            onKeyDown: function (e) {
-              if (e.key === "Enter") doWebSearch();
+            onKeyDown: function (value) {
+              if (value.key === "Enter") doWebSearch();
             },
           }),
           h(Button, { variant: "primary", loading: web.busy, onClick: doWebSearch }, "搜索"),
@@ -1397,22 +1407,22 @@
               ? h(
                   "div",
                   { className: "playlist-scroll" },
-                  web.list.map(function (s, i) {
+                  web.list.map(function (track, index) {
                     return h(
                       "div",
                       {
-                        key: s.id || i,
+                        key: track.id || index,
                         className: "playlist-item",
                         onClick: function () {
-                          playWebResult(s);
+                          playWebResult(track);
                         },
                       },
-                      h("div", { className: "pl-idx" }, i + 1),
+                      h("div", { className: "pl-idx" }, index + 1),
                       h(
                         "div",
                         { className: "pl-main" },
-                        h("div", { className: "pl-name" }, s.name || s.title || ""),
-                        h("div", { className: "pl-artist" }, s.artist || s.singer || ""),
+                        h("div", { className: "pl-name" }, track.name || track.title || ""),
+                        h("div", { className: "pl-artist" }, track.artist || track.singer || ""),
                       ),
                       h(
                         "div",
@@ -1422,9 +1432,9 @@
                           {
                             className: "btn sm",
                             title: "加入队列",
-                            onClick: function (e) {
-                              e.stopPropagation();
-                              addNext(s);
+                            onClick: function (event) {
+                              event.stopPropagation();
+                              addNext(track);
                             },
                           },
                           h(Icon, { name: "plus" }),
@@ -1447,7 +1457,7 @@
         {
           open: showTts,
           title: "选择发音人",
-          sub: "当前：" + (TTS_LABEL[tts] || tts || "未设置"),
+          sub: "当前：" + (tTSLABEL[tts] || tts || "未设置"),
           onClose: function () {
             setShowTts(false);
           },
@@ -1460,21 +1470,21 @@
         h(
           "div",
           { style: { display: "flex", flexWrap: "wrap", gap: "8px" } },
-          TTS_SPEAKERS.map(function (s) {
+          tTSSPEAKERS.map(function (item) {
             return h(
               Chip,
               {
-                key: s[0],
-                on: tts === s[1],
+                key: item[0],
+                on: tts === item[1],
                 onClick: function () {
-                  setTts(s[0]);
+                  setTts(item[0]);
                   try {
-                    R1WS.setTtsSpeaker(s[0]);
-                    toast("已切换为 " + s[1], "ok");
-                  } catch (e) {}
+                    R1WS.setTtsSpeaker(item[0]);
+                    toast("已切换为 " + item[1], "ok");
+                  } catch (error) {}
                 },
               },
-              s[1],
+              item[1],
             );
           }),
         ),
@@ -1494,29 +1504,29 @@
         h(
           "div",
           { className: "rows" },
-          C.SOURCES.map(function (s) {
+          r1Core.SOURCES.map(function (item) {
             return h(Row, {
-              key: s.key,
+              key: item.key,
               icon: "music",
-              accent: source === s.v,
-              title: s.label,
-              sub: source === s.v ? "当前使用中" : "点击切换",
+              accent: source === item.v,
+              title: item.label,
+              sub: source === item.v ? "当前使用中" : "点击切换",
               onClick: function () {
-                setSource(s.v);
+                setSource(item.v);
                 sourceSwitchRef.current = true; /* 切换保护：3 秒内不接受设备滞后回包 */
                 setTimeout(function () {
                   sourceSwitchRef.current = false;
                 }, 3000);
                 try {
-                  localStorage.setItem("r1_music_source", String(s.v));
-                } catch (e) {}
+                  localStorage.setItem("r1_music_source", String(item.v));
+                } catch (error) {}
                 try {
-                  R1WS.setMusicSource(s.key);
-                } catch (e) {}
-                toast("音乐源已切换为 " + s.label, "ok");
+                  R1WS.setMusicSource(item.key);
+                } catch (error) {}
+                toast("音乐源已切换为 " + item.label, "ok");
                 setShowSrc(false);
               },
-              end: source === s.v ? h(Icon, { name: "check" }) : null,
+              end: source === item.v ? h(Icon, { name: "check" }) : null,
             });
           }),
         ),
@@ -1551,9 +1561,9 @@
           { style: { marginBottom: 12 } },
           h(Seg, {
             value: songSrc,
-            onChange: function (k) {
-              setSongSrc(k);
-              loadGroups(true, k);
+            onChange: function (value) {
+              setSongSrc(value);
+              loadGroups(true, value);
             },
             items: [
               { key: "qq", label: "QQ 音乐" },
@@ -1569,7 +1579,7 @@
             if (!guard()) return;
             try {
               R1WS.playSongList(String(id));
-            } catch (e) {}
+            } catch (error) {}
             toast("正在播放：" + title, "ok");
             setShowSongs(false);
           },
@@ -1611,19 +1621,19 @@
    * 热榜：网易云 / QQ 官方榜单（服务端 /api/hotlist 代理 + 5 分钟缓存）
    * 点歌直接推到音箱播放；+ 号把歌加入播放队列。酷我接口被限制暂不可用。
    * =================================================================== */
-  var HOT_SOURCES = [
+  var hOTSOURCES = [
     { k: "netease", l: "网易云" },
     { k: "qq", l: "QQ 音乐" },
     { k: "kuwo", l: "酷我", broken: true },
   ];
-  var HOT_BOARDS = [
+  var hOTBOARDS = [
     { k: "hot", l: "热歌" },
     { k: "new", l: "新歌" },
     { k: "soar", l: "飙升" },
   ];
   /* 各榜单在音源侧对应的官方歌单 id：一键播放直接把歌单 id 下发给设备（与"我的歌单"同款逻辑），
    * 设备自行拉取完整榜单（约 100 首），无需前端逐首 web_添加 */
-  var HOT_BOARD_LIST_IDS = {
+  var hOTBOARDLISTIDS = {
     netease: { hot: "3778678", new: "3779629", soar: "19723756" },
     qq: { hot: "26", new: "27", soar: "28" },
   };
@@ -1633,35 +1643,35 @@
   function cachedPic(name, artist) {
     if (!name) return "";
     var keys = Object.keys(hotCache);
-    for (var i = 0; i < keys.length; i++) {
-      var arr = hotCache[keys[i]] || [];
-      for (var j = 0; j < arr.length; j++) {
-        if (arr[j].name === name && arr[j].pic) return arr[j].pic;
+    for (var index = 0; index < keys.length; index++) {
+      var items = hotCache[keys[index]] || [];
+      for (var index2 = 0; index2 < items.length; index2++) {
+        if (items[index2].name === name && items[index2].pic) return items[index2].pic;
       }
     }
     return "";
   }
 
   function HotTab(props) {
-    var _src = useState("netease"),
-      src = _src[0],
-      setSrc = _src[1];
-    var _board = useState("hot"),
-      board = _board[0],
-      setBoard = _board[1];
-    var _list = useState(null),
-      list = _list[0],
-      setList = _list[1];
-    var _busy = useState(false),
-      busy = _busy[0],
-      setBusy = _busy[1];
-    var _err = useState(""),
-      err = _err[0],
-      setErr = _err[1];
+    var sourceState = useState("netease"),
+      source = sourceState[0],
+      setSrc = sourceState[1];
+    var boardState = useState("hot"),
+      board = boardState[0],
+      setBoard = boardState[1];
+    var listState = useState(null),
+      list = listState[0],
+      setList = listState[1];
+    var busyState = useState(false),
+      busy = busyState[0],
+      setBusy = busyState[1];
+    var errorState = useState(""),
+      error = errorState[0],
+      setErr = errorState[1];
 
     useEffect(
       function () {
-        var key = src + ":" + board;
+        var key = source + ":" + board;
         if (hotCache[key]) {
           setList(hotCache[key]);
           setErr("");
@@ -1671,17 +1681,17 @@
         setErr("");
         setList(null);
         var dead = false;
-        fetch(R1Config.serviceUrl("api/hotlist") + "?source=" + src + "&board=" + board)
-          .then(function (r) {
-            return r.json();
+        fetch(R1Config.serviceUrl("api/hotlist") + "?source=" + source + "&board=" + board)
+          .then(function (result) {
+            return result.json();
           })
-          .then(function (d) {
+          .then(function (result) {
             if (dead) return;
-            if (d.success && d.list && d.list.length) {
-              hotCache[key] = d.list;
-              setList(d.list);
+            if (result.success && result.list && result.list.length) {
+              hotCache[key] = result.list;
+              setList(result.list);
             } else {
-              setErr(d.error || "榜单暂不可用");
+              setErr(result.error || "榜单暂不可用");
             }
             setBusy(false);
           })
@@ -1694,7 +1704,7 @@
           dead = true;
         };
       },
-      [src, board],
+      [source, board],
     );
 
     var playAllBusy = useRef(false);
@@ -1703,7 +1713,7 @@
       if (!props.guard()) return;
       try {
         R1WS.musicPlay((item.name || "") + " " + (item.artist || ""));
-      } catch (e) {}
+      } catch (error2) {}
       toast("正在点播：" + item.name, "ok", 1800);
     }
     function addSong(item) {
@@ -1715,7 +1725,7 @@
           arg2: 1,
           obj: "web_添加" + (item.name || "") + " " + (item.artist || ""),
         });
-      } catch (e) {}
+      } catch (error2) {}
       toast("已加入播放队列", "ok");
     }
     /* 一键播放整榜：设备端「歌单 id 直发」（arg2:9）只认它自己拉取过的歌单，
@@ -1738,9 +1748,9 @@
       var start = function () {
         try {
           R1WS.musicPlay((batch[0].name || "") + " " + (batch[0].artist || ""));
-        } catch (e) {}
-        for (var i = 1; i < batch.length; i++) {
-          (function (it, delay, idx) {
+        } catch (error2) {}
+        for (var index = 1; index < batch.length; index++) {
+          (function (it, delay, index2) {
             setTimeout(function () {
               try {
                 R1WS.sendMessage({
@@ -1749,13 +1759,13 @@
                   arg2: 1,
                   obj: "web_添加" + (it.name || "") + " " + (it.artist || ""),
                 });
-              } catch (e) {}
-              if (idx === batch.length - 1) {
+              } catch (error2) {}
+              if (index2 === batch.length - 1) {
                 playAllBusy.current = false;
                 toast("整榜 " + batch.length + " 首已全部加入队列", "ok", 2600);
               }
             }, delay);
-          })(batch[i], i * 150, i);
+          })(batch[index], index * 150, index);
         }
         toast(
           "正在播放第 1 首，其余 " +
@@ -1767,13 +1777,13 @@
           3000,
         );
       };
-      if (devStr === src) {
+      if (devStr === source) {
         start();
         return;
       }
       try {
-        R1WS.setMusicSource(src);
-      } catch (e) {}
+        R1WS.setMusicSource(source);
+      } catch (error2) {}
       toast("正在切换音源，稍后自动开始…", "info", 2000);
       setTimeout(start, 1200);
     }
@@ -1792,12 +1802,12 @@
             marginBottom: 10,
           },
         },
-        HOT_SOURCES.map(function (s2) {
+        hOTSOURCES.map(function (s2) {
           return h(
             Chip,
             {
               key: s2.k,
-              on: src === s2.k && !s2.broken,
+              on: source === s2.k && !s2.broken,
               onClick: function () {
                 if (s2.broken) {
                   toast("酷我榜单接口暂时被限制，敬请期待", "info", 2200);
@@ -1828,8 +1838,8 @@
         h(Seg, {
           value: board,
           onChange: setBoard,
-          items: HOT_BOARDS.map(function (b) {
-            return { key: b.k, label: b.l };
+          items: hOTBOARDS.map(function (item) {
+            return { key: item.k, label: item.l };
           }),
         }),
       ),
@@ -1839,17 +1849,17 @@
             { style: { display: "grid", placeItems: "center", padding: "30px 0" } },
             h(Spinner),
           )
-        : err
-          ? h(Empty, { icon: "alert", title: "榜单暂不可用", desc: err })
+        : error
+          ? h(Empty, { icon: "alert", title: "榜单暂不可用", desc: error })
           : list && list.length
             ? h(
                 "div",
                 { className: "playlist-scroll" },
-                list.map(function (it, i) {
+                list.map(function (it, index) {
                   return h(
                     "div",
                     {
-                      key: i,
+                      key: index,
                       className: "playlist-item",
                       onClick: function () {
                         playSong(it);
@@ -1862,14 +1872,15 @@
                         ? h("img", {
                             src: it.pic,
                             alt: "",
-                            onError: function (e) {
-                              if (e.target.parentNode) e.target.parentNode.classList.add("no-pic");
-                              e.target.style.display = "none";
+                            onError: function (event) {
+                              if (event.target.parentNode)
+                                event.target.parentNode.classList.add("no-pic");
+                              event.target.style.display = "none";
                             },
                           })
                         : h(Icon, { name: "music" }),
                     ),
-                    h("div", { className: "pl-idx" }, i + 1),
+                    h("div", { className: "pl-idx" }, index + 1),
                     h(
                       "div",
                       { className: "pl-main" },
@@ -1884,8 +1895,8 @@
                         {
                           className: "btn sm",
                           title: "加入队列",
-                          onClick: function (e) {
-                            e.stopPropagation();
+                          onClick: function (event) {
+                            event.stopPropagation();
                             addSong(it);
                           },
                         },
@@ -1897,7 +1908,7 @@
               )
             : h(Empty, { icon: "list", title: "暂无数据" }),
       /* 设备端只播它注册过的歌单：网易云官方榜单本质是歌单，收藏后即可直发 */
-      src === "netease"
+      source === "netease"
         ? h(
             "div",
             {
@@ -1936,13 +1947,13 @@
         desc: data.msg || data.login_msg || "请先在设备上登录音乐账号",
       });
     }
-    var d = data.data;
-    var list = Array.isArray(d)
-      ? d
-      : d && Array.isArray(d.data)
-        ? d.data
-        : d && Array.isArray(d.list)
-          ? d.list
+    var payload = data.data;
+    var list = Array.isArray(payload)
+      ? payload
+      : payload && Array.isArray(payload.data)
+        ? payload.data
+        : payload && Array.isArray(payload.list)
+          ? payload.list
           : [];
     if (!list.length) return h(Empty, { icon: "folder", title: "当前音源暂无歌单数据" });
 
@@ -1951,15 +1962,15 @@
     return h(
       "div",
       { className: "song-list-content" },
-      list.map(function (g, gi) {
-        var items = g.list || g.songs || g.items || [];
+      list.map(function (item, gi) {
+        var items = item.list || item.songs || item.items || [];
         return h(
           "div",
           { key: gi, className: "song-list-group" },
           h(
             "div",
             { className: "song-list-group-title" },
-            h("span", null, g.title || g.name || "默认分组"),
+            h("span", null, item.title || item.name || "默认分组"),
             h("span", { className: "song-list-count" }, "[" + items.length + "]"),
           ),
           h(
@@ -1988,11 +1999,11 @@
                     ? h("img", {
                         src: item.pic,
                         alt: title,
-                        onError: function (e) {
+                        onError: function (event) {
                           /* 封面加载失败：隐藏裂图，显示占位图标 */
-                          e.target.style.display = "none";
-                          if (e.target.parentNode)
-                            e.target.parentNode.classList.add("cover-fallback");
+                          event.target.style.display = "none";
+                          if (event.target.parentNode)
+                            event.target.parentNode.classList.add("cover-fallback");
                         },
                       })
                     : null,
@@ -2016,39 +2027,39 @@
   /* =====================================================================
    * 屏幕
    * =================================================================== */
-  var DEFAULT_DW = 720,
-    DEFAULT_DH = 480;
+  var dEFAULTDW = 720,
+    dEFAULTDH = 480;
 
   function ScreenPanel() {
-    var st = C.useStore();
-    var _frame = useState(""),
-      frame = _frame[0],
-      setFrame = _frame[1];
-    var _streaming = useState(false),
-      streaming = _streaming[0],
-      setStreaming = _streaming[1];
-    var _fps = useState(0),
-      fps = _fps[0],
-      setFps = _fps[1];
-    var _text = useState(""),
-      text = _text[0],
-      setText = _text[1];
-    var _ttsText = useState(""),
-      ttsText = _ttsText[0],
-      setTtsText = _ttsText[1];
-    var _size = useState({ w: DEFAULT_DW, h: DEFAULT_DH }),
-      size = _size[0],
-      setSize = _size[1];
-    var _imgBad = useState(false),
-      imgBad = _imgBad[0],
-      setImgBad = _imgBad[1];
+    var store = r1Core.useStore();
+    var frameState = useState(""),
+      frame = frameState[0],
+      setFrame = frameState[1];
+    var streamingState = useState(false),
+      streaming = streamingState[0],
+      setStreaming = streamingState[1];
+    var fpsState = useState(0),
+      fps = fpsState[0],
+      setFps = fpsState[1];
+    var textState = useState(""),
+      text = textState[0],
+      setText = textState[1];
+    var ttsTextState = useState(""),
+      ttsText = ttsTextState[0],
+      setTtsText = ttsTextState[1];
+    var sizeState = useState({ w: dEFAULTDW, h: dEFAULTDH }),
+      size = sizeState[0],
+      setSize = sizeState[1];
+    var imgBadState = useState(false),
+      imgBad = imgBadState[0],
+      setImgBad = imgBadState[1];
     var imgRef = useRef(null);
     var dragRef = useRef({ down: false });
     var statRef = useRef({ frames: 0, last: Date.now(), smooth: 0 });
     var lastUrlRef = useRef("");
-    var _fluid = useState(false),
-      fluid = _fluid[0],
-      setFluid = _fluid[1];
+    var fluidState = useState(false),
+      fluid = fluidState[0],
+      setFluid = fluidState[1];
 
     /* 帧格式归一化（移植原版 onFrame 逻辑）：
      * 设备发来的帧可能是完整 dataURL、裸 base64 或二进制 Blob，
@@ -2056,12 +2067,12 @@
     function normalizeFrame(payload) {
       if (!payload) return "";
       if (typeof payload === "string") {
-        var s = payload.trim();
+        var text2 = payload.trim();
         /* 完整 dataURL / blob / http 地址 → 直接可用 */
-        if (/^(data:image\/[a-zA-Z0-9+.-]+;base64,|blob:|https?:\/\/)/.test(s)) return s;
+        if (/^(data:image\/[a-zA-Z0-9+.-]+;base64,|blob:|https?:\/\/)/.test(text2)) return text2;
         /* 裸 base64（长度足够且只含 base64 字符）→ 补 jpeg 前缀 */
-        if (/^[A-Za-z0-9+/=\s]+$/.test(s) && s.length > 100) {
-          return "data:image/jpeg;base64," + s.replace(/\s+/g, "");
+        if (/^[A-Za-z0-9+/=\s]+$/.test(text2) && text2.length > 100) {
+          return "data:image/jpeg;base64," + text2.replace(/\s+/g, "");
         }
         return "";
       }
@@ -2071,12 +2082,12 @@
           typeof Blob !== "undefined" && payload instanceof Blob ? payload : new Blob([payload]);
         if (!blob.size) return "";
         return typeof URL !== "undefined" && URL.createObjectURL ? URL.createObjectURL(blob) : "";
-      } catch (e) {
+      } catch (error) {
         return "";
       }
     }
 
-    C.useR1Event("screen_frame", function (data) {
+    r1Core.useR1Event("screen_frame", function (data) {
       var url = normalizeFrame(data);
       if (!url) return;
       /* 释放上一个 blob 帧，避免内存泄漏 */
@@ -2087,59 +2098,61 @@
       ) {
         try {
           URL.revokeObjectURL(lastUrlRef.current);
-        } catch (e) {}
+        } catch (error) {}
       }
       lastUrlRef.current = url;
       setFrame(url);
       setImgBad(false);
-      var s = statRef.current;
-      s.frames++;
+      var current = statRef.current;
+      current.frames++;
       var now = Date.now();
-      if (now - s.last >= 1000) {
-        var cur = Math.round((s.frames * 1000) / (now - s.last));
+      if (now - current.last >= 1000) {
+        var current2 = Math.round((current.frames * 1000) / (now - current.last));
         /* 指数平滑：FPS 数字不再 1↔4 乱跳，看起来更接近真实感受 */
-        s.smooth = s.smooth ? Math.round(s.smooth * 0.55 + cur * 0.45) : cur;
-        setFps(s.smooth);
-        s.frames = 0;
-        s.last = now;
+        current.smooth = current.smooth
+          ? Math.round(current.smooth * 0.55 + current2 * 0.45)
+          : current2;
+        setFps(current.smooth);
+        current.frames = 0;
+        current.last = now;
       }
     });
-    C.useR1Event("screen_size", function (d) {
+    r1Core.useR1Event("screen_size", function (value) {
       try {
-        var str = typeof d === "string" ? d : JSON.stringify(d);
-        var m = str.match(/(\d{2,5})\s*[xX]\s*(\d{2,5})/);
-        if (m) setSize({ w: parseInt(m[1], 10), h: parseInt(m[2], 10) });
-      } catch (e) {}
+        var text2 = typeof value === "string" ? value : JSON.stringify(value);
+        var value2 = text2.match(/(\d{2,5})\s*[xX]\s*(\d{2,5})/);
+        if (value2) setSize({ w: parseInt(value2[1], 10), h: parseInt(value2[2], 10) });
+      } catch (error) {}
     });
 
     useEffect(
       function () {
-        if (!st.connected) return;
+        if (!store.connected) return;
         try {
           R1WS.startScreenStream(100);
           setStreaming(true);
-        } catch (e) {}
+        } catch (error) {}
         return function () {
           try {
             R1WS.stopScreenStream();
-          } catch (e) {}
+          } catch (error) {}
           /* 离开页面释放最后一次 blob 帧 */
           if (lastUrlRef.current && lastUrlRef.current.indexOf("blob:") === 0) {
             try {
               URL.revokeObjectURL(lastUrlRef.current);
-            } catch (e) {}
+            } catch (error) {}
             lastUrlRef.current = "";
           }
         };
       },
-      [st.connected],
+      [store.connected],
     );
 
     /* 方向键/回车/空格 → 设备按键（输入框聚焦时不拦截） */
     useEffect(function () {
-      function onKey(e) {
-        var tag = (e.target && e.target.tagName) || "";
-        if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+      function onKey(event) {
+        var tag = (event.target && event.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || event.target.isContentEditable) return;
         var map = {
           ArrowUp: 19,
           ArrowDown: 20,
@@ -2150,12 +2163,12 @@
           Backspace: 67,
           Escape: 4,
         };
-        var code = map[e.key];
+        var code = map[event.key];
         if (code) {
-          e.preventDefault();
+          event.preventDefault();
           try {
             R1WS.sendKeyevent(code);
-          } catch (err) {}
+          } catch (error) {}
         }
       }
       window.addEventListener("keydown", onKey);
@@ -2165,78 +2178,87 @@
     }, []);
 
     function toDevice(cx, cy) {
-      var el = imgRef.current;
-      if (!el) return { x: 0, y: 0 };
-      var r = el.getBoundingClientRect();
-      if (!r.width || !r.height) return { x: 0, y: 0 };
+      var element = imgRef.current;
+      if (!element) return { x: 0, y: 0 };
+      var bounds = element.getBoundingClientRect();
+      if (!bounds.width || !bounds.height) return { x: 0, y: 0 };
       return {
-        x: Math.round(((cx - r.left) / r.width) * size.w),
-        y: Math.round(((cy - r.top) / r.height) * size.h),
+        x: Math.round(((cx - bounds.left) / bounds.width) * size.w),
+        y: Math.round(((cy - bounds.top) / bounds.height) * size.h),
       };
     }
-    function onPointerDown(e) {
-      e.preventDefault();
-      var p = toDevice(e.clientX, e.clientY);
+    function onPointerDown(event) {
+      event.preventDefault();
+      var point = toDevice(event.clientX, event.clientY);
       dragRef.current = {
         down: true,
-        sx: p.x,
-        sy: p.y,
-        dx: p.x,
-        dy: p.y,
+        sx: point.x,
+        sy: point.y,
+        dx: point.x,
+        dy: point.y,
         t0: Date.now(),
         moved: false,
       };
       try {
-        e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId);
-      } catch (err) {}
+        event.target.setPointerCapture && event.target.setPointerCapture(event.pointerId);
+      } catch (error) {}
     }
-    function onPointerMove(e) {
-      var d = dragRef.current;
-      if (!d.down) return;
-      var p = toDevice(e.clientX, e.clientY);
-      if (Math.abs(p.x - d.sx) + Math.abs(p.y - d.sy) > 4) d.moved = true;
-      d.dx = p.x;
-      d.dy = p.y;
+    function onPointerMove(event) {
+      var current = dragRef.current;
+      if (!current.down) return;
+      var point = toDevice(event.clientX, event.clientY);
+      if (Math.abs(point.x - current.sx) + Math.abs(point.y - current.sy) > 4) current.moved = true;
+      current.dx = point.x;
+      current.dy = point.y;
     }
     function onPointerUp() {
-      var d = dragRef.current;
-      if (!d.down) return;
-      d.down = false;
-      var dur = Date.now() - d.t0;
+      var current = dragRef.current;
+      if (!current.down) return;
+      current.down = false;
+      var dur = Date.now() - current.t0;
       try {
-        if (d.moved)
+        if (current.moved)
           R1WS.sendInput(
-            "swipe " + d.sx + " " + d.sy + " " + d.dx + " " + d.dy + " " + Math.max(80, dur),
+            "swipe " +
+              current.sx +
+              " " +
+              current.sy +
+              " " +
+              current.dx +
+              " " +
+              current.dy +
+              " " +
+              Math.max(80, dur),
           );
-        else R1WS.sendInput("tap " + d.sx + " " + d.sy);
-      } catch (e) {}
+        else R1WS.sendInput("tap " + current.sx + " " + current.sy);
+      } catch (error) {}
     }
     function sendText() {
-      var v = (text || "").trim();
-      if (!v) {
+      var text2 = (text || "").trim();
+      if (!text2) {
         toast("请输入要发送的文本", "err");
         return;
       }
       try {
-        R1WS.sendInput("text " + v);
-      } catch (e) {}
+        R1WS.sendInput("text " + text2);
+      } catch (error) {}
       setText("");
       toast("已发送文本", "ok");
     }
     function sendTts() {
-      var v = (ttsText || "").trim();
-      if (!v) {
+      var text2 = (ttsText || "").trim();
+      if (!text2) {
         toast("请输入要播报的内容", "err");
         return;
       }
       try {
-        R1WS.tts(v);
-      } catch (e) {}
+        R1WS.tts(text2);
+      } catch (error) {}
       setTtsText("");
       toast("已发送语音播报", "ok");
     }
-    function uploadBg(e) {
-      var file = e.target.files && e.target.files[0];
+    function uploadBg(event) {
+      var file = event.target.files && event.target.files[0];
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) {
         toast("图片不能超过 5MB", "err");
@@ -2247,13 +2269,13 @@
         try {
           R1WS.setBackground(ev.target.result);
           toast("背景已上传", "ok");
-        } catch (err) {}
+        } catch (error) {}
       };
       reader.readAsDataURL(file);
-      e.target.value = "";
+      event.target.value = "";
     }
     function toggleStream() {
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
@@ -2265,7 +2287,7 @@
           R1WS.startScreenStream(100);
           setStreaming(true);
         }
-      } catch (e) {}
+      } catch (error) {}
     }
 
     /* 流畅模式（实验）：降低设备分辨率换更高的推流帧率
@@ -2274,23 +2296,23 @@
     function restartStreamAfter(ms) {
       try {
         R1WS.stopScreenStream();
-      } catch (e) {}
+      } catch (error) {}
       setTimeout(function () {
         try {
           R1WS.startScreenStream(100);
           setStreaming(true);
-        } catch (e) {}
+        } catch (error) {}
       }, ms);
     }
     function toggleFluid() {
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
       if (!fluid) {
         try {
           R1WS.executeShell("wm size 480x320");
-        } catch (e) {}
+        } catch (error) {}
         setSize({ w: 480, h: 320 });
         setFluid(true);
         restartStreamAfter(1200);
@@ -2298,7 +2320,7 @@
       } else {
         try {
           R1WS.executeShell("wm size 720x480");
-        } catch (e) {}
+        } catch (error) {}
         setSize({ w: 720, h: 480 });
         setFluid(false);
         restartStreamAfter(1200);
@@ -2321,7 +2343,7 @@
       { k: "OK", c: 23 },
     ];
 
-    if (!st.connected) {
+    if (!store.connected) {
       return h(
         "div",
         { className: "page-inner narrow" },
@@ -2339,7 +2361,7 @@
                 variant: "primary",
                 icon: "link",
                 onClick: function () {
-                  C.openSheet("connect");
+                  r1Core.openSheet("connect");
                 },
               },
               "连接设备",
@@ -2369,7 +2391,7 @@
               onClick: function () {
                 try {
                   R1WS.requestScreencap();
-                } catch (e) {}
+                } catch (error) {}
               },
             },
             "截屏",
@@ -2383,7 +2405,7 @@
                 try {
                   R1WS.resetScreenResolution();
                   toast("已请求重置分辨率为 720x480", "ok");
-                } catch (e) {}
+                } catch (error) {}
               },
             },
             "重置分辨率",
@@ -2475,7 +2497,7 @@
                   onClick: function () {
                     try {
                       R1WS.sendKeyevent(key.c);
-                    } catch (e) {}
+                    } catch (error) {}
                   },
                 },
                 key.k,
@@ -2493,8 +2515,8 @@
               value: text,
               onChange: setText,
               placeholder: "发送到设备输入框",
-              onKeyDown: function (e) {
-                if (e.key === "Enter") sendText();
+              onKeyDown: function (value) {
+                if (value.key === "Enter") sendText();
               },
             }),
             h(Button, { onClick: sendText }, "发送"),
@@ -2506,8 +2528,8 @@
               value: ttsText,
               onChange: setTtsText,
               placeholder: "让设备朗读这段文字",
-              onKeyDown: function (e) {
-                if (e.key === "Enter") sendTts();
+              onKeyDown: function (value) {
+                if (value.key === "Enter") sendTts();
               },
             }),
             h(Button, { variant: "primary", onClick: sendTts }, "播报"),
@@ -2539,22 +2561,22 @@
    * 氛围灯（原版协议：模式 0/1/2/3/4，亮度 1-200，颜色下发整数）
    * =================================================================== */
   function LightSheetBody() {
-    var info = C.useStore().deviceInfo || {};
-    var _on = useState(false),
-      on = _on[0],
-      setOn = _on[1];
-    var _mode = useState(0),
-      mode = _mode[0],
-      setMode = _mode[1];
-    var _bright = useState(100),
-      bright = _bright[0],
-      setBright = _bright[1];
-    var _speed = useState(4),
-      speed = _speed[0],
-      setSpeed = _speed[1];
-    var _color = useState("#ffffff"),
-      color = _color[0],
-      setColor = _color[1];
+    var info = r1Core.useStore().deviceInfo || {};
+    var onState = useState(false),
+      on = onState[0],
+      setOn = onState[1];
+    var modeState = useState(0),
+      mode = modeState[0],
+      setMode = modeState[1];
+    var brightState = useState(100),
+      bright = brightState[0],
+      setBright = brightState[1];
+    var speedState = useState(4),
+      speed = speedState[0],
+      setSpeed = speedState[1];
+    var colorState = useState("#ffffff"),
+      color = colorState[0],
+      setColor = colorState[1];
 
     useEffect(
       function () {
@@ -2574,7 +2596,7 @@
       setTimeout(function () {
         try {
           R1WS.requestServiceInfo();
-        } catch (e) {}
+        } catch (error) {}
       }, 2500);
     }
 
@@ -2607,12 +2629,12 @@
             { className: "row-end" },
             h(R1UI.Switch, {
               on: on,
-              onChange: function (v) {
-                setOn(v);
+              onChange: function (value) {
+                setOn(value);
                 try {
-                  R1WS.setAtmosphereLight(v);
+                  R1WS.setAtmosphereLight(value);
                   refreshLater();
-                } catch (e) {}
+                } catch (error) {}
               },
             }),
           ),
@@ -2626,21 +2648,21 @@
         h(
           "div",
           { style: { display: "flex", gap: "8px", flexWrap: "wrap" } },
-          MODES.map(function (m) {
+          MODES.map(function (item) {
             return h(
               Chip,
               {
-                key: m.mode,
-                on: mode === m.mode,
+                key: item.mode,
+                on: mode === item.mode,
                 onClick: function () {
-                  setMode(m.mode);
+                  setMode(item.mode);
                   try {
-                    R1WS.setLightMode(m.mode);
+                    R1WS.setLightMode(item.mode);
                     refreshLater();
-                  } catch (e) {}
+                  } catch (error) {}
                 },
               },
-              m.label,
+              item.label,
             );
           }),
         ),
@@ -2655,10 +2677,10 @@
           max: 200,
           label: "亮度",
           onChange: setBright,
-          onCommit: function (v) {
+          onCommit: function (value) {
             try {
-              R1WS.setLightBrightness(v);
-            } catch (e) {}
+              R1WS.setLightBrightness(value);
+            } catch (error) {}
           },
         }),
       ),
@@ -2673,10 +2695,10 @@
               max: 100,
               label: "渐变速度",
               onChange: setSpeed,
-              onCommit: function (v) {
+              onCommit: function (value) {
                 try {
-                  R1WS.setLightColorSpeed(v);
-                } catch (e) {}
+                  R1WS.setLightColorSpeed(value);
+                } catch (error) {}
               },
             }),
           )
@@ -2701,12 +2723,12 @@
                   borderRadius: "8px",
                   cursor: "pointer",
                 },
-                onChange: function (e) {
-                  var v = e.target.value;
-                  setColor(v);
+                onChange: function (event) {
+                  var value = event.target.value;
+                  setColor(value);
                   try {
-                    R1WS.setLightColor(parseInt(v.substr(1), 16));
-                  } catch (err) {}
+                    R1WS.setLightColor(parseInt(value.substr(1), 16));
+                  } catch (error) {}
                 },
               }),
               h(
@@ -2720,13 +2742,13 @@
     );
   }
 
-  P.MusicPanel = MusicPanel;
-  P.ScreenPanel = ScreenPanel;
-  P.LightSheet = LightSheetBody;
+  r1Panels.MusicPanel = MusicPanel;
+  r1Panels.ScreenPanel = ScreenPanel;
+  r1Panels.LightSheet = LightSheetBody;
 
   /* 发音人弹层（设备页顶栏入口也会用到） */
-  P.TtsSpeakerSheet = function TtsSpeakerSheet() {
-    var tts = (C.useStore().deviceInfo || {}).ttsModelType;
+  r1Panels.TtsSpeakerSheet = function TtsSpeakerSheet() {
+    var tts = (r1Core.useStore().deviceInfo || {}).ttsModelType;
     return h(
       "div",
       null,
@@ -2738,20 +2760,20 @@
       h(
         "div",
         { style: { display: "flex", flexWrap: "wrap", gap: "8px" } },
-        TTS_SPEAKERS.map(function (s) {
+        tTSSPEAKERS.map(function (item) {
           return h(
             Chip,
             {
-              key: s[0],
-              on: tts === s[0],
+              key: item[0],
+              on: tts === item[0],
               onClick: function () {
                 try {
-                  R1WS.setTtsSpeaker(s[0]);
-                  toast("已切换为 " + s[1], "ok");
-                } catch (e) {}
+                  R1WS.setTtsSpeaker(item[0]);
+                  toast("已切换为 " + item[1], "ok");
+                } catch (error) {}
               },
             },
-            s[1],
+            item[1],
           );
         }),
       ),

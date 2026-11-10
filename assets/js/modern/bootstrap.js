@@ -29,28 +29,28 @@ window.__loadReact(0, function () {
     var full;
     try {
       full = new URL(file, window.location.href).href;
-    } catch (e) {
+    } catch (error) {
       full = file;
     }
     fetch(full, { cache: "no-store" })
-      .then(function (r) {
-        var ct = r.headers.get("content-type") || "未知";
+      .then(function (response) {
+        var contentType = response.headers.get("content-type") || "未知";
         var hint;
-        if (r.status === 404) {
+        if (response.status === 404) {
           hint =
             "服务器上没有这个文件（HTTP 404）：请把整个 js/ 目录完整上传到服务器（文件名大小写要完全一致），并确认上传路径与访问路径对应。";
-        } else if (!r.ok) {
+        } else if (!response.ok) {
           hint =
             "服务器拒绝访问（HTTP " +
-            r.status +
+            response.status +
             "）：请检查服务器对该目录/文件的读取权限或安全软件拦截。";
-        } else if (/javascript|ecmascript/.test(ct)) {
+        } else if (/javascript|ecmascript/.test(contentType)) {
           hint =
             "服务器返回正常，但脚本没执行：多半是浏览器缓存了旧版，请强制刷新（Ctrl+F5，手机端清缓存）后重试。";
         } else {
           hint =
             "服务器把 .js 返回成了「" +
-            ct +
+            contentType +
             "」，浏览器因此拒绝执行：请在服务器 MIME/类型配置中为 .js 添加 text/javascript（常见于 nginx/apache/IIS 未配 MIME，或某些网盘/建站面板）。";
         }
         renderDiag(full, hint);
@@ -62,25 +62,25 @@ window.__loadReact(0, function () {
         );
       });
   }
-  (function load(i) {
-    if (i >= files.length) {
+  (function load(value) {
+    if (value >= files.length) {
       if (failed.length) console.warn("加载失败的可选模块：", failed);
       return;
     }
-    var s = document.createElement("script");
-    s.src = files[i];
+    var script = document.createElement("script");
+    script.src = files[value];
     /* 单个模块失败不阻断后续模块：外壳缺失的页面会显示占位提示 */
-    s.onload = function () {
-      load(i + 1);
+    script.onload = function () {
+      load(value + 1);
     };
-    s.onerror = function () {
-      failed.push(files[i]);
-      if (files[i].indexOf("app.js") >= 0) {
-        diagnose(files[i]);
+    script.onerror = function () {
+      failed.push(files[value]);
+      if (files[value].indexOf("app.js") >= 0) {
+        diagnose(files[value]);
         return;
       }
-      load(i + 1);
+      load(value + 1);
     };
-    document.head.appendChild(s);
+    document.head.appendChild(script);
   })(0);
 });

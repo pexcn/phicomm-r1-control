@@ -1,17 +1,29 @@
 if (!window.control_host) {
   window.control_host = new URL(R1Config.assetBaseUrl).host;
 }
-const web_ver = 2863;
-const downurl = "https://xfdown.lanzouq.com/";
-const new_app_ver = 128;
-const new_echo_ver = 1887;
-const new_unisound_ver = 1856;
-const app_downid = "iLWWO3349cah";
-const echo_downid = "iebgs4f8tcxc";
-const unisound_downid = "iUCPE34zde2h";
+const WEB_VERSION = 2863;
+const DOWNLOAD_BASE_URL = "https://xfdown.lanzouq.com/";
+const LATEST_APP_VERSION = 128;
+const LATEST_ECHO_VERSION = 1887;
+const LATEST_UNISOUND_VERSION = 1856;
+const APP_DOWNLOAD_ID = "iLWWO3349cah";
+const ECHO_DOWNLOAD_ID = "iebgs4f8tcxc";
+const UNISOUND_DOWNLOAD_ID = "iUCPE34zde2h";
 
-if (localStorage.getItem("web_ver") && localStorage.getItem("web_ver") != web_ver) {
-  localStorage.setItem("web_ver", web_ver);
+// 兼容固件和原控制界面读取的旧全局字段。
+Object.assign(window, {
+  web_ver: WEB_VERSION,
+  downurl: DOWNLOAD_BASE_URL,
+  new_app_ver: LATEST_APP_VERSION,
+  new_echo_ver: LATEST_ECHO_VERSION,
+  new_unisound_ver: LATEST_UNISOUND_VERSION,
+  app_downid: APP_DOWNLOAD_ID,
+  echo_downid: ECHO_DOWNLOAD_ID,
+  unisound_downid: UNISOUND_DOWNLOAD_ID,
+});
+
+if (localStorage.getItem("web_ver") && localStorage.getItem("web_ver") != WEB_VERSION) {
+  localStorage.setItem("web_ver", WEB_VERSION);
   var time = new Date().getTime();
   setCookie("time", time, 86400);
   document.getElementsByTagName("h3")[0].innerHTML = "数据更新。。。";
@@ -20,7 +32,7 @@ if (localStorage.getItem("web_ver") && localStorage.getItem("web_ver") != web_ve
   }, 500);
 } else {
   if (!localStorage.getItem("web_ver")) {
-    localStorage.setItem("web_ver", web_ver);
+    localStorage.setItem("web_ver", WEB_VERSION);
   }
   var script = document.createElement("script");
   script.type = "text/javascript";

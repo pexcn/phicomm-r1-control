@@ -1,6 +1,6 @@
 /**
  * R1 应用外壳：导航 / 顶栏 / 弹层路由 / 迷你播放条 / 启动流程
- * 页面实现分别在 panel-music.js 与 panel-device.js（挂载到 window.R1Panels）。
+ * 页面实现分别在 music-panel.js 与 device-panel.js（挂载到 window.R1Panels）。
  */
 (function (global) {
   "use strict";
@@ -21,8 +21,8 @@
     ConfirmHost = R1UI.ConfirmHost;
   var useState = React.useState,
     useEffect = React.useEffect;
-  var C = R1Core;
-  var P = R1Panels || (global.R1Panels = {});
+  var r1Core = R1Core;
+  var r1Panels = R1Panels || (global.R1Panels = {});
 
   var NAV = [
     { key: "music", label: "音乐", icon: "music" },
@@ -42,7 +42,7 @@
 
   /* 弹层注册表：type → { 标题, 内容组件, 尺寸, 是否居中 } */
   function sheetConfig(type) {
-    var Pn = R1Panels || {};
+    var r1Panels2 = R1Panels || {};
     var map = {
       connect: {
         title: "连接 R1 音箱",
@@ -53,45 +53,60 @@
       source: {
         title: "音乐源",
         sub: "切换点播与歌单使用的音源",
-        Comp: Pn.SourceSheet,
+        Comp: r1Panels2.SourceSheet,
         center: true,
       },
       light: {
         title: "氛围灯设置",
         sub: "效果 / 亮度 / 渐变速度 / 颜色",
-        Comp: Pn.LightSheet,
+        Comp: r1Panels2.LightSheet,
         center: true,
       },
       tts: {
         title: "选择发音人",
         sub: "设备朗读文本时使用的声音",
-        Comp: Pn.TtsSpeakerSheet,
+        Comp: r1Panels2.TtsSpeakerSheet,
         center: true,
       },
       login: {
         title: "扫码登录",
         sub: "登录音乐账号后可同步歌单与收藏",
-        Comp: Pn.LoginSheet,
+        Comp: r1Panels2.LoginSheet,
         size: "wide",
       },
       local: {
         title: "本地音乐",
         sub: "设备本地存储的音频文件",
-        Comp: Pn.LocalMusicSheet,
+        Comp: r1Panels2.LocalMusicSheet,
         size: "wide",
       },
-      memo: { title: "备忘与闹钟", sub: "管理设备上的提醒事项", Comp: Pn.MemoSheet, size: "wide" },
-      voice: { title: "语音报时", sub: "整点报时与语音设置", Comp: Pn.VoiceSheet },
-      restart: { title: "自动重启", sub: "设备定时自检与重启策略", Comp: Pn.RestartSheet },
+      memo: {
+        title: "备忘与闹钟",
+        sub: "管理设备上的提醒事项",
+        Comp: r1Panels2.MemoSheet,
+        size: "wide",
+      },
+      voice: { title: "语音报时", sub: "整点报时与语音设置", Comp: r1Panels2.VoiceSheet },
+      restart: { title: "自动重启", sub: "设备定时自检与重启策略", Comp: r1Panels2.RestartSheet },
       advanced: {
         title: "高级工具",
         sub: "DLNA / mDNS / ADB / 配网 / 小爱",
-        Comp: Pn.AdvancedSheet,
+        Comp: r1Panels2.AdvancedSheet,
         size: "wide",
       },
-      adb: { title: "ADB 控制台", sub: "在设备上执行 Shell 命令", Comp: Pn.AdbSheet, size: "wide" },
-      settings: { title: "设置", sub: "外观与使用偏好", Comp: Pn.SettingsSheet, center: true },
-      about: { title: "关于", sub: "版本信息", Comp: Pn.AboutSheet, center: true },
+      adb: {
+        title: "ADB 控制台",
+        sub: "在设备上执行 Shell 命令",
+        Comp: r1Panels2.AdbSheet,
+        size: "wide",
+      },
+      settings: {
+        title: "设置",
+        sub: "外观与使用偏好",
+        Comp: r1Panels2.SettingsSheet,
+        center: true,
+      },
+      about: { title: "关于", sub: "版本信息", Comp: r1Panels2.AboutSheet, center: true },
     };
     return map[type] || null;
   }
@@ -100,20 +115,20 @@
    * 连接弹层
    * =================================================================== */
   function ConnectSheet() {
-    var st = C.useStore();
-    var _ip = useState(""),
-      ip = _ip[0],
-      setIp = _ip[1];
-    var scan = st.scan || { running: false, devices: [], scanned: 0, total: 0 };
+    var store = r1Core.useStore();
+    var ipState = useState(""),
+      ip = ipState[0],
+      setIp = ipState[1];
+    var scan = store.scan || { running: false, devices: [], scanned: 0, total: 0 };
     var isHttps = location.protocol === "https:";
 
     function doConnect(target) {
-      var v = String(target != null ? target : ip).trim();
-      if (!v) {
-        C.toast("请输入设备地址", "err");
+      var text = String(target != null ? target : ip).trim();
+      if (!text) {
+        r1Core.toast("请输入设备地址", "err");
         return;
       }
-      C.connectTo(v);
+      r1Core.connectTo(text);
     }
 
     return h(
@@ -126,15 +141,15 @@
           value: ip,
           onChange: setIp,
           placeholder: "IP、主机名或 wss://代理地址",
-          onKeyDown: function (e) {
-            if (e.key === "Enter") doConnect();
+          onKeyDown: function (value) {
+            if (value.key === "Enter") doConnect();
           },
         }),
         h(
           Button,
           {
             variant: "primary",
-            loading: st.connecting && !st.connected,
+            loading: store.connecting && !store.connected,
             onClick: function () {
               doConnect();
             },
@@ -143,14 +158,14 @@
         ),
       ),
 
-      st.connected
+      store.connected
         ? h(
             "div",
             { className: "rows", style: { marginBottom: "14px" } },
             h(Row, {
               icon: "wifi",
               accent: true,
-              title: "已连接 " + (R1WS.getConnectIp ? R1WS.getConnectIp() : st.lastIp),
+              title: "已连接 " + (R1WS.getConnectIp ? R1WS.getConnectIp() : store.lastIp),
               sub: "控制页面已就绪",
               end: h(
                 Button,
@@ -158,7 +173,7 @@
                   size: "sm",
                   variant: "ghost",
                   onClick: function () {
-                    C.disconnect();
+                    r1Core.disconnect();
                   },
                 },
                 "断开",
@@ -181,7 +196,7 @@
               icon: "signal",
               variant: scan.running ? "soft" : "ghost",
               onClick: function () {
-                scan.running ? C.stopScan() : C.startScan();
+                scan.running ? r1Core.stopScan() : r1Core.startScan();
               },
             },
             scan.running ? "停止扫描" : "扫描局域网设备",
@@ -210,15 +225,18 @@
           ? h(
               "div",
               { className: "rows" },
-              scan.devices.map(function (d, i) {
+              scan.devices.map(function (item, index) {
                 return h(Row, {
-                  key: i,
+                  key: index,
                   icon: "wifi",
-                  accent: !!d.isR1,
-                  title: d.name || "未知设备",
-                  sub: d.ip + (d.port ? ":" + d.port : "") + (d.model ? " · " + d.model : ""),
+                  accent: !!item.isR1,
+                  title: item.name || "未知设备",
+                  sub:
+                    item.ip +
+                    (item.port ? ":" + item.port : "") +
+                    (item.model ? " · " + item.model : ""),
                   onClick: function () {
-                    doConnect(d.ip);
+                    doConnect(item.ip);
                   },
                   end: h(Icon, { name: "chevronR" }),
                 });
@@ -228,7 +246,7 @@
       ),
 
       /* 连接历史 */
-      st.history && st.history.length
+      store.history && store.history.length
         ? h(
             "div",
             null,
@@ -236,14 +254,14 @@
             h(
               "div",
               { className: "rows" },
-              st.history.map(function (x) {
+              store.history.map(function (item) {
                 return h(Row, {
-                  key: x.ip,
+                  key: item.ip,
                   icon: "clock",
-                  title: x.ip,
-                  sub: new Date(x.time).toLocaleString(),
+                  title: item.ip,
+                  sub: new Date(item.time).toLocaleString(),
                   onClick: function () {
-                    doConnect(x.ip);
+                    doConnect(item.ip);
                   },
                   end: h(Icon, { name: "chevronR" }),
                 });
@@ -271,8 +289,8 @@
    * 迷你播放条（手机/小平板、非音乐页时显示）
    * =================================================================== */
   function MiniPlayer() {
-    var st = C.useStore();
-    var _s = useState({
+    var store = r1Core.useStore();
+    var sState = useState({
       title: "",
       artist: "",
       cover: "",
@@ -280,22 +298,22 @@
       progress: 0,
       duration: 0,
     });
-    var s = _s[0],
-      setS = _s[1];
+    var sStateItem = sState[0],
+      setS = sState[1];
 
-    C.useR1Event("music_info", function (info) {
+    r1Core.useR1Event("music_info", function (info) {
       if (!info) return;
-      setS(function (prev) {
+      setS(function (previous) {
         return {
-          title: info.title || prev.title,
-          artist: info.artist || prev.artist,
-          cover: info.cover || info.albumUrl || prev.cover,
+          title: info.title || previous.title,
+          artist: info.artist || previous.artist,
+          cover: info.cover || info.albumUrl || previous.cover,
           playing:
             info.playing !== undefined
               ? !!info.playing
               : info.play_state !== undefined
                 ? !!info.play_state
-                : prev.playing,
+                : previous.playing,
           progress:
             info.position !== undefined
               ? info.position / 1000
@@ -303,20 +321,22 @@
                 ? info.progress > 10000
                   ? info.progress / 1000
                   : info.progress
-                : prev.progress,
+                : previous.progress,
           duration:
             info.duration !== undefined
               ? info.duration > 10000
                 ? Math.floor(info.duration / 1000)
                 : info.duration
-              : prev.duration,
+              : previous.duration,
         };
       });
     });
 
-    if (!st.connected || !s.title || st.route === "music") return null;
+    if (!store.connected || !sStateItem.title || store.route === "music") return null;
 
-    var pct = s.duration ? Math.min(100, (s.progress / s.duration) * 100) : 0;
+    var pct = sStateItem.duration
+      ? Math.min(100, (sStateItem.progress / sStateItem.duration) * 100)
+      : 0;
 
     return h(
       "div",
@@ -325,31 +345,31 @@
         "div",
         {
           className: "mini-art",
-          style: s.cover ? { backgroundImage: "url(" + s.cover + ")" } : null,
+          style: sStateItem.cover ? { backgroundImage: "url(" + sStateItem.cover + ")" } : null,
         },
-        s.cover ? null : h(Icon, { name: "music" }),
+        sStateItem.cover ? null : h(Icon, { name: "music" }),
       ),
       h(
         "div",
         {
           className: "mini-main",
           onClick: function () {
-            C.goRoute("music");
+            r1Core.goRoute("music");
           },
         },
-        h("div", { className: "mini-title" }, s.title),
-        h("div", { className: "mini-artist" }, s.artist || "R1 音箱"),
+        h("div", { className: "mini-title" }, sStateItem.title),
+        h("div", { className: "mini-artist" }, sStateItem.artist || "R1 音箱"),
       ),
       h(
         "button",
         {
           className: "btn icon sm ghost",
           title: "上一首",
-          onClick: function (e) {
-            e.stopPropagation();
+          onClick: function (event) {
+            event.stopPropagation();
             try {
               R1WS.musicControl("prev");
-            } catch (err) {}
+            } catch (error) {}
           },
         },
         h(Icon, { name: "prev" }),
@@ -358,27 +378,27 @@
         "button",
         {
           className: "btn icon sm primary",
-          title: s.playing ? "暂停" : "播放",
-          onClick: function (e) {
-            e.stopPropagation();
+          title: sStateItem.playing ? "暂停" : "播放",
+          onClick: function (event) {
+            event.stopPropagation();
             try {
-              s.playing ? R1WS.musicPause() : R1WS.musicResume();
-            } catch (err) {}
-            setS(Object.assign({}, s, { playing: !s.playing }));
+              sStateItem.playing ? R1WS.musicPause() : R1WS.musicResume();
+            } catch (error) {}
+            setS(Object.assign({}, sStateItem, { playing: !sStateItem.playing }));
           },
         },
-        h(Icon, { name: s.playing ? "pause" : "play" }),
+        h(Icon, { name: sStateItem.playing ? "pause" : "play" }),
       ),
       h(
         "button",
         {
           className: "btn icon sm ghost",
           title: "下一首",
-          onClick: function (e) {
-            e.stopPropagation();
+          onClick: function (event) {
+            event.stopPropagation();
             try {
               R1WS.musicControl("next");
-            } catch (err) {}
+            } catch (error) {}
           },
         },
         h(Icon, { name: "next" }),
@@ -391,24 +411,24 @@
    * 应用外壳
    * =================================================================== */
   function App() {
-    var st = C.useStore();
+    var store = r1Core.useStore();
 
     useEffect(function () {
-      C.boot();
+      r1Core.boot();
     }, []);
 
     /* 没有历史 IP：直接弹连接；有历史但 7 秒没连上：也弹连接 */
     useEffect(function () {
-      if (C.getState().lastIp) {
-        var t = setTimeout(function () {
-          if (!C.getState().connected) C.openSheet("connect");
+      if (r1Core.getState().lastIp) {
+        var timeoutId = setTimeout(function () {
+          if (!r1Core.getState().connected) r1Core.openSheet("connect");
         }, 7000);
         return function () {
-          clearTimeout(t);
+          clearTimeout(timeoutId);
         };
       }
       var t2 = setTimeout(function () {
-        if (!C.getState().connected) C.openSheet("connect");
+        if (!r1Core.getState().connected) r1Core.openSheet("connect");
       }, 600);
       return function () {
         clearTimeout(t2);
@@ -416,24 +436,24 @@
     }, []);
 
     function connPill() {
-      if (st.connected)
+      if (store.connected)
         return h(
           Pill,
           { tone: "ok", dot: true },
           R1WS.getConnectIp ? R1WS.getConnectIp() : "已连接",
         );
-      if (st.connecting) return h(Pill, { tone: "warn", dot: true, pulse: true }, "连接中…");
+      if (store.connecting) return h(Pill, { tone: "warn", dot: true, pulse: true }, "连接中…");
       return h(Pill, { tone: "err", dot: true }, "未连接");
     }
 
     function pageContent() {
       var comp = {
-        music: P.MusicPanel,
-        screen: P.ScreenPanel,
-        sound: P.SoundPanel,
-        bluetooth: P.BluetoothPanel,
-        device: P.DevicePanel,
-      }[st.route];
+        music: r1Panels.MusicPanel,
+        screen: r1Panels.ScreenPanel,
+        sound: r1Panels.SoundPanel,
+        bluetooth: r1Panels.BluetoothPanel,
+        device: r1Panels.DevicePanel,
+      }[store.route];
       if (comp) return h(comp);
       return h(
         "div",
@@ -460,20 +480,20 @@
       );
     }
 
-    var sheet = st.sheet;
-    var cfg = sheet ? sheetConfig(sheet.type) : null;
+    var sheet = store.sheet;
+    var config = sheet ? sheetConfig(sheet.type) : null;
 
     return h(
       React.Fragment,
       null,
       /* ---- 网页自定义背景层（设置 → 高级工具 → 自定义背景） ---- */
-      st.customBg
+      store.customBg
         ? h(
             "div",
             { className: "app-bg-layer" },
             h("div", {
               className: "app-bg-image",
-              style: { backgroundImage: "url(" + st.customBg + ")" },
+              style: { backgroundImage: "url(" + store.customBg + ")" },
             }),
             h("div", { className: "app-bg-overlay" }),
           )
@@ -481,7 +501,7 @@
 
       h(
         "div",
-        { className: "app" + (st.customBg ? " app-layout-bg" : "") },
+        { className: "app" + (store.customBg ? " app-layout-bg" : "") },
 
         /* ---- 左侧导航（≥900px） ---- */
         h(
@@ -491,19 +511,19 @@
           h(
             "div",
             { className: "rail-nav" },
-            NAV.map(function (n) {
+            NAV.map(function (item) {
               return h(
                 "button",
                 {
-                  key: n.key,
-                  className: "rail-item" + (st.route === n.key ? " on" : ""),
+                  key: item.key,
+                  className: "rail-item" + (store.route === item.key ? " on" : ""),
                   onClick: function () {
-                    C.goRoute(n.key);
+                    r1Core.goRoute(item.key);
                   },
-                  title: n.label,
+                  title: item.label,
                 },
-                h(Icon, { name: n.icon }),
-                h("span", { className: "lbl" }, n.label),
+                h(Icon, { name: item.icon }),
+                h("span", { className: "lbl" }, item.label),
               );
             }),
           ),
@@ -515,7 +535,7 @@
               {
                 className: "rail-item" + (sheet && sheet.type === "settings" ? " on" : ""),
                 onClick: function () {
-                  C.openSheet("settings");
+                  r1Core.openSheet("settings");
                 },
                 title: "设置",
               },
@@ -535,13 +555,13 @@
             h(
               "div",
               { style: { minWidth: 0 } },
-              h("div", { className: "topbar-title" }, TITLES[st.route] || "R1"),
+              h("div", { className: "topbar-title" }, TITLES[store.route] || "R1"),
             ),
             h("div", { className: "topbar-spacer" }),
             h(
               "div",
               { className: "topbar-actions" },
-              st.connected
+              store.connected
                 ? null
                 : h(
                     Button,
@@ -550,7 +570,7 @@
                       variant: "soft",
                       icon: "link",
                       onClick: function () {
-                        C.openSheet("connect");
+                        r1Core.openSheet("connect");
                       },
                     },
                     "连接",
@@ -560,7 +580,7 @@
                 icon: "settings",
                 title: "设置",
                 onClick: function () {
-                  C.openSheet("settings");
+                  r1Core.openSheet("settings");
                 },
               }),
             ),
@@ -569,8 +589,8 @@
           h(
             "main",
             {
-              className: "page" + (st.route === "music" ? " page-music" : ""),
-              key: st.route,
+              className: "page" + (store.route === "music" ? " page-music" : ""),
+              key: store.route,
             },
             pageContent(),
           ),
@@ -582,36 +602,36 @@
         h(
           "nav",
           { className: "tabbar" },
-          NAV.map(function (n) {
+          NAV.map(function (item) {
             return h(
               "button",
               {
-                key: n.key,
-                className: "tabbar-item" + (st.route === n.key ? " on" : ""),
+                key: item.key,
+                className: "tabbar-item" + (store.route === item.key ? " on" : ""),
                 onClick: function () {
-                  C.goRoute(n.key);
+                  r1Core.goRoute(item.key);
                 },
               },
-              h(Icon, { name: n.icon }),
-              h("span", { className: "lbl" }, n.label),
+              h(Icon, { name: item.icon }),
+              h("span", { className: "lbl" }, item.label),
             );
           }),
         ),
 
         /* ---- 弹层 ---- */
-        cfg
+        config
           ? h(
               Modal,
               {
                 open: true,
-                title: cfg.title,
-                sub: cfg.sub,
-                size: cfg.size,
-                center: cfg.center,
-                onClose: C.closeSheet,
+                title: config.title,
+                sub: config.sub,
+                size: config.size,
+                center: config.center,
+                onClose: r1Core.closeSheet,
               },
-              cfg.Comp
-                ? h(cfg.Comp, { payload: sheet.payload })
+              config.Comp
+                ? h(config.Comp, { payload: sheet.payload })
                 : h(Empty, {
                     icon: "sparkle",
                     title: "模块加载中",

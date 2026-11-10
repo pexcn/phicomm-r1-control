@@ -1,8 +1,8 @@
-var config_wifi_asset_base = new URL("../../../", document.currentScript.src);
+var assetBaseUrl = new URL("../../../", document.currentScript.src);
 document.body.style = "background-color:#A9D0F5;";
 var link = document.createElement("link");
 link.rel = "stylesheet";
-link.href = new URL("assets/css/classic.css", config_wifi_asset_base).href;
+link.href = new URL("assets/css/classic.css", assetBaseUrl).href;
 document.getElementsByTagName("head")[0].appendChild(link);
 
 var script = document.createElement("script");
@@ -13,19 +13,19 @@ script.onerror = function () {
   document.head.appendChild(fallback);
 };
 script.type = "text/javascript";
-script.src = new URL("assets/vendor/jquery/jquery-3.6.0.min.js", config_wifi_asset_base).href;
+script.src = new URL("assets/vendor/jquery/jquery-3.6.0.min.js", assetBaseUrl).href;
 document.head.appendChild(script);
 
-var config_wifi_div = document.createElement("div");
-config_wifi_div.style = "text-align:center;";
+var wifiContainer = document.createElement("div");
+wifiContainer.style = "text-align:center;";
 
 var h3 = document.createElement("h3");
 h3.style.color = "rgba(238, 0, 0, 1)";
 h3.innerHTML = "R1音箱配网页面";
-config_wifi_div.appendChild(h3);
+wifiContainer.appendChild(h3);
 window.StatusBar_div = document.createElement("div");
 document.body.appendChild(StatusBar_div);
-document.body.appendChild(config_wifi_div);
+document.body.appendChild(wifiContainer);
 
 window.config_wifi_btn = null;
 window.timer = -1;
@@ -59,38 +59,38 @@ function load() {
 
   var text = document.createElement("text");
   text.innerHTML = "提示：";
-  config_wifi_div.appendChild(text);
-  config_wifi_div.appendChild(document.createElement("div"));
-  config_wifi_div.appendChild(tips);
-  config_wifi_div.appendChild(document.createElement("div"));
+  wifiContainer.appendChild(text);
+  wifiContainer.appendChild(document.createElement("div"));
+  wifiContainer.appendChild(tips);
+  wifiContainer.appendChild(document.createElement("div"));
 
   var text = document.createElement("text");
   text.innerHTML = "检查：";
-  config_wifi_div.appendChild(text);
-  config_wifi_div.appendChild(iframe);
-  config_wifi_div.appendChild(document.createElement("div"));
+  wifiContainer.appendChild(text);
+  wifiContainer.appendChild(iframe);
+  wifiContainer.appendChild(document.createElement("div"));
 
   var text = document.createElement("text");
   text.innerHTML = "输入：";
-  config_wifi_div.appendChild(text);
-  config_wifi_div.appendChild(document.createElement("div"));
+  wifiContainer.appendChild(text);
+  wifiContainer.appendChild(document.createElement("div"));
 
   var text = document.createElement("text");
   text.innerHTML = "WIFI：";
-  config_wifi_div.appendChild(text);
+  wifiContainer.appendChild(text);
   var ssid = document.createElement("input");
   ssid.type = "text";
   ssid.id = "ssid";
   ssid.className = "input";
   ssid.style.width = "65%";
   ssid.value = sessionStorage.getItem("ssid");
-  config_wifi_div.appendChild(ssid);
+  wifiContainer.appendChild(ssid);
 
-  config_wifi_div.appendChild(document.createElement("div"));
+  wifiContainer.appendChild(document.createElement("div"));
 
   var text = document.createElement("text");
   text.innerHTML = "加密：";
-  config_wifi_div.appendChild(text);
+  wifiContainer.appendChild(text);
   var encryption = document.createElement("select");
   encryption.id = "encryption";
   encryption.className = "input";
@@ -103,44 +103,44 @@ function load() {
     ["WPA加密", "WPA"],
   ];
 
-  for (var i = 0; i < encryptions.length; i++) {
+  for (var index = 0; index < encryptions.length; index++) {
     var option = document.createElement("option");
-    option.innerHTML = encryptions[i][0];
-    option.value = encryptions[i][1];
+    option.innerHTML = encryptions[index][0];
+    option.value = encryptions[index][1];
     encryption.appendChild(option);
   }
 
   encryption[encryptions.length - 1].selected = true;
 
-  for (var i in encryptions) {
-    if (encryptions[i][1] == sessionStorage.getItem("secure")) {
-      encryption[i].selected = true;
+  for (var index in encryptions) {
+    if (encryptions[index][1] == sessionStorage.getItem("secure")) {
+      encryption[index].selected = true;
     }
   }
 
-  config_wifi_div.appendChild(encryption);
+  wifiContainer.appendChild(encryption);
 
-  config_wifi_div.appendChild(document.createElement("div"));
+  wifiContainer.appendChild(document.createElement("div"));
 
   var text = document.createElement("text");
   text.innerHTML = "密码：";
-  config_wifi_div.appendChild(text);
+  wifiContainer.appendChild(text);
   var password = document.createElement("input");
   password.type = "text";
   password.id = "password";
   password.className = "input";
   password.style.width = "65%";
   password.value = sessionStorage.getItem("password");
-  config_wifi_div.appendChild(password);
+  wifiContainer.appendChild(password);
 
-  config_wifi_div.appendChild(document.createElement("div"));
+  wifiContainer.appendChild(document.createElement("div"));
 
-  var btn = document.createElement("input");
-  btn.type = "button";
-  btn.className = "btn";
-  btn.value = "开始配网";
-  btn.id = "config_wifi_btn";
-  btn.onclick = function () {
+  var button = document.createElement("input");
+  button.type = "button";
+  button.className = "btn";
+  button.value = "开始配网";
+  button.id = "config_wifi_btn";
+  button.onclick = function () {
     this.disabled = true;
     this.value = "正在发送配网信息。。。";
     var data = {
@@ -163,9 +163,9 @@ function load() {
       if (window.timer != -1 && xhttp.readyState == 4) {
         clearTimeout(window.timer);
         window.timer = -1;
-        const ret = xhttp.responseText || "";
+        const result = xhttp.responseText || "";
         config_wifi_btn.value = "已发送配网信息，请自行检查是否配网成功！";
-        alert(config_wifi_btn.value + "\n" + ret);
+        alert(config_wifi_btn.value + "\n" + result);
         setTimeout(function () {
           config_wifi_btn.disabled = false;
           config_wifi_btn.value = "开始配网";
@@ -186,17 +186,17 @@ function load() {
     xhttp.send(JSON.stringify(data));
     //$.ajax({type:'POST',url:'http://192.168.43.1:8989/api/configwifi',dataType:'json',data:JSON.stringify(data),success:success,error:error});
   };
-  window.config_wifi_btn = btn;
-  config_wifi_div.appendChild(btn);
+  window.config_wifi_btn = button;
+  wifiContainer.appendChild(button);
 
-  config_wifi_div.appendChild(document.createElement("br"));
+  wifiContainer.appendChild(document.createElement("br"));
 
-  var btn = document.createElement("input");
-  btn.type = "button";
-  btn.className = "btn";
-  btn.value = "返回首页";
-  btn.onclick = function () {
-    location.href = new URL("?no_auto_connect", config_wifi_asset_base).href;
+  var button = document.createElement("input");
+  button.type = "button";
+  button.className = "btn";
+  button.value = "返回首页";
+  button.onclick = function () {
+    location.href = new URL("?no_auto_connect", assetBaseUrl).href;
   };
-  config_wifi_div.appendChild(btn);
+  wifiContainer.appendChild(button);
 }

@@ -9,24 +9,24 @@
       "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js",
     ],
   ];
-  window.__loadReact = function (i, next) {
-    if (i >= pairs.length) {
+  window.__loadReact = function (value, next) {
+    if (value >= pairs.length) {
       next();
       return;
     }
-    var s = document.createElement("script");
-    s.src = pairs[i][0];
-    s.onerror = function () {
-      var c = document.createElement("script");
-      c.src = pairs[i][1];
-      c.onload = c.onerror = function () {
-        window.__loadReact(i + 1, next);
+    var script = document.createElement("script");
+    script.src = pairs[value][0];
+    script.onerror = function () {
+      var script2 = document.createElement("script");
+      script2.src = pairs[value][1];
+      script2.onload = script2.onerror = function () {
+        window.__loadReact(value + 1, next);
       };
-      document.head.appendChild(c);
+      document.head.appendChild(script2);
     };
-    s.onload = function () {
-      window.__loadReact(i + 1, next);
+    script.onload = function () {
+      window.__loadReact(value + 1, next);
     };
-    document.head.appendChild(s);
+    document.head.appendChild(script);
   };
 })();

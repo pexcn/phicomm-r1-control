@@ -163,16 +163,16 @@ function discoverDLNADevices() {
         plus.android.importClass(address);
         parseDLNAResponse(response, address.getHostAddress(), address.getHostName());
         receiveLoopTimeout = setTimeout(receiveLoop, 100);
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log(error);
         completeDiscovery();
       }
     };
 
     receiveLoopTimeout = setTimeout(receiveLoop, 0);
-  } catch (e) {
-    console.error("SSDP错误: ", e);
-    updateStatus("SSDP错误: " + e.message, false);
+  } catch (error) {
+    console.error("SSDP错误: ", error);
+    updateStatus("SSDP错误: " + error.message, false);
     completeDiscovery();
   }
 }
@@ -251,8 +251,8 @@ function fetchDLNADeviceDetails(deviceInfo) {
               getXmlValue(deviceElement, "manufacturer") || deviceInfo.manufacturer;
             deviceInfo.model = getXmlValue(deviceElement, "modelName") || deviceInfo.model;
           }
-        } catch (e) {
-          console.error("解析设备描述失败: ", e);
+        } catch (error) {
+          console.error("解析设备描述失败: ", error);
         }
       }
 
@@ -264,8 +264,8 @@ function fetchDLNADeviceDetails(deviceInfo) {
   try {
     xhr.open("GET", deviceInfo.location);
     xhr.send();
-  } catch (e) {
-    console.error("获取设备描述失败: ", e);
+  } catch (error) {
+    console.error("获取设备描述失败: ", error);
     addDeviceToList(deviceInfo);
   }
 }
@@ -393,13 +393,13 @@ function discoverAirPlayDevices() {
       });
 
       updateStatus("正在扫描网络中的AirPlay设备...", true);
-    } catch (e) {
-      console.error("发现服务失败: " + (e.message || e));
-      updateStatus("发现服务失败: " + (e.message || e), false);
+    } catch (error) {
+      console.error("发现服务失败: " + (error.message || error));
+      updateStatus("发现服务失败: " + (error.message || error), false);
     }
-  } catch (e) {
-    console.error("初始化NSD失败: " + (e.message || e));
-    updateStatus("初始化失败: " + (e.message || e), false);
+  } catch (error) {
+    console.error("初始化NSD失败: " + (error.message || error));
+    updateStatus("初始化失败: " + (error.message || error), false);
   }
 }
 
@@ -454,8 +454,8 @@ function createDiscoveryListener(serviceType) {
             },
           }),
         );
-      } catch (e) {
-        console.error("解析服务异常: " + (e.message || e));
+      } catch (error) {
+        console.error("解析服务异常: " + (error.message || error));
       }
     },
     onServiceLost: function (service) {
@@ -635,14 +635,14 @@ function completeDiscovery() {
   if (dlnaSocket) {
     try {
       dlnaSocket.close();
-    } catch (e) {}
+    } catch (error) {}
     dlnaSocket = null;
   }
 
   if (multicastLock) {
     try {
       multicastLock.release();
-    } catch (e) {}
+    } catch (error) {}
     multicastLock = null;
   }
 
@@ -664,14 +664,14 @@ function stopDiscovery() {
   if (dlnaSocket) {
     try {
       plus.android.invoke(dlnaSocket, "close");
-    } catch (e) {}
+    } catch (error) {}
     dlnaSocket = null;
   }
 
   if (multicastLock) {
     try {
       multicastLock.release();
-    } catch (e) {}
+    } catch (error) {}
     multicastLock = null;
   }
 
@@ -689,8 +689,8 @@ function stopDiscovery() {
           nsdManager.stopServiceDiscovery(discoveryListeners[type]);
         }
       });
-    } catch (e) {
-      console.error("停止发现失败: " + (e.message || e));
+    } catch (error) {
+      console.error("停止发现失败: " + (error.message || error));
     }
     discoveryListeners = {};
   }
@@ -717,8 +717,8 @@ function init() {
         console.log("权限已获取");
         initNetwork();
       },
-      function (e) {
-        console.error("权限被拒绝: ", e);
+      function (value) {
+        console.error("权限被拒绝: ", value);
         updateStatus("错误：权限被拒绝，无法扫描设备", false);
       },
     );
@@ -727,7 +727,7 @@ function init() {
   // 事件绑定
   scanBtn.addEventListener("click", startDiscovery);
   stopBtn.addEventListener("click", stopDiscovery);
-  document.getElementById("backHomeBtn").addEventListener("click", (e) => {
+  document.getElementById("backHomeBtn").addEventListener("click", (event) => {
     if (!confirm(`确定要返回首页吗？`)) return;
     if (isSearching) {
       stopDiscovery();
@@ -752,7 +752,7 @@ function initNetwork() {
       multicastLock = wifiManager.createMulticastLock("NetworkDiscovery");
       plus.android.importClass(multicastLock);
       multicastLock.acquire();
-    } catch (e) {}
+    } catch (error) {}
 
     // 放宽线程策略
     const policy = new ThreadPolicy.Builder().permitAll().build();
@@ -775,9 +775,9 @@ function initNetwork() {
     devicesList.appendChild(deviceCard);
 
     return true;
-  } catch (e) {
-    console.error("初始化错误: ", e);
-    updateStatus("初始化错误: " + e.message, false);
+  } catch (error) {
+    console.error("初始化错误: ", error);
+    updateStatus("初始化错误: " + error.message, false);
   }
 }
 

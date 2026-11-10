@@ -64,7 +64,7 @@ button:disabled {
 
 /* ---------- 0.2 iconify 图标基础样式 ----------
  * 图标统一用原版 iconify-icon Web Component（CDN 加载，与旧版一致，
- * iPhone 兼容性经过验证）；CDN 不可用时 ui.js 自动回退内联 SVG。
+ * iPhone 兼容性经过验证）；CDN 不可用时 components.js 自动回退内联 SVG。
  * 宿主元素默认行内块 + 垂直居中，尺寸由使用处的 .ico 类或 width/height 控制。 */
 iconify-icon {
   display: inline-block;

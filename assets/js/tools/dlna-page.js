@@ -182,8 +182,8 @@ function discoverDevices() {
         plus.android.importClass(address);
         parseResponse(response, address.getHostAddress(), address.getHostName());
         receiveLoopTimeout = setTimeout(receiveLoop, 100);
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log(error);
         completeDiscovery();
         // 超时或错误时继续监听
         //receiveLoopTimeout = setTimeout(receiveLoop, 600);
@@ -191,9 +191,9 @@ function discoverDevices() {
     };
 
     receiveLoopTimeout = setTimeout(receiveLoop, 0);
-  } catch (e) {
-    console.error("SSDP错误: ", e);
-    updateStatus("SSDP错误: " + e.message, false);
+  } catch (error) {
+    console.error("SSDP错误: ", error);
+    updateStatus("SSDP错误: " + error.message, false);
     completeDiscovery();
   }
 }
@@ -275,8 +275,8 @@ function fetchDeviceDetails(deviceInfo) {
               getXmlValue(deviceElement, "manufacturer") || deviceInfo.manufacturer;
             deviceInfo.model = getXmlValue(deviceElement, "modelName") || deviceInfo.model;
           }
-        } catch (e) {
-          console.error("解析设备描述失败: ", e);
+        } catch (error) {
+          console.error("解析设备描述失败: ", error);
         }
       }
 
@@ -288,8 +288,8 @@ function fetchDeviceDetails(deviceInfo) {
   try {
     xhr.open("GET", deviceInfo.location);
     xhr.send();
-  } catch (e) {
-    console.error("获取设备描述失败: ", e);
+  } catch (error) {
+    console.error("获取设备描述失败: ", error);
     addDeviceToList(deviceInfo);
   }
 }
@@ -508,14 +508,14 @@ function completeDiscovery() {
   if (socket) {
     try {
       socket.close();
-    } catch (e) {}
+    } catch (error) {}
     socket = null;
   }
 
   if (multicastLock) {
     try {
       multicastLock.release();
-    } catch (e) {}
+    } catch (error) {}
     multicastLock = null;
   }
 
@@ -537,14 +537,14 @@ function stopDiscovery() {
   if (socket) {
     try {
       plus.android.invoke(socket, "close");
-    } catch (e) {}
+    } catch (error) {}
     socket = null;
   }
 
   if (multicastLock) {
     try {
       multicastLock.release();
-    } catch (e) {}
+    } catch (error) {}
     multicastLock = null;
   }
 
@@ -568,8 +568,8 @@ function init() {
         console.log("权限已获取");
         initSSDP();
       },
-      function (e) {
-        console.error("权限被拒绝: ", e);
+      function (value) {
+        console.error("权限被拒绝: ", value);
         updateStatus("错误：权限被拒绝，无法扫描设备", false);
       },
     );
@@ -592,7 +592,7 @@ function initSSDP() {
       multicastLock = wifiManager.createMulticastLock("DLNADiscovery");
       plus.android.importClass(multicastLock);
       multicastLock.acquire();
-    } catch (e) {}
+    } catch (error) {}
 
     // 放宽线程策略
     const policy = new ThreadPolicy.Builder().permitAll().build();
@@ -621,9 +621,9 @@ function initSSDP() {
     stopBtn.addEventListener("click", stopDiscovery);
 
     return true;
-  } catch (e) {
-    console.error("initSSDP错误: ", e);
-    updateStatus("initSSDP错误: " + e.message, false);
+  } catch (error) {
+    console.error("initSSDP错误: ", error);
+    updateStatus("initSSDP错误: " + error.message, false);
   }
 }
 

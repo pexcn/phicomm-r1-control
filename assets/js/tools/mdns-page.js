@@ -19,12 +19,12 @@ document.addEventListener("plusready", function () {
       "android.permission.ACCESS_WIFI_STATE",
       "android.permission.CHANGE_WIFI_MULTICAST_STATE",
     ],
-    function (e) {
+    function (value) {
       console.log("权限已获取");
       initNsd();
     },
-    function (e) {
-      console.error("权限被拒绝: ", e);
+    function (value) {
+      console.error("权限被拒绝: ", value);
       updateStatus("错误：权限被拒绝，无法扫描设备", false);
     },
   );
@@ -96,9 +96,9 @@ document.addEventListener("plusready", function () {
       devicesList.appendChild(deviceCard);
 
       return true;
-    } catch (e) {
-      console.error("初始化NSD失败: " + (e.message || e));
-      updateStatus("初始化失败: " + (e.message || e), false);
+    } catch (error) {
+      console.error("初始化NSD失败: " + (error.message || error));
+      updateStatus("初始化失败: " + (error.message || error), false);
       return false;
     }
   }
@@ -138,8 +138,8 @@ document.addEventListener("plusready", function () {
               },
             }),
           );
-        } catch (e) {
-          console.error("解析服务异常: " + (e.message || e));
+        } catch (error) {
+          console.error("解析服务异常: " + (error.message || error));
         }
       },
       onServiceLost: function (service) {
@@ -189,9 +189,9 @@ document.addEventListener("plusready", function () {
       }
 
       updateStatus("正在扫描网络中的设备...", true);
-    } catch (e) {
-      console.error("发现服务失败: " + (e.message || e));
-      updateStatus("发现服务失败: " + (e.message || e), false);
+    } catch (error) {
+      console.error("发现服务失败: " + (error.message || error));
+      updateStatus("发现服务失败: " + (error.message || error), false);
     }
   }
 
@@ -207,9 +207,9 @@ document.addEventListener("plusready", function () {
         });
 
         updateStatus("扫描已停止", false);
-      } catch (e) {
-        console.error("停止发现失败: " + (e.message || e));
-        updateStatus("停止发现失败: " + e, false);
+      } catch (error) {
+        console.error("停止发现失败: " + (error.message || error));
+        updateStatus("停止发现失败: " + error, false);
       }
     }
   }
@@ -228,8 +228,8 @@ document.addEventListener("plusready", function () {
       newService.textContent = `服务: ${type.replace(/\./g, "")} (端口: ${port})`;
       serviceList.appendChild(newService);
 
-      const device_name = existingDevice.querySelector(".device-name")[0];
-      if (device_name) device_name.innerHTML = name;
+      const deviceName = existingDevice.querySelector(".device-name")[0];
+      if (deviceName) deviceName.innerHTML = name;
       return;
     }
 

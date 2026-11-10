@@ -6,9 +6,9 @@
   "use strict";
 
   /* ========== 配置常量 ========== */
-  var RECONNECT_DELAY = 3000; // 重连间隔(ms)
-  var HEARTBEAT_INTERVAL = 30000; // 心跳间隔(ms)
-  var REQUEST_TIMEOUT = 10000; // 请求超时(ms)
+  var rECONNECTDELAY = 3000; // 重连间隔(ms)
+  var hEARTBEATINTERVAL = 30000; // 心跳间隔(ms)
+  var rEQUESTTIMEOUT = 10000; // 请求超时(ms)
 
   /* 调试日志总开关：控制台里执行 R1_DEBUG = true 即可打开（console.error/warn 不受控）。
    * 原实现是全局把 console.log 覆写成空函数，有两个副作用：
@@ -17,11 +17,11 @@
    *     屏蔽输出并没有省下开销。
    * 现改为短路判断：开关关闭时 && 右侧整体不求值，零成本。 */
   global.R1_DEBUG = false;
-  var INFO_UPDATE_INTERVAL = 5000; // 设备信息更新间隔(ms)
-  var MUSIC_UPDATE_INTERVAL = 500; // 音乐状态更新间隔(ms)
+  var iNFOUPDATEINTERVAL = 5000; // 设备信息更新间隔(ms)
+  var mUSICUPDATEINTERVAL = 500; // 音乐状态更新间隔(ms)
 
   /* ========== 内部状态 ========== */
-  var ws = null; // WebSocket实例
+  var socket = null; // WebSocket实例
   var connected = false; // 连接状态
   var connecting = false; // 正在连接
   var wsUrl = ""; // WebSocket地址
@@ -62,18 +62,18 @@
 
   function off(event, callback) {
     if (!listeners[event]) return;
-    listeners[event] = listeners[event].filter(function (cb) {
-      return cb !== callback;
+    listeners[event] = listeners[event].filter(function (callback2) {
+      return callback2 !== callback;
     });
   }
 
   function emit(event, data) {
     if (!listeners[event]) return;
-    listeners[event].forEach(function (cb) {
+    listeners[event].forEach(function (callback) {
       try {
-        cb(data);
-      } catch (e) {
-        console.error("[R1WS] 事件回调错误:", e);
+        callback(data);
+      } catch (error) {
+        console.error("[R1WS] 事件回调错误:", error);
       }
     });
   }
@@ -81,28 +81,29 @@
   /* ========== WebSocket 连接管理 ========== */
   /* 局域网访问权限模块（Chromium 147+ local-network-access API）
    * HTTPS 页面下需要此权限才能 ws:// 直连局域网设备 */
-  var _lnPermissionState = "unknown"; /* granted / prompt / denied / unknown / unsupported */
+  var localNetworkPermissionState =
+    "unknown"; /* granted / prompt / denied / unknown / unsupported */
 
   function initLocalNetworkPermission() {
     if (!navigator || !navigator.permissions) {
-      _lnPermissionState = "unsupported";
+      localNetworkPermissionState = "unsupported";
       R1_DEBUG && console.log("[R1WS] 浏览器不支持 Permissions API，跳过权限检测");
       return Promise.resolve();
     }
     return navigator.permissions
       .query({ name: "local-network-access" })
       .then(function (status) {
-        _lnPermissionState = status.state;
-        R1_DEBUG && console.log("[R1WS] 本地网络访问权限:", _lnPermissionState);
+        localNetworkPermissionState = status.state;
+        R1_DEBUG && console.log("[R1WS] 本地网络访问权限:", localNetworkPermissionState);
         status.onchange = function () {
-          _lnPermissionState = status.state;
-          R1_DEBUG && console.log("[R1WS] 本地网络访问权限变更:", _lnPermissionState);
-          emit("permission_change", { state: _lnPermissionState });
+          localNetworkPermissionState = status.state;
+          R1_DEBUG && console.log("[R1WS] 本地网络访问权限变更:", localNetworkPermissionState);
+          emit("permission_change", { state: localNetworkPermissionState });
         };
       })
-      .catch(function (e) {
-        _lnPermissionState = "unsupported";
-        R1_DEBUG && console.log("[R1WS] local-network-access 不支持:", e.message);
+      .catch(function (error) {
+        localNetworkPermissionState = "unsupported";
+        R1_DEBUG && console.log("[R1WS] local-network-access 不支持:", error.message);
       });
   }
 
@@ -119,15 +120,15 @@
   /* 执行实际的 WebSocket 创建与连接绑定 */
   function doConnect(wsUrl) {
     try {
-      ws = new WebSocket(wsUrl);
-    } catch (e) {
+      socket = new WebSocket(wsUrl);
+    } catch (error) {
       connecting = false;
-      emit("error", { message: "WebSocket创建失败: " + e.message });
+      emit("error", { message: "WebSocket创建失败: " + error.message });
       scheduleReconnect();
       return;
     }
 
-    ws.onopen = function () {
+    socket.onopen = function () {
       connected = true;
       connecting = false;
       emit("connected", { url: wsUrl });
@@ -135,31 +136,31 @@
       requestInitInfo();
     };
 
-    ws.onclose = function () {
+    socket.onclose = function () {
       var wasConnected = connected;
       connected = false;
       connecting = false;
-      ws = null;
+      socket = null;
       stopInfoUpdate();
       stopMusicUpdate();
       emit("disconnected", {});
       if (wasConnected) scheduleReconnect();
     };
 
-    ws.onerror = function () {
+    socket.onerror = function () {
       connecting = false;
       emit("error", { message: "WebSocket连接错误" });
     };
 
-    ws.onmessage = function (evt) {
-      if (typeof evt.data === "string") {
-        handleMessage(evt.data);
+    socket.onmessage = function (event) {
+      if (typeof event.data === "string") {
+        handleMessage(event.data);
       } else {
         /* 二进制帧：原网页 (原网页.js:1098) 正是把这种 binary 帧当成屏幕推流
          *  — 直接 URL.createObjectURL(data.data) 给 <img> 用。
          * 兼容：Blob / ArrayBuffer / Uint8Array */
         try {
-          var payload = evt.data;
+          var payload = event.data;
           if (payload instanceof ArrayBuffer) {
             payload = new Blob([payload], { type: "image/jpeg" });
           } else if (payload && payload.byteLength != null && !(payload instanceof Blob)) {
@@ -180,12 +181,12 @@
   function connect(ip) {
     var target = ip ? R1Config.parseDeviceAddress(ip).address : "";
     if (connected && connectIp === target) return;
-    if (connecting && ws) {
+    if (connecting && socket) {
       try {
-        ws.onclose = null;
-        ws.close();
-      } catch (e) {}
-      ws = null;
+        socket.onclose = null;
+        socket.close();
+      } catch (error) {}
+      socket = null;
       connecting = false;
     }
     clearTimers();
@@ -203,15 +204,15 @@
     if (
       /^wss:/.test(wsUrl) ||
       !isHttps ||
-      _lnPermissionState === "granted" ||
-      _lnPermissionState === "unsupported"
+      localNetworkPermissionState === "granted" ||
+      localNetworkPermissionState === "unsupported"
     ) {
       /* HTTP 页面 / 已授权 / 不支持权限API → 直接连接 */
       doConnect(wsUrl);
       return;
     }
 
-    if (_lnPermissionState === "prompt") {
+    if (localNetworkPermissionState === "prompt") {
       /* 待授权：提示用户后连接，触发浏览器权限弹窗 */
       R1_DEBUG && console.log("[R1WS] 需要本地网络访问权限，正在请求...");
       emit("permission_prompt", {});
@@ -219,7 +220,7 @@
       return;
     }
 
-    if (_lnPermissionState === "denied") {
+    if (localNetworkPermissionState === "denied") {
       /* 已拒绝：仍然尝试连接（部分浏览器可能仍允许），失败则提示用户手动开启 */
       console.warn("[R1WS] 本地网络访问权限被拒绝，尝试连接...");
       doConnect(wsUrl);
@@ -237,10 +238,10 @@
   function disconnect() {
     clearTimers();
     stopInfoUpdate();
-    if (ws) {
-      ws.onclose = null;
-      ws.close();
-      ws = null;
+    if (socket) {
+      socket.onclose = null;
+      socket.close();
+      socket = null;
     }
     connected = false;
     connecting = false;
@@ -251,13 +252,13 @@
     clearTimers();
     reconnectTimer = setTimeout(function () {
       connect(connectIp);
-    }, RECONNECT_DELAY);
+    }, rECONNECTDELAY);
   }
 
   function startHeartbeat() {
     heartbeatTimer = setInterval(function () {
-      if (connected && ws) wsSend({ type: "ping", timestamp: Date.now() });
-    }, HEARTBEAT_INTERVAL);
+      if (connected && socket) wsSend({ type: "ping", timestamp: Date.now() });
+    }, hEARTBEATINTERVAL);
   }
 
   function clearTimers() {
@@ -276,12 +277,12 @@
   }
 
   /* ========== 原始发送函数 ========== */
-  function wsSend(obj) {
-    if (!connected || !ws) return false;
+  function wsSend(record) {
+    if (!connected || !socket) return false;
     try {
-      ws.send(JSON.stringify(obj));
+      socket.send(JSON.stringify(record));
       return true;
-    } catch (e) {
+    } catch (error) {
       return false;
     }
   }
@@ -298,7 +299,7 @@
     infoUpdateTimer = setInterval(function () {
       if (!connected) return;
       requestDeviceInfo();
-    }, INFO_UPDATE_INTERVAL);
+    }, iNFOUPDATEINTERVAL);
   }
 
   function stopInfoUpdate() {
@@ -312,7 +313,7 @@
   function requestDeviceInfo(force) {
     var now = Date.now();
     if (!force && now < lastDeviceInfoUpdateTime) return;
-    lastDeviceInfoUpdateTime = now + INFO_UPDATE_INTERVAL;
+    lastDeviceInfoUpdateTime = now + iNFOUPDATEINTERVAL;
 
     /* 移植原版update_device_info：发送API信息请求 */
     if (isNewUnisound) {
@@ -409,7 +410,7 @@
     musicUpdateTimer = setInterval(function () {
       if (!connected) return;
       requestMusicInfo();
-    }, MUSIC_UPDATE_INTERVAL);
+    }, mUSICUPDATEINTERVAL);
   }
 
   function stopMusicUpdate() {
@@ -429,7 +430,7 @@
     var data;
     try {
       data = JSON.parse(rawData);
-    } catch (e) {
+    } catch (error) {
       console.warn("[R1WS] 非JSON消息:", rawData);
       return;
     }
@@ -502,7 +503,7 @@
           }
           if (!Array.isArray(listData)) listData = [];
           emit("music_list", listData);
-        } catch (e) {
+        } catch (error) {
           emit("music_list", []);
         }
         break;
@@ -512,7 +513,7 @@
         try {
           var eqData = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
           emit("eq_config", eqData);
-        } catch (e) {}
+        } catch (error) {}
         break;
 
       /* 登录状态 */
@@ -821,8 +822,8 @@
         /* 启动音乐状态更新 */
         startMusicUpdate();
       }
-    } catch (e) {
-      console.error("[R1WS] get_info解析错误:", e);
+    } catch (error) {
+      console.error("[R1WS] get_info解析错误:", error);
     }
   }
 
@@ -1051,8 +1052,8 @@
           R1_DEBUG && console.log("[R1WS] 未处理的Unisound子类型:", innerType);
           break;
       }
-    } catch (e) {
-      console.error("[R1WS] Unisound解析错误:", e);
+    } catch (error) {
+      console.error("[R1WS] Unisound解析错误:", error);
     }
   }
 
@@ -1062,7 +1063,7 @@
    *   t=2: i = e.data                              (data是对象)
    *   i.type === 'info' → 更新device_info_data.api_info → load_device_info()
    */
-  function handleUnisoundApi(e, format) {
+  function handleUnisoundApi(message, format) {
     try {
       /* 原版：1 != e.login_state → 显示错误信息，else块不执行
        * 但get_song_list等响应可能没有login_state字段
@@ -1071,11 +1072,11 @@
        *
        * 兼容扩展：login_state = 0/-1/'0'/'-1' 都视为未登录
        * 这是部分设备的私有协议（不再用 0 而用 -1 表示未登录） */
-      var ls = e.login_state;
+      var ls = message.login_state;
       var isLoginFail = ls !== undefined && ls !== 1 && ls !== "1";
       if (isLoginFail) {
-        console.warn("[R1WS] API登录状态异常:", e.login_msg, "(" + ls + ")");
-        emit("api_error", { msg: e.login_msg, state: ls });
+        console.warn("[R1WS] API登录状态异常:", message.login_msg, "(" + ls + ")");
+        emit("api_error", { msg: message.login_msg, state: ls });
         /* 不return：原版api()会丢掉整个响应，但这里我们依然尝试解析e.data，
          * 因为部分接口（如get_song_list）即使未登录也可能返回部分信息 */
       }
@@ -1085,13 +1086,13 @@
 
       /* 解析data部分 */
       var parsed;
-      if (format === 1 && typeof e.data === "string") {
+      if (format === 1 && typeof message.data === "string") {
         /* 原版：JSON.parse(e.data).nameValuePairs */
-        var parsedData = JSON.parse(e.data);
+        var parsedData = JSON.parse(message.data);
         parsed = parsedData.nameValuePairs || parsedData;
       } else {
         /* 原版：i = e.data */
-        parsed = e.data;
+        parsed = message.data;
       }
       if (!parsed) {
         console.warn("[R1WS] API响应data为空");
@@ -1190,16 +1191,16 @@
           R1_DEBUG && console.log("[R1WS] 未处理的API子类型:", innerType);
           break;
       }
-    } catch (err) {
-      console.error("[R1WS] API解析错误:", err);
+    } catch (error) {
+      console.error("[R1WS] API解析错误:", error);
     }
   }
 
   /* ===== 处理Unisound get_info（移植原版update_unisound_info） ===== */
-  function handleUnisoundGetInfo(e) {
+  function handleUnisoundGetInfo(message) {
     try {
-      if (e.code !== 1) return;
-      var data = e.data;
+      if (message.code !== 1) return;
+      var data = message.data;
       if (!data) return;
 
       /* 更新休眠/唤醒状态 */
@@ -1212,8 +1213,8 @@
 
       emit("unisound_device_info", data);
       emit("device_info", deviceInfo);
-    } catch (err) {
-      console.error("[R1WS] Unisound get_info解析错误:", err);
+    } catch (error) {
+      console.error("[R1WS] Unisound get_info解析错误:", error);
     }
   }
 
@@ -1302,15 +1303,16 @@
               if (saved) {
                 try {
                   list = JSON.parse(saved);
-                } catch (e) {
+                } catch (error) {
                   list = [];
                 }
               }
               var found = false;
-              for (var i = 0; i < list.length; i++) {
-                if (list[i].hostname === devEntry.hostname) {
-                  for (var k in devEntry) {
-                    if (devEntry[k] && devEntry[k] !== list[i][k]) list[i][k] = devEntry[k];
+              for (var index = 0; index < list.length; index++) {
+                if (list[index].hostname === devEntry.hostname) {
+                  for (var key in devEntry) {
+                    if (devEntry[key] && devEntry[key] !== list[index][key])
+                      list[index][key] = devEntry[key];
                   }
                   found = true;
                   break;
@@ -1318,12 +1320,12 @@
               }
               if (!found) list.push(devEntry);
               localStorage.setItem("device_list", JSON.stringify(list));
-            } catch (e) {}
+            } catch (error) {}
           }
         }
       }
-    } catch (e) {
-      console.error("[R1WS] API信息解析错误:", e);
+    } catch (error) {
+      console.error("[R1WS] API信息解析错误:", error);
     }
   }
 
@@ -1351,10 +1353,10 @@
     var cpuTempItem = null;
     var dateItem = null;
 
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].type_id === "get_device_info") deviceInfoItem = items[i];
-      else if (items[i].type_id === "cpu_temp") cpuTempItem = items[i];
-      else if (items[i].type_id === "date") dateItem = items[i];
+    for (var index = 0; index < items.length; index++) {
+      if (items[index].type_id === "get_device_info") deviceInfoItem = items[index];
+      else if (items[index].type_id === "cpu_temp") cpuTempItem = items[index];
+      else if (items[index].type_id === "date") dateItem = items[index];
     }
 
     if (deviceInfoItem) handleGetDeviceInfo(deviceInfoItem);
@@ -1373,20 +1375,20 @@
   /* ===== 处理get_device_info（系统详细信息） ===== */
   function handleGetDeviceInfo(data) {
     try {
-      var d = data.data;
-      if (!d) return;
+      var payload = data.data;
+      if (!payload) return;
 
       /* 兼容nameValuePairs格式 */
-      if (d.nameValuePairs) d = d.nameValuePairs;
+      if (payload.nameValuePairs) payload = payload.nameValuePairs;
 
       /* 提取内存信息 */
-      if (d.meminfo) {
-        var memLines = d.meminfo.split("\r\n");
+      if (payload.meminfo) {
+        var memLines = payload.meminfo.split("\r\n");
         var memTotal = -1,
           memFree = -1,
           memCached = -1;
-        for (var i = 0; i < memLines.length; i++) {
-          var parts = memLines[i].split(":");
+        for (var index = 0; index < memLines.length; index++) {
+          var parts = memLines[index].split(":");
           if (parts[0] === "MemTotal") memTotal = parseInt(parts[1]);
           else if (parts[0] === "MemFree") memFree = parseInt(parts[1]);
           else if (parts[0] === "Cached") memCached = parseInt(parts[1]);
@@ -1402,16 +1404,16 @@
       }
 
       /* 提取CPU信息 */
-      if (d.cpuinfo && Array.isArray(d.cpuinfo)) {
-        var cpuUsage = d.cpuinfo[3] ? parseInt(d.cpuinfo[3]) : 0;
+      if (payload.cpuinfo && Array.isArray(payload.cpuinfo)) {
+        var cpuUsage = payload.cpuinfo[3] ? parseInt(payload.cpuinfo[3]) : 0;
         deviceInfo.cpu_usage = cpuUsage;
       }
 
       /* CPU在线核心 */
-      if (d.cpu) {
-        var cpuLines = d.cpu.split("\r\n");
-        for (var j = 0; j < cpuLines.length; j++) {
-          var cpuParts = cpuLines[j].split(":");
+      if (payload.cpu) {
+        var cpuLines = payload.cpu.split("\r\n");
+        for (var index2 = 0; index2 < cpuLines.length; index2++) {
+          var cpuParts = cpuLines[index2].split(":");
           if (cpuParts[0] === "online") {
             deviceInfo.cpu_online = cpuParts[1];
             break;
@@ -1421,13 +1423,13 @@
 
       /* 最大CPU频率 */
       var maxFreq = 0;
-      var procCount = d.availableProcessors || 0;
-      for (var k = 0; k < procCount; k++) {
-        var cpuData = d["cpu" + k];
+      var procCount = payload.availableProcessors || 0;
+      for (var index3 = 0; index3 < procCount; index3++) {
+        var cpuData = payload["cpu" + index3];
         if (cpuData) {
           var freqLines = cpuData.split("\r\n");
-          for (var m = 0; m < freqLines.length; m++) {
-            var freqParts = freqLines[m].split(":");
+          for (var index4 = 0; index4 < freqLines.length; index4++) {
+            var freqParts = freqLines[index4].split(":");
             if (freqParts[0] === "scaling_cur_freq") {
               var freq = parseInt(freqParts[1]);
               if (freq > maxFreq) maxFreq = freq;
@@ -1438,13 +1440,13 @@
       if (maxFreq > 0) deviceInfo.cpu_max_freq = (maxFreq / 1e6).toFixed(2);
 
       /* 运行时间 */
-      if (d.elapsedRealtime != null) {
-        deviceInfo.uptime = formatUptime(d.elapsedRealtime);
-        deviceInfo.uptime_raw = d.elapsedRealtime;
+      if (payload.elapsedRealtime != null) {
+        deviceInfo.uptime = formatUptime(payload.elapsedRealtime);
+        deviceInfo.uptime_raw = payload.elapsedRealtime;
       }
 
       /* 固件版本 */
-      if (d.incremental) deviceInfo.firmware_ver = d.incremental;
+      if (payload.incremental) deviceInfo.firmware_ver = payload.incremental;
 
       /* 设备名称 */
       if (deviceInfo.device_name) {
@@ -1471,8 +1473,8 @@
       deviceInfo.update_time = formatTimestamp(Math.round(Date.now() / 1000));
 
       emit("device_info", deviceInfo);
-    } catch (e) {
-      console.error("[R1WS] get_device_info解析错误:", e);
+    } catch (error) {
+      console.error("[R1WS] get_device_info解析错误:", error);
     }
   }
 
@@ -1487,13 +1489,13 @@
       var lineIdx = 0;
 
       /* 解析内存信息 */
-      for (var i = 0; i < lines.length; i++) {
-        var parts = lines[i].split(":");
+      for (var index = 0; index < lines.length; index++) {
+        var parts = lines[index].split(":");
         if (parts[0] === "MemTotal") memTotal = parseInt(parts[1]);
         else if (parts[0] === "MemFree") memFree = parseInt(parts[1]);
         else if (parts[0] === "Cached") memCached = parseInt(parts[1]);
         if (memTotal !== -1 && memFree !== -1 && memCached !== -1) {
-          lineIdx = i + 1;
+          lineIdx = index + 1;
           break;
         }
       }
@@ -1505,13 +1507,13 @@
 
       /* 解析CPU和启动时间 */
       var btime = null;
-      for (var j = lineIdx; j < lines.length; j++) {
-        if (lines[j].substring(0, 6) === "btime ") {
-          btime = parseInt(lines[j].substring(6));
-        } else if (lines[j].split(":")[0] === "incremental") {
-          deviceInfo.firmware_ver = lines[j].split(":")[1];
-        } else if (lines[j].split(":")[0] === "date") {
-          deviceInfo.device_time = lines[j].split(":").slice(1).join(":");
+      for (var index2 = lineIdx; index2 < lines.length; index2++) {
+        if (lines[index2].substring(0, 6) === "btime ") {
+          btime = parseInt(lines[index2].substring(6));
+        } else if (lines[index2].split(":")[0] === "incremental") {
+          deviceInfo.firmware_ver = lines[index2].split(":")[1];
+        } else if (lines[index2].split(":")[0] === "date") {
+          deviceInfo.device_time = lines[index2].split(":").slice(1).join(":");
         }
       }
 
@@ -1524,8 +1526,8 @@
       deviceInfo.update_time = formatTimestamp(Math.round(Date.now() / 1000));
 
       emit("device_info", deviceInfo);
-    } catch (e) {
-      console.error("[R1WS] shell查询解析错误:", e);
+    } catch (error) {
+      console.error("[R1WS] shell查询解析错误:", error);
     }
   }
 
@@ -1569,16 +1571,17 @@
             if (saved) {
               try {
                 list = JSON.parse(saved);
-              } catch (e) {
+              } catch (error) {
                 list = [];
               }
             }
             /* 更新或添加 */
             var found = false;
-            for (var i = 0; i < list.length; i++) {
-              if (list[i].hostname === devEntry.hostname) {
-                for (var k in devEntry) {
-                  if (devEntry[k] && devEntry[k] !== list[i][k]) list[i][k] = devEntry[k];
+            for (var index = 0; index < list.length; index++) {
+              if (list[index].hostname === devEntry.hostname) {
+                for (var key in devEntry) {
+                  if (devEntry[key] && devEntry[key] !== list[index][key])
+                    list[index][key] = devEntry[key];
                 }
                 found = true;
                 break;
@@ -1586,24 +1589,24 @@
             }
             if (!found) list.push(devEntry);
             localStorage.setItem("device_list", JSON.stringify(list));
-          } catch (e) {}
+          } catch (error) {}
         }
 
         emit("device_info", deviceInfo);
       }
-    } catch (e) {}
+    } catch (error) {}
   }
 
   /* ========== 时间格式化工具 ========== */
   function formatTimestamp(ts) {
-    var d = new Date(ts * 1000);
-    var y = d.getFullYear();
-    var m = ("0" + (d.getMonth() + 1)).slice(-2);
-    var day = ("0" + d.getDate()).slice(-2);
-    var h = ("0" + d.getHours()).slice(-2);
-    var min = ("0" + d.getMinutes()).slice(-2);
-    var sec = ("0" + d.getSeconds()).slice(-2);
-    return y + "-" + m + "-" + day + " " + h + ":" + min + ":" + sec;
+    var date = new Date(ts * 1000);
+    var fullYear = date.getFullYear();
+    var items = ("0" + (date.getMonth() + 1)).slice(-2);
+    var day = ("0" + date.getDate()).slice(-2);
+    var items2 = ("0" + date.getHours()).slice(-2);
+    var min = ("0" + date.getMinutes()).slice(-2);
+    var sec = ("0" + date.getSeconds()).slice(-2);
+    return fullYear + "-" + items + "-" + day + " " + items2 + ":" + min + ":" + sec;
   }
 
   function formatUptime(ms) {
@@ -1623,11 +1626,11 @@
 
   /* 通用发送（兼容原版send_message格式） */
   function sendMessage(params, callback) {
-    if (!connected || !ws) {
+    if (!connected || !socket) {
       emit("error", { message: "未连接到设备" });
       return false;
     }
-    var msg = {
+    var message = {
       type: "send_message",
       what: params.what,
       arg1: params.arg1 || 0,
@@ -1636,16 +1639,16 @@
     };
     if (callback) {
       var id = generateId();
-      msg.type_id = id;
+      message.type_id = id;
       pendingRequests[id] = {
         callback: callback,
         timer: setTimeout(function () {
           delete pendingRequests[id];
           callback({ error: "请求超时" });
-        }, REQUEST_TIMEOUT),
+        }, rEQUESTTIMEOUT),
       };
     }
-    return wsSend(msg);
+    return wsSend(message);
   }
 
   /* 音乐控制（完整移植原版send_music_cmd逻辑） */
@@ -1718,11 +1721,11 @@
   /* 数字→字符串 映射：1=qq 2=netease 3=kuwo
    * 设备接口只认字符串 'qq'/'netease'/'kuwo'，传数字 1/2/3 会被设备拒绝。
    * 此处统一在发送前转成字符串。 */
-  var MUSIC_SOURCE_STR = { 1: "qq", 2: "netease", 3: "kuwo" };
-  function musicSourceToStr(src) {
-    if (src === undefined || src === null) return "netease";
-    if (typeof src === "string") return src;
-    return MUSIC_SOURCE_STR[src] || "netease";
+  var mUSICSOURCESTR = { 1: "qq", 2: "netease", 3: "kuwo" };
+  function musicSourceToStr(source) {
+    if (source === undefined || source === null) return "netease";
+    if (typeof source === "string") return source;
+    return mUSICSOURCESTR[source] || "netease";
   }
   function requestSongList(musicSource, force) {
     var source = musicSource || (musicInfo && musicInfo.music_source) || 2; /* 默认网易云 */
@@ -1764,7 +1767,7 @@
       songListCache = null;
     }
     songListCache = { music_source: sourceStr, time: Date.now(), data: null };
-    var req = {
+    var request = {
       type: "send_to_unisound",
       data: {
         type: "api",
@@ -1774,8 +1777,8 @@
         },
       },
     };
-    R1_DEBUG && console.log("[R1WS] requestSongList 发送请求:", JSON.stringify(req));
-    wsSend(req);
+    R1_DEBUG && console.log("[R1WS] requestSongList 发送请求:", JSON.stringify(request));
+    wsSend(request);
   }
   function playSongList(url) {
     /* 原版：ws_send({type:"send_message", what:65536, arg1:0, arg2:9, obj: url}) */
@@ -1837,8 +1840,8 @@
               emit("lrc", { lyrics: lyrics, musicId: musicId });
             }
           }
-        } catch (e) {
-          console.error("[R1WS] fetchMusicInfo解析错误:", e);
+        } catch (error) {
+          console.error("[R1WS] fetchMusicInfo解析错误:", error);
         }
       };
       /* 构建form data */
@@ -1847,8 +1850,8 @@
         params.push(encodeURIComponent(key) + "=" + encodeURIComponent(postData[key]));
       }
       xhr.send(params.join("&"));
-    } catch (e) {
-      console.error("[R1WS] fetchMusicInfo请求错误:", e);
+    } catch (error) {
+      console.error("[R1WS] fetchMusicInfo请求错误:", error);
     }
   }
 
@@ -1865,13 +1868,13 @@
       if (!lines || !lines.length) return [];
 
       var result = [];
-      for (var i = 0; i < lines.length; i++) {
-        var timeMatches = lines[i].match(/(\[\d{1,3}:\d{1,2}.\d{1,3}\])/g);
+      for (var index = 0; index < lines.length; index++) {
+        var timeMatches = lines[index].match(/(\[\d{1,3}:\d{1,2}.\d{1,3}\])/g);
         if (!timeMatches) continue;
         var lastTime = timeMatches[timeMatches.length - 1];
-        var text = lines[i].substring(lines[i].indexOf(lastTime) + lastTime.length).trim();
-        for (var j = 0; j < timeMatches.length; j++) {
-          var timeStr = timeMatches[j];
+        var text = lines[index].substring(lines[index].indexOf(lastTime) + lastTime.length).trim();
+        for (var index2 = 0; index2 < timeMatches.length; index2++) {
+          var timeStr = timeMatches[index2];
           var ms = lrcTimeToMs(timeStr.substring(1, timeStr.length - 1));
           if (!isNaN(ms) && text) {
             /* 过滤空行：原版保留所有时间戳行，UI 层用 text || line 渲染时
@@ -1882,12 +1885,12 @@
         }
       }
       /* 按时间排序 */
-      result.sort(function (a, b) {
-        return a.time - b.time;
+      result.sort(function (left, right) {
+        return left.time - right.time;
       });
       return result;
-    } catch (e) {
-      console.error("[R1WS] LRC解析错误:", e);
+    } catch (error) {
+      console.error("[R1WS] LRC解析错误:", error);
       return [{ time: 0, text: "暂无歌词" }];
     }
   }
@@ -1991,9 +1994,9 @@
     return sendMessage({ what: 2, arg1: 0, arg2: 0, obj: name });
   }
 
-  function executeShell(cmd, type_id) {
-    if (!connected || !ws) return false;
-    return wsSend({ type: "shell", type_id: type_id || "shell_cmd", shell: cmd });
+  function executeShell(cmd, typeId) {
+    if (!connected || !socket) return false;
+    return wsSend({ type: "shell", type_id: typeId || "shell_cmd", shell: cmd });
   }
 
   /* 服务设置（原版协议：直接发送type，带type_id） */
@@ -2449,15 +2452,15 @@
    *
    * 端口列表默认按以下顺序尝试：80, 8080, 9999, 9090, 9527
    */
-  function scanLocalDevices(opts) {
-    opts = opts || {};
-    var startIP = opts.startIP || 1;
-    var endIP = opts.endIP || 254;
-    var timeout = opts.timeout || 1500;
-    var concurrency = opts.concurrency || 20;
-    var ports = opts.ports || [80, 8080, 9999, 9090, 9527];
-    var singleIP = opts.ip || null; /* 单 IP 模式：只探测这一个 IP */
-    var subnetOverride = opts.subnet || null; /* 直接指定子网，跳过 WebRTC */
+  function scanLocalDevices(options) {
+    options = options || {};
+    var startIP = options.startIP || 1;
+    var endIP = options.endIP || 254;
+    var timeout = options.timeout || 1500;
+    var concurrency = options.concurrency || 20;
+    var ports = options.ports || [80, 8080, 9999, 9090, 9527];
+    var singleIP = options.ip || null; /* 单 IP 模式：只探测这一个 IP */
+    var subnetOverride = options.subnet || null; /* 直接指定子网，跳过 WebRTC */
 
     /* 异步流程：getLocalIPs -> 逐个探测 */
     var cancelled = false;
@@ -2465,10 +2468,10 @@
     var scanTimers = new Set();
     var scanSockets = new Set();
     var closePeer = function () {};
-    function later(fn, ms) {
+    function later(callback, ms) {
       var timer = setTimeout(function () {
         scanTimers.delete(timer);
-        if (!cancelled) fn();
+        if (!cancelled) callback();
       }, ms);
       scanTimers.add(timer);
       return timer;
@@ -2493,7 +2496,7 @@
           scanSockets.forEach(function (socket) {
             try {
               socket.close();
-            } catch (e) {}
+            } catch (error) {}
           });
           scanSockets.clear();
           var result = {
@@ -2512,7 +2515,7 @@
           try {
             var dump = JSON.stringify(data).toLowerCase();
             if (/r1|phicomm|unisound|echo[_-]?service/.test(dump)) return true;
-          } catch (e) {}
+          } catch (error) {}
           if (data.model && /r1|phicomm/i.test(String(data.model))) return true;
           if (data.device_name && /r1|phicomm/i.test(String(data.device_name))) return true;
           if (data.hostname && /phicomm_r1/i.test(String(data.hostname))) return true;
@@ -2545,7 +2548,7 @@
             done = true;
             try {
               probeWs && probeWs.close();
-            } catch (e) {}
+            } catch (error) {}
           }, timeout);
 
           try {
@@ -2556,7 +2559,7 @@
               : "ws://" + ip + ":" + port;
             probeWs = new WebSocket(probeUrl);
             scanSockets.add(probeWs);
-          } catch (e) {
+          } catch (error) {
             clearTimeout(timer);
             return;
           }
@@ -2567,7 +2570,7 @@
             if (cancelled) return;
             try {
               probeWs.send(JSON.stringify({ type: "get_info", type_id: String(Date.now()) }));
-            } catch (e) {}
+            } catch (error) {}
           };
           probeWs.onmessage = function (ev) {
             if (done || cancelled) return;
@@ -2576,7 +2579,7 @@
             var data = null;
             try {
               data = JSON.parse(ev.data);
-            } catch (e) {
+            } catch (error) {
               data = { raw: ev.data };
             }
             /* 任何响应都算发现 */
@@ -2590,7 +2593,7 @@
             }
             try {
               probeWs.close();
-            } catch (e) {}
+            } catch (error) {}
           };
           probeWs.onerror = function () {
             hadError = true;
@@ -2599,7 +2602,7 @@
             clearTimeout(timer);
             try {
               probeWs.close();
-            } catch (e) {}
+            } catch (error) {}
           };
           probeWs.onclose = function () {
             scanSockets.delete(probeWs);
@@ -2622,14 +2625,14 @@
           nextPort();
         }
 
-        function getLocalIPs(cb) {
+        function getLocalIPs(callback) {
           var ips = [],
             settled = false;
           function complete() {
             if (settled || cancelled) return;
             settled = true;
             closePeer();
-            cb(ips);
+            callback(ips);
           }
           try {
             var RTC =
@@ -2644,48 +2647,48 @@
             closePeer = function () {
               try {
                 pc.close();
-              } catch (e) {}
+              } catch (error) {}
             };
             pc.createDataChannel("");
-            pc.onicecandidate = function (e) {
-              if (!e || !e.candidate || !e.candidate.candidate) {
+            pc.onicecandidate = function (value) {
+              if (!value || !value.candidate || !value.candidate.candidate) {
                 try {
                   pc.close();
                 } catch (er) {}
                 complete();
                 return;
               }
-              var m = e.candidate.candidate.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
-              if (m && ips.indexOf(m[1]) === -1) ips.push(m[1]);
+              var value2 = value.candidate.candidate.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
+              if (value2 && ips.indexOf(value2[1]) === -1) ips.push(value2[1]);
             };
             pc.createOffer()
-              .then(function (o) {
-                return pc.setLocalDescription(o);
+              .then(function (result) {
+                return pc.setLocalDescription(result);
               })
               .catch(function () {
                 try {
                   pc.close();
-                } catch (e) {}
+                } catch (error) {}
                 complete();
               });
             later(function () {
               try {
                 pc.close();
-              } catch (e) {}
+              } catch (error) {}
               complete();
             }, 1500);
-          } catch (e) {
+          } catch (error) {
             complete();
           }
         }
 
         function ipToBase(ip) {
-          var p = ip.split(".");
-          return p[0] + "." + p[1] + "." + p[2] + ".";
+          var items = ip.split(".");
+          return items[0] + "." + items[1] + "." + items[2] + ".";
         }
         function buildList(base) {
           var list = [];
-          for (var i = startIP; i <= endIP; i++) list.push(base + i);
+          for (var index2 = startIP; index2 <= endIP; index2++) list.push(base + index2);
           return list;
         }
 
@@ -2703,10 +2706,10 @@
           var base = subnetOverride.endsWith(".") ? subnetOverride : subnetOverride + ".";
           var ipList = buildList(base);
           total = ipList.length * ports.length;
-          var idx = 0;
+          var index = 0;
           function runBatch() {
-            var batch = ipList.slice(idx, idx + concurrency);
-            idx += batch.length;
+            var batch = ipList.slice(index, index + concurrency);
+            index += batch.length;
             if (batch.length === 0) {
               later(finish, timeout + 500);
               return;
@@ -2727,8 +2730,8 @@
             /* 兜底：探测 192.168.1.x / 192.168.0.x */
             var fallback = ["192.168.1.", "192.168.0.", "192.168.31.", "10.0.0."];
             var ipList = [];
-            fallback.forEach(function (b) {
-              for (var i = startIP; i <= endIP; i++) ipList.push(b + i);
+            fallback.forEach(function (item) {
+              for (var index3 = startIP; index3 <= endIP; index3++) ipList.push(item + index3);
             });
             total = ipList.length * ports.length;
             var idx2 = 0;
@@ -2749,12 +2752,12 @@
           }
           /* 选第一个非 127 开头的内网 IP */
           var base2 = null;
-          for (var i = 0; i < ips.length; i++) {
+          for (var index2 = 0; index2 < ips.length; index2++) {
             if (
-              ips[i].indexOf("127.") !== 0 &&
-              /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(ips[i])
+              ips[index2].indexOf("127.") !== 0 &&
+              /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(ips[index2])
             ) {
-              base2 = ipToBase(ips[i]);
+              base2 = ipToBase(ips[index2]);
               break;
             }
           }
@@ -2792,9 +2795,9 @@
    * 探测单个 IP 的多个端口
    * 用于调试：手动输入一个 IP 试一下
    */
-  function probeSingleIP(ip, opts) {
-    opts = opts || {};
-    return scanLocalDevices(Object.assign({}, opts, { ip: ip, singleIP: ip }));
+  function probeSingleIP(ip, options) {
+    options = options || {};
+    return scanLocalDevices(Object.assign({}, options, { ip: ip, singleIP: ip }));
   }
 
   function openDeviceScan() {
@@ -2802,14 +2805,14 @@
      * 高级页里有"设备扫描"按钮，已集成 scanLocalDevices 逻辑 */
     try {
       emit("openDeviceScan");
-    } catch (e) {}
+    } catch (error) {}
     try {
       /* 优先跳到当前窗口 hash 锚点，方便被 #device-scan 路由识别 */
       window.location.hash = "#device-scan";
-    } catch (e) {}
+    } catch (error) {}
     try {
       window.focus();
-    } catch (e) {}
+    } catch (error) {}
   }
 
   /**
@@ -2915,8 +2918,8 @@
   }
 
   /* ========== 工具方法：手动触发任意消息（方便调试） ========== */
-  function sendRaw(obj) {
-    return wsSend(obj);
+  function sendRaw(record) {
+    return wsSend(record);
   }
 
   /* ========== 导出接口 ========== */
@@ -2936,7 +2939,7 @@
 
     /* 本地网络访问权限 */
     get localNetworkPermission() {
-      return _lnPermissionState;
+      return localNetworkPermissionState;
     },
     initLocalNetworkPermission: initLocalNetworkPermission,
 

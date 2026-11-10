@@ -196,6 +196,8 @@ class BrowserTests(unittest.TestCase):
         self.page.wait_for_function("typeof App !== 'undefined'")
         self.assertEqual(self.page.evaluate("R1Config.assetBaseUrl"), self.base)
         self.assertEqual(self.page.evaluate("control_host"), urlsplit(self.base).netloc)
+        self.assertEqual(self.page.evaluate("state.version"),
+                         {"web": 2863, "echo": 1887, "unisound": 1856, "app": 128})
 
     def test_https_subdirectory_wss_reconnect_and_assets(self):
         base = "https://r1-control.test/project/"

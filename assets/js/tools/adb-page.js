@@ -2,12 +2,12 @@
 			if (!confirm(`确定要刷新页面吗？`)) return;
 			location.reload();
         });*/
-var closeWebview = (e) => {
+var closeWebview = (value) => {
   if (!confirm(`确定要返回首页吗？`)) return;
   plus.webview.currentWebview().close();
   //location.pathname = '';
 };
-document.getElementById("backHomeBtn").addEventListener("click", (e) => {
+document.getElementById("backHomeBtn").addEventListener("click", (event) => {
   closeWebview();
 });
 window.onerror = function (message, source, lineno, colno, error) {
@@ -53,11 +53,11 @@ const originalConsole = {
 // 格式化输出
 function formatOutput(args) {
   let output = "";
-  for (let i = 0; i < args.length; i++) {
-    if (typeof args[i] === "object") {
-      output += JSON.stringify(args[i], null, 2) + " ";
+  for (let index = 0; index < args.length; index++) {
+    if (typeof args[index] === "object") {
+      output += JSON.stringify(args[index], null, 2) + " ";
     } else {
-      output += args[i] + " ";
+      output += args[index] + " ";
     }
   }
   const now = new Date();

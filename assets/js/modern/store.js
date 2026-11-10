@@ -1,6 +1,6 @@
 /**
  * R1 应用核心层：状态仓库 / R1WS 事件绑定 / 连接流程 / 主题 / 工具函数
- * 说明：通信协议全部由 ws.js（R1WS）负责，这里只做状态编排。
+ * 说明：通信协议全部由 websocket.js（R1WS）负责，这里只做状态编排。
  */
 (function (global) {
   "use strict";
@@ -32,11 +32,11 @@
   };
 
   var listeners = [];
-  function subscribe(fn) {
-    listeners.push(fn);
+  function subscribe(callback) {
+    listeners.push(callback);
     return function () {
-      listeners = listeners.filter(function (x) {
-        return x !== fn;
+      listeners = listeners.filter(function (item) {
+        return item !== callback;
       });
     };
   }
@@ -46,15 +46,15 @@
   function setState(patch) {
     var next = typeof patch === "function" ? patch(state) : patch;
     var changed = false;
-    for (var k in next) {
-      if (next[k] !== state[k]) {
+    for (var key in next) {
+      if (next[key] !== state[key]) {
         changed = true;
         break;
       }
     }
     if (!changed) return;
     state = Object.assign({}, state, next);
-    for (var i = 0; i < listeners.length; i++) listeners[i]();
+    for (var index = 0; index < listeners.length; index++) listeners[index]();
   }
   function useStore() {
     return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
@@ -69,12 +69,12 @@
     useEffect(
       function () {
         if (typeof R1WS === "undefined") return;
-        var fn = function (data) {
+        var callback = function (data) {
           ref.current(data);
         };
-        R1WS.on(name, fn);
+        R1WS.on(name, callback);
         return function () {
-          R1WS.off(name, fn);
+          R1WS.off(name, callback);
         };
       },
       [name],
@@ -126,7 +126,7 @@
   function getCustomBg() {
     try {
       return localStorage.getItem("r1_custom_bg_url") || "";
-    } catch (e) {
+    } catch (error) {
       return "";
     }
   }
@@ -134,7 +134,7 @@
     try {
       if (url) localStorage.setItem("r1_custom_bg_url", url);
       else localStorage.removeItem("r1_custom_bg_url");
-    } catch (e) {
+    } catch (error) {
       toast("背景图过大，浏览器存不下，请换小一点的图片", "err");
       return;
     }
@@ -144,20 +144,20 @@
   function applyTheme(dark) {
     try {
       document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-    } catch (e) {}
+    } catch (error) {}
     try {
       localStorage.setItem("r1_theme", dark ? "dark" : "light");
-    } catch (e) {}
+    } catch (error) {}
     setState({ dark: !!dark });
     /* 主题切换时若开着网页背景，半透明变量要按新主题重算 */
     if (state.customBg) updateBgCssVars(true);
   }
-  function setFollowSystem(v) {
+  function setFollowSystem(value) {
     try {
-      localStorage.setItem("r1_follow_system", v ? "true" : "false");
-    } catch (e) {}
-    setState({ followSystem: !!v });
-    if (v) applyTheme(isSystemDark());
+      localStorage.setItem("r1_follow_system", value ? "true" : "false");
+    } catch (error) {}
+    setState({ followSystem: !!value });
+    if (value) applyTheme(isSystemDark());
   }
   function initTheme() {
     var follow = true,
@@ -165,17 +165,17 @@
     try {
       follow = localStorage.getItem("r1_follow_system") !== "false";
       dark = follow ? isSystemDark() : localStorage.getItem("r1_theme") === "dark";
-    } catch (e) {}
+    } catch (error) {}
     setState({ dark: dark, followSystem: follow });
     try {
       document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-    } catch (e) {}
+    } catch (error) {}
 
     /* 跟随系统时实时响应系统主题变化 */
     if (follow && window.matchMedia) {
       var mq = window.matchMedia("(prefers-color-scheme: dark)");
-      var handler = function (e) {
-        if (state.followSystem) applyTheme(e.matches);
+      var handler = function (value) {
+        if (state.followSystem) applyTheme(value.matches);
       };
       if (mq.addEventListener) mq.addEventListener("change", handler);
       else if (mq.addListener) mq.addListener(handler);
@@ -186,34 +186,34 @@
   function pushHistory(ip) {
     var list = [{ ip: ip, time: Date.now() }]
       .concat(
-        (state.history || []).filter(function (x) {
-          return x.ip !== ip;
+        (state.history || []).filter(function (item) {
+          return item.ip !== ip;
         }),
       )
       .slice(0, 8);
     setState({ history: list });
     try {
       localStorage.setItem("r1_connect_history", JSON.stringify(list));
-    } catch (e) {}
+    } catch (error) {}
     try {
       localStorage.setItem("r1_last_ip", ip);
-    } catch (e) {}
+    } catch (error) {}
   }
 
   function connectTo(ip) {
     ip = String(ip || "").trim();
     try {
       ip = R1Config.parseDeviceAddress(ip).address;
-    } catch (e) {
-      toast(e.message, "err");
+    } catch (error) {
+      toast(error.message, "err");
       return;
     }
     setState({ connecting: true, lastIp: ip });
     pushHistory(ip);
     try {
       R1WS.connect(ip);
-    } catch (e) {
-      toast("连接失败：" + (e && e.message), "err");
+    } catch (error) {
+      toast("连接失败：" + (error && error.message), "err");
     }
     setTimeout(function () {
       setState({ connecting: false });
@@ -223,7 +223,7 @@
   function disconnect() {
     try {
       R1WS.disconnect();
-    } catch (e) {}
+    } catch (error) {}
     setState({ connected: false });
   }
 
@@ -233,39 +233,42 @@
     if (state.scan.running) return;
     if (typeof R1WS === "undefined" || !R1WS.scanLocalDevices) return;
 
-    function onProgress(p) {
-      setState({ scan: Object.assign({}, state.scan, { scanned: p.scanned, total: p.total }) });
+    function onProgress(value) {
+      setState({
+        scan: Object.assign({}, state.scan, { scanned: value.scanned, total: value.total }),
+      });
     }
     R1WS.on("scan:progress", onProgress);
     setState({ scan: { running: true, devices: [], scanned: 0, total: 0 } });
 
-    var ret;
+    var result;
     try {
-      ret = R1WS.scanLocalDevices();
-    } catch (e) {
-      ret = null;
+      result = R1WS.scanLocalDevices();
+    } catch (error) {
+      result = null;
     }
 
-    var done = function (res) {
+    var done = function (response) {
       R1WS.off("scan:progress", onProgress);
       scanCleanup = null;
-      var devices = (res && res.devices) || [];
+      var devices = (response && response.devices) || [];
       setState({ scan: { running: false, devices: devices, scanned: 0, total: 0 } });
-      if (!devices.length && !(res && res.cancelled)) toast("未发现设备，可手动输入 IP", "info");
+      if (!devices.length && !(response && response.cancelled))
+        toast("未发现设备，可手动输入 IP", "info");
     };
-    if (ret && typeof ret.then === "function")
-      ret.then(done, function () {
+    if (result && typeof result.then === "function")
+      result.then(done, function () {
         done({ devices: [] });
       });
     else done({ devices: [] });
 
-    if (ret && typeof ret.abort === "function") scanCleanup = ret.abort;
+    if (result && typeof result.abort === "function") scanCleanup = result.abort;
   }
   function stopScan() {
     if (scanCleanup) {
       try {
         scanCleanup();
-      } catch (e) {}
+      } catch (error) {}
       scanCleanup = null;
     }
     R1WS.off && R1WS.off("scan:progress", function () {});
@@ -285,7 +288,7 @@
     if (ROUTES.indexOf(route) >= 0) {
       try {
         localStorage.setItem("r1_last_route", route);
-      } catch (e) {}
+      } catch (error) {}
     }
     setState({ route: route, sheet: null });
   }
@@ -293,23 +296,23 @@
   /* ================= 工具函数 ================= */
   function fmtTime(sec) {
     sec = Math.max(0, Math.floor(Number(sec) || 0));
-    var m = Math.floor(sec / 60),
-      s = sec % 60;
-    return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+    var value = Math.floor(sec / 60),
+      value2 = sec % 60;
+    return (value < 10 ? "0" : "") + value + ":" + (value2 < 10 ? "0" : "") + value2;
   }
-  function fmtBytes(n) {
-    if (!n) return "0 B";
-    var u = ["B", "KB", "MB", "GB"],
-      i = 0;
-    var v = Number(n);
-    while (v >= 1024 && i < u.length - 1) {
-      v /= 1024;
-      i++;
+  function fmtBytes(value) {
+    if (!value) return "0 B";
+    var items = ["B", "KB", "MB", "GB"],
+      index = 0;
+    var numericValue = Number(value);
+    while (numericValue >= 1024 && index < items.length - 1) {
+      numericValue /= 1024;
+      index++;
     }
-    return v.toFixed(v >= 100 || i === 0 ? 0 : 1) + " " + u[i];
+    return numericValue.toFixed(numericValue >= 100 || index === 0 ? 0 : 1) + " " + items[index];
   }
-  function isEmptyObj(o) {
-    return !o || typeof o !== "object" || !Object.keys(o).length;
+  function isEmptyObj(value) {
+    return !value || typeof value !== "object" || !Object.keys(value).length;
   }
 
   /* ================= 业务常量 ================= */
@@ -318,7 +321,7 @@
     { v: 2, key: "netease", label: "网易云音乐", icon: "music" },
     { v: 3, key: "kuwo", label: "酷我音乐", icon: "music" },
   ];
-  var SOURCE_LABEL = {
+  var sOURCELABEL = {
     1: "QQ 音乐",
     2: "网易云音乐",
     3: "酷我音乐",
@@ -328,13 +331,13 @@
   };
 
   /* 设备协议：1=随机 2=顺序 3=单曲；UI 循环 list → random → single → list */
-  var MODE_ORDER = ["list", "random", "single"];
-  var MODE_LABEL = { list: "顺序播放", random: "随机播放", single: "单曲循环" };
-  var MODE_ICON = { list: "repeat", random: "shuffle", single: "repeatOne" };
-  var MODE_CODE = { random: 1, list: 2, single: 3 };
-  function nextMode(cur) {
-    var i = MODE_ORDER.indexOf(cur);
-    return MODE_ORDER[(i + 1) % MODE_ORDER.length];
+  var mODEORDER = ["list", "random", "single"];
+  var mODELABEL = { list: "顺序播放", random: "随机播放", single: "单曲循环" };
+  var mODEICON = { list: "repeat", random: "shuffle", single: "repeatOne" };
+  var mODECODE = { random: 1, list: 2, single: 3 };
+  function nextMode(current) {
+    var value = mODEORDER.indexOf(current);
+    return mODEORDER[(value + 1) % mODEORDER.length];
   }
 
   /* ================= 启动 ================= */
@@ -358,7 +361,7 @@
       /* 刷新后恢复到上次停留的板块；值非法时回落到音乐页 */
       if (ROUTES.indexOf(savedRoute) >= 0) nextState.route = savedRoute;
       setState(nextState);
-    } catch (e) {}
+    } catch (error) {}
 
     if (typeof R1WS === "undefined") return;
 
@@ -368,9 +371,9 @@
     R1WS.on("disconnected", function () {
       setState({ connected: false });
     });
-    R1WS.on("error", function (d) {
-      var msg = (d && (d.message || d.msg)) || "设备通信出错";
-      if (global.R1UI && global.R1UI.toast) global.R1UI.toast(msg, "err");
+    R1WS.on("error", function (value) {
+      var message = (value && (value.message || value.msg)) || "设备通信出错";
+      if (global.R1UI && global.R1UI.toast) global.R1UI.toast(message, "err");
     });
     R1WS.on("device_info", function (info) {
       setState({ deviceInfo: Object.assign({}, info || {}) });
@@ -386,13 +389,13 @@
             localStorage.removeItem("r1_qq_avatar");
           }
         }
-      } catch (e) {}
+      } catch (error) {}
       setState({ apiInfo: Object.assign({}, info || {}) });
     });
 
     try {
       if (R1WS.initLocalNetworkPermission) R1WS.initLocalNetworkPermission();
-    } catch (e) {}
+    } catch (error) {}
 
     /* 自动连接上次设备 */
     var lastIp = state.lastIp;
@@ -400,7 +403,7 @@
       setState({ connecting: true });
       try {
         R1WS.connect(lastIp);
-      } catch (e) {}
+      } catch (error) {}
       setTimeout(function () {
         if (!state.connected) setState({ connecting: false });
       }, 7000);
@@ -410,11 +413,11 @@
   }
 
   /* toast 直接透传 R1UI，避免循环依赖 */
-  function toast(msg, type) {
-    if (global.R1UI && global.R1UI.toast) global.R1UI.toast(msg, type);
+  function toast(message, type) {
+    if (global.R1UI && global.R1UI.toast) global.R1UI.toast(message, type);
   }
-  function confirm(opt) {
-    if (global.R1UI && global.R1UI.confirm) return global.R1UI.confirm(opt);
+  function confirm(options) {
+    if (global.R1UI && global.R1UI.confirm) return global.R1UI.confirm(options);
     return Promise.resolve(true);
   }
 
@@ -449,11 +452,11 @@
     fmtBytes: fmtBytes,
     isEmptyObj: isEmptyObj,
     SOURCES: SOURCES,
-    SOURCE_LABEL: SOURCE_LABEL,
-    MODE_LABEL: MODE_LABEL,
-    MODE_ICON: MODE_ICON,
-    MODE_CODE: MODE_CODE,
-    MODE_ORDER: MODE_ORDER,
+    SOURCE_LABEL: sOURCELABEL,
+    MODE_LABEL: mODELABEL,
+    MODE_ICON: mODEICON,
+    MODE_CODE: mODECODE,
+    MODE_ORDER: mODEORDER,
     nextMode: nextMode,
   };
 })(window);

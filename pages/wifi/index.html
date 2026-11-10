@@ -715,8 +715,8 @@
           const strength = wifi.level;
 
           let strengthBars = "";
-          for (let i = 1; i <= 3; i++) {
-            strengthBars += `<div class="bar ${i <= strength ? "active" : ""}"></div>`;
+          for (let index = 1; index <= 3; index++) {
+            strengthBars += `<div class="bar ${index <= strength ? "active" : ""}"></div>`;
           }
 
           html += `
@@ -747,8 +747,8 @@
         document.querySelectorAll(".wifi-item").forEach((item) => {
           item.addEventListener("click", function () {
             // 移除其他选择
-            document.querySelectorAll(".wifi-item").forEach((i) => {
-              i.classList.remove("selected");
+            document.querySelectorAll(".wifi-item").forEach((element) => {
+              element.classList.remove("selected");
             });
 
             // 添加当前选择
@@ -764,9 +764,9 @@
 
             // 更新加密方式
             const encryption = document.getElementById("encryption");
-            for (let i = 0; i < encryption.options.length; i++) {
-              if (encryption.options[i].value === secure) {
-                encryption.selectedIndex = i;
+            for (let index = 0; index < encryption.options.length; index++) {
+              if (encryption.options[index].value === secure) {
+                encryption.selectedIndex = index;
                 break;
               }
             }
@@ -799,8 +799,8 @@
               updateStatus("请选择要连接的WiFi", "idle");
               document.getElementById("wifiListTab").click();
               return true;
-            } catch (e) {
-              addCheckMessage("解析WiFi列表失败: " + e.message, "error");
+            } catch (error) {
+              addCheckMessage("解析WiFi列表失败: " + error.message, "error");
               updateStatus("获取WiFi列表失败", "error");
               return false;
             }
@@ -854,9 +854,9 @@
             location.href = "../../?no_auto_connect";
           }
         });
-        document.getElementById("encryption").addEventListener("change", (e) => {
+        document.getElementById("encryption").addEventListener("change", (event) => {
           const password = document.getElementById("password");
-          if (e.target.value !== "INSECURE") {
+          if (event.target.value !== "INSECURE") {
             password.parentNode.style.display = "";
           } else {
             password.value = "";
@@ -885,9 +885,9 @@
         }
         if (savedSecure) {
           const encryption = document.getElementById("encryption");
-          for (let i = 0; i < encryption.options.length; i++) {
-            if (encryption.options[i].value === savedSecure) {
-              encryption.selectedIndex = i;
+          for (let index = 0; index < encryption.options.length; index++) {
+            if (encryption.options[index].value === savedSecure) {
+              encryption.selectedIndex = index;
               break;
             }
           }
@@ -895,12 +895,12 @@
 
         // 设置标签切换
         document.querySelectorAll(".tab").forEach((tab) => {
-          tab.addEventListener("click", function (e) {
+          tab.addEventListener("click", function (event) {
             const tabId = this.dataset.tab;
 
             // 更新标签状态
-            document.querySelectorAll(".tab").forEach((t) => {
-              t.classList.remove("active");
+            document.querySelectorAll(".tab").forEach((element) => {
+              element.classList.remove("active");
             });
             this.classList.add("active");
 
@@ -966,7 +966,7 @@
             },
           );
         }
-        var check_timer = null;
+        var checkTimer = null;
         var xhttp = {};
         clearCheckMessages();
         addCheckMessage("正在检查与R1音箱的连接...", "warning");
@@ -974,7 +974,7 @@
         const handler = () => {
           if (xhttp.readyState === 4) {
             if (xhttp.status === 200) {
-              clearInterval(check_timer);
+              clearInterval(checkTimer);
               addCheckMessage("已连接到配网热点", "success");
               updateStatus("已连接到配网热点，请输入WiFi信息", "idle");
               addCheckMessage("等待接收配网信息...", "warning");
@@ -998,7 +998,7 @@
 
       // 开始配网
       function startConfig() {
-        const btn = document.getElementById("configBtn");
+        const button = document.getElementById("configBtn");
         const activeTab = document.querySelector(".tab.active").dataset.tab;
 
         let ssid, encryption, password;
@@ -1030,8 +1030,8 @@
           return;
         }
 
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在配网...';
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在配网...';
 
         updateStatus("正在发送配网信息到音箱...", "scanning");
 
@@ -1056,12 +1056,12 @@
         const xhttp = window.plus ? new plus.net.XMLHttpRequest() : new XMLHttpRequest();
         xhttp.open("POST", "http://192.168.43.1:8989/api/configwifi");
 
-        xhttp.onreadystatechange = function (e) {
+        xhttp.onreadystatechange = function (value) {
           if (xhttp.readyState === 4) {
             clearTimeout(window.timer);
-            const ret = xhttp.responseText || "";
-            if (ret) {
-              addCheckMessage(ret, "success");
+            const result = xhttp.responseText || "";
+            if (result) {
+              addCheckMessage(result, "success");
               addCheckMessage("配网信息发送成功", "success");
               updateStatus("配网信息发送成功！请检查音箱是否已连接到您的WiFi网络", "idle");
               alert("配网信息已发送成功！请检查音箱是否已连接到您的WiFi网络。");
@@ -1069,10 +1069,10 @@
               addCheckMessage("配网信息已发送", "warning");
               updateStatus("配网信息已发送！请检查音箱是否已连接到您的WiFi网络。", "idle");
             }
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plug"></i> 开始配网';
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-plug"></i> 开始配网';
           }
-          console.log(xhttp, e);
+          console.log(xhttp, value);
         };
 
         xhttp.send(JSON.stringify(data));
@@ -1084,8 +1084,8 @@
           updateStatus("配网超时，请检查连接", "error");
           alert("配网超时，请检查是否已连接到音箱的WiFi热点且已关闭手机数据连接！");
 
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-plug"></i> 开始配网';
+          button.disabled = false;
+          button.innerHTML = '<i class="fas fa-plug"></i> 开始配网';
         }, 3000);
       }
 
@@ -1119,12 +1119,12 @@
               function (fileEntry) {
                 fileEntry.createWriter(
                   function (writer) {
-                    writer.onwriteend = function (e) {
+                    writer.onwriteend = function (value) {
                       if (successCallback) successCallback(fileEntry.fullPath);
                     };
 
-                    writer.onerror = function (e) {
-                      const error = new Error("写入文件失败: " + e.toString());
+                    writer.onerror = function (value) {
+                      const error = new Error("写入文件失败: " + value.toString());
                       if (errorCallback) errorCallback(error);
                     };
                     writer.write(content);

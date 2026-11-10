@@ -6,7 +6,7 @@
  *   1. 行为以 legacy/app.js（旧版 MUI 实现）为准：音量超过 18 二次确认、
  *      拖动期间忽略设备回包、蓝牙 1 秒轮询 + 开关防回弹、二维码 2 秒轮询等
  *      细节都直接移植，避免"新版改了行为"；
- *   2. 设备调用只用 ws.js 导出表里的方法（含通用 wsSend/executeShell），并统一
+ *   2. 设备调用只用 websocket.js 导出表里的方法（含通用 wsSend/executeShell），并统一
  *      包 try/catch —— 单条指令失败只提示，不拖垮整页；
  *   3. 弹层组件只渲染 Modal 的 body，标题/尺寸/关闭由 app.js 外壳负责；
  *   4. 连接状态、设备信息、服务开关走 R1Core 全局仓库；音量、EQ、蓝牙列表等
@@ -35,23 +35,23 @@
   var useState = React.useState,
     useEffect = React.useEffect,
     useRef = React.useRef;
-  var C = R1Core;
-  var toast = C.toast;
+  var r1Core = R1Core;
+  var toast = r1Core.toast;
 
-  var P = (global.R1Panels = global.R1Panels || {});
+  var r1Panels = (global.R1Panels = global.R1Panels || {});
 
-  var VOL_MAX = 30; /* 设备音量上限（原版 0~30） */
-  var VOL_WARN = 18; /* 超过该值需要二次确认，原版即为此阈值 */
+  var vOLMAX = 30; /* 设备音量上限（原版 0~30） */
+  var vOLWARN = 18; /* 超过该值需要二次确认，原版即为此阈值 */
 
   /* EQ 频段显示名：设备返回的是 mHz（60000 = 60Hz） */
-  var HZ_NAMES = {
+  var hZNAMES = {
     60000: "低频",
     230000: "中低",
     910000: "中频",
     3600000: "中高",
     14000000: "高频",
   };
-  var PRESET_NAMES = {
+  var pRESETNAMES = {
     Custom: "自定义",
     Normal: "标准",
     Classical: "古典",
@@ -67,58 +67,58 @@
 
   /* ================= 通用小工具 ================= */
 
-  function clamp(v, min, max) {
-    return Math.max(min, Math.min(max, v));
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
   }
 
   /* 所有设备调用的统一入口：失败只提示，不抛到渲染层 */
-  function safe(fn, failMsg) {
+  function safe(callback, failMsg) {
     try {
-      fn();
-    } catch (e) {
-      toast(failMsg || "设备通信失败：" + (e && e.message), "err");
+      callback();
+    } catch (error) {
+      toast(failMsg || "设备通信失败：" + (error && error.message), "err");
     }
   }
 
   /* 值 → 展示字符串；对象直接渲染会触发 React 错误 #31，这里统一转字符串 */
-  function text(v) {
-    if (v === null || v === undefined || v === "") return "--";
-    if (typeof v === "object") {
+  function text(value) {
+    if (value === null || value === undefined || value === "") return "--";
+    if (typeof value === "object") {
       try {
-        return JSON.stringify(v);
-      } catch (e) {
+        return JSON.stringify(value);
+      } catch (error) {
         return "[object]";
       }
     }
-    return String(v);
+    return String(value);
   }
 
   /* 时间戳兼容秒/毫秒 */
-  function fmtTs(v) {
-    var t = Number(v);
-    if (!t) return "--";
-    if (t < 1e12) t = t * 1000;
-    var d = new Date(t);
+  function fmtTs(value) {
+    var numericValue = Number(value);
+    if (!numericValue) return "--";
+    if (numericValue < 1e12) numericValue = numericValue * 1000;
+    var date = new Date(numericValue);
     return (
-      d.getFullYear() +
+      date.getFullYear() +
       "-" +
-      (d.getMonth() + 1) +
+      (date.getMonth() + 1) +
       "-" +
-      d.getDate() +
+      date.getDate() +
       " " +
-      ("0" + d.getHours()).slice(-2) +
+      ("0" + date.getHours()).slice(-2) +
       ":" +
-      ("0" + d.getMinutes()).slice(-2)
+      ("0" + date.getMinutes()).slice(-2)
     );
   }
 
   /* 三态开关值：设备未回包时用各自的默认值（与旧版一致：DLNA/AirPlay 默认开） */
-  function flag(v, def) {
-    return v === undefined || v === null ? !!def : !!v;
+  function flag(value, def) {
+    return value === undefined || value === null ? !!def : !!value;
   }
 
   function presetLabel(name) {
-    return PRESET_NAMES[name] || name || "未知";
+    return pRESETNAMES[name] || name || "未知";
   }
 
   /* 未连接页面：统一 Empty + 连接按钮 */
@@ -140,7 +140,7 @@
               variant: "primary",
               icon: "link",
               onClick: function () {
-                C.openSheet("connect");
+                r1Core.openSheet("connect");
               },
             },
             "连接设备",
@@ -166,21 +166,21 @@
     useEffect(function () {
       var list = ref.current;
       return function () {
-        list.forEach(function (t) {
-          clearTimeout(t);
+        list.forEach(function (item) {
+          clearTimeout(item);
         });
         ref.current = [];
       };
     }, []);
-    return function (fn, ms) {
-      var t = setTimeout(function () {
-        ref.current = ref.current.filter(function (x) {
-          return x !== t;
+    return function (callback, ms) {
+      var timeoutId = setTimeout(function () {
+        ref.current = ref.current.filter(function (item) {
+          return item !== timeoutId;
         });
-        fn();
+        callback();
       }, ms);
-      ref.current.push(t);
-      return t;
+      ref.current.push(timeoutId);
+      return timeoutId;
     };
   }
 
@@ -188,14 +188,14 @@
   /* 切换后延时 requestServiceInfo：命令回包只代表"设备收到了"，
    * 真实状态要再拉一次，避免 UI 与设备不一致（旧版在结果事件里也是这么做的）。 */
   function ServiceSwitches() {
-    var st = C.useStore();
-    var info = st.deviceInfo || {};
+    var store = r1Core.useStore();
+    var info = store.deviceInfo || {};
     var later = useTimers();
     var refreshing = useRef(false);
 
-    C.useR1Event("service_setting_result", function (res) {
-      if (res && (res.code === 200 || res.code === "200")) toast("操作成功", "ok");
-      else toast((res && res.msg) || "操作失败", "err");
+    r1Core.useR1Event("service_setting_result", function (response) {
+      if (response && (response.code === 200 || response.code === "200")) toast("操作成功", "ok");
+      else toast((response && response.msg) || "操作失败", "err");
     });
 
     function refresh() {
@@ -209,9 +209,9 @@
       }, 800);
     }
     function toggle(send, label) {
-      return function (v) {
+      return function (value) {
         safe(function () {
-          send(v);
+          send(value);
         }, label + "设置失败");
         refresh();
       };
@@ -227,8 +227,8 @@
         sub: "保持 DLNA / AirPlay 等后台服务常驻",
         end: h(Switch, {
           on: flag(info.Service_Normally_Open, false),
-          onChange: toggle(function (v) {
-            R1WS.setServiceNormallyOpen(v);
+          onChange: toggle(function (value) {
+            R1WS.setServiceNormallyOpen(value);
           }, "服务常开"),
         }),
       }),
@@ -238,8 +238,8 @@
         sub: "允许手机投屏应用发现并推送媒体",
         end: h(Switch, {
           on: flag(info.dlna_open, true),
-          onChange: toggle(function (v) {
-            R1WS.setDlnaOpen(v);
+          onChange: toggle(function (value) {
+            R1WS.setDlnaOpen(value);
           }, "DLNA"),
         }),
       }),
@@ -249,8 +249,8 @@
         sub: "允许 AirPlay 设备推送音频到音箱",
         end: h(Switch, {
           on: flag(info.airplay_open, true),
-          onChange: toggle(function (v) {
-            R1WS.setAirplayOpen(v);
+          onChange: toggle(function (value) {
+            R1WS.setAirplayOpen(value);
           }, "AirPlay"),
         }),
       }),
@@ -261,33 +261,33 @@
    * 音效页
    * =================================================================== */
   function SoundPanel() {
-    var st = C.useStore();
+    var store = r1Core.useStore();
     var later = useTimers();
 
-    var _vol = useState(15),
-      volume = _vol[0],
-      setVolume = _vol[1];
-    var _bands = useState([]),
-      bands = _bands[0],
-      setBands = _bands[1];
-    var _range = useState({ min: -1200, max: 1200 }),
-      bandRange = _range[0],
-      setBandRange = _range[1];
-    var _presets = useState([]),
-      presets = _presets[0],
-      setPresets = _presets[1];
-    var _cur = useState(-1),
-      currentPreset = _cur[0],
-      setCurrentPreset = _cur[1];
-    var _eqOn = useState(true),
-      eqOn = _eqOn[0],
-      setEqOn = _eqOn[1];
-    var _tone = useState(true),
-      btTone = _tone[0],
-      setBtTone = _tone[1];
-    var _asr = useState(5),
-      asr = _asr[0],
-      setAsr = _asr[1];
+    var volumeState = useState(15),
+      volume = volumeState[0],
+      setVolume = volumeState[1];
+    var bandsState = useState([]),
+      bands = bandsState[0],
+      setBands = bandsState[1];
+    var bandRangeState = useState({ min: -1200, max: 1200 }),
+      bandRange = bandRangeState[0],
+      setBandRange = bandRangeState[1];
+    var presetsState = useState([]),
+      presets = presetsState[0],
+      setPresets = presetsState[1];
+    var currentPresetState = useState(-1),
+      currentPreset = currentPresetState[0],
+      setCurrentPreset = currentPresetState[1];
+    var eqOnState = useState(true),
+      eqOn = eqOnState[0],
+      setEqOn = eqOnState[1];
+    var btToneState = useState(true),
+      btTone = btToneState[0],
+      setBtTone = btToneState[1];
+    var asrState = useState(5),
+      asr = asrState[0],
+      setAsr = asrState[1];
 
     /* 音量拖动锁：拖动/回包静默期内忽略设备回包，否则旧值会把滑杆打回去 */
     var volDragRef = useRef(false);
@@ -312,37 +312,37 @@
     );
 
     /* ---------- 设备事件 ---------- */
-    C.useR1Event("music_info", function (info) {
+    r1Core.useR1Event("music_info", function (info) {
       if (!info || info.volume === undefined) return;
       if (volDragRef.current) return;
-      setVolume(clamp(Math.round(Number(info.volume)) || 0, 0, VOL_MAX));
+      setVolume(clamp(Math.round(Number(info.volume)) || 0, 0, vOLMAX));
     });
-    C.useR1Event("device_info", function (info) {
+    r1Core.useR1Event("device_info", function (info) {
       if (!info) return;
       if (info.volume !== undefined && !volDragRef.current) {
-        setVolume(clamp(Math.round(Number(info.volume)) || 0, 0, VOL_MAX));
+        setVolume(clamp(Math.round(Number(info.volume)) || 0, 0, vOLMAX));
       }
       if (info.asr_max_duration !== undefined) setAsr(Number(info.asr_max_duration) || 5);
       if (info.bluetooth_prompt_tone !== undefined) setBtTone(!!info.bluetooth_prompt_tone);
     });
-    C.useR1Event("eq_config", function (data) {
+    r1Core.useR1Event("eq_config", function (data) {
       if (!data) return;
       var eq = data.eq || {};
       if (eq.Bands && Array.isArray(eq.Bands.list)) {
         if (!eqDragRef.current) {
           /* "标准(Normal)"预设：部分机型回包带非 0 增益，旧版直接按 0dB 平面显示 */
-          var cur = null;
+          var current = null;
           if (eq.Preset_list && eq.Current_Preset !== undefined) {
-            for (var i = 0; i < eq.Preset_list.length; i++) {
-              if (eq.Preset_list[i].Preset === eq.Current_Preset) {
-                cur = eq.Preset_list[i];
+            for (var index = 0; index < eq.Preset_list.length; index++) {
+              if (eq.Preset_list[index].Preset === eq.Current_Preset) {
+                current = eq.Preset_list[index];
                 break;
               }
             }
           }
-          var isNormal = !!(cur && cur.Name === "Normal");
-          var next = eq.Bands.list.map(function (b) {
-            return { band: b.Band, freq: b.Frequency, level: isNormal ? 0 : b.BandLevel };
+          var isNormal = !!(current && current.Name === "Normal");
+          var next = eq.Bands.list.map(function (item) {
+            return { band: item.Band, freq: item.Frequency, level: isNormal ? 0 : item.BandLevel };
           });
           bandsRef.current = next;
           setBands(next);
@@ -362,23 +362,23 @@
     /* ---------- 挂载请求 + EQ 轮询（卸载清理） ---------- */
     useEffect(
       function () {
-        if (!st.connected) return;
+        if (!store.connected) return;
         safe(function () {
           R1WS.requestDeviceInfo();
         });
         safe(function () {
           R1WS.requestEqConfig();
         });
-        var t = setInterval(function () {
+        var intervalId = setInterval(function () {
           safe(function () {
             R1WS.requestEqConfig();
           });
         }, 2000);
         return function () {
-          clearInterval(t);
+          clearInterval(intervalId);
         };
       },
-      [st.connected],
+      [store.connected],
     );
 
     useEffect(function () {
@@ -403,44 +403,46 @@
         volTimerRef.current = null;
       }, 1500);
     }
-    function volChange(v) {
+    function volChange(value) {
       if (!volDragRef.current) volBaseRef.current = volume; /* 只记拖动起点 */
       volHold();
-      setVolume(v);
+      setVolume(value);
     }
-    function volCommit(v) {
-      v = clamp(Math.round(v), 0, VOL_MAX);
+    function volCommit(value) {
+      value = clamp(Math.round(value), 0, vOLMAX);
       volHold();
-      setVolume(v);
+      setVolume(value);
       /* 只有"从 ≤18 跨到 >18"才需要确认；已经在高音量区间调来调去不再打扰 */
-      if (v > VOL_WARN && !volWarnedRef.current && volBaseRef.current <= VOL_WARN) {
-        C.confirm({
-          title: "音量提醒",
-          desc: "音量超过 " + VOL_WARN + " 可能打扰他人，甚至损伤扬声器。确定继续吗？",
-          okText: "继续调大",
-          cancelText: "取消",
-          danger: false,
-        }).then(function (ok) {
-          if (ok) {
-            volWarnedRef.current = true;
-            safe(function () {
-              R1WS.setVolume(v);
-            });
-          } else {
-            setVolume(volBaseRef.current);
-          }
-          volRelease();
-        });
+      if (value > vOLWARN && !volWarnedRef.current && volBaseRef.current <= vOLWARN) {
+        r1Core
+          .confirm({
+            title: "音量提醒",
+            desc: "音量超过 " + vOLWARN + " 可能打扰他人，甚至损伤扬声器。确定继续吗？",
+            okText: "继续调大",
+            cancelText: "取消",
+            danger: false,
+          })
+          .then(function (ok) {
+            if (ok) {
+              volWarnedRef.current = true;
+              safe(function () {
+                R1WS.setVolume(value);
+              });
+            } else {
+              setVolume(volBaseRef.current);
+            }
+            volRelease();
+          });
         return;
       }
       safe(function () {
-        R1WS.setVolume(v);
+        R1WS.setVolume(value);
       });
       volRelease();
     }
-    function volStep(d) {
+    function volStep(value) {
       volBaseRef.current = volume;
-      volCommit(clamp(volume + d, 0, VOL_MAX));
+      volCommit(clamp(volume + value, 0, vOLMAX));
     }
     function volMute() {
       volBaseRef.current = volume;
@@ -448,16 +450,16 @@
     }
 
     /* ---------- EQ ---------- */
-    function sendEq(cfg) {
+    function sendEq(config) {
       safe(function () {
-        R1WS.setEq(cfg);
+        R1WS.setEq(config);
       }, "均衡器指令发送失败");
     }
 
-    function changeBand(i, level) {
+    function changeBand(value, level) {
       eqDragRef.current = true;
-      var next = bandsRef.current.map(function (b, idx) {
-        return idx === i ? { band: b.band, freq: b.freq, level: level } : b;
+      var next = bandsRef.current.map(function (item, index) {
+        return index === value ? { band: item.band, freq: item.freq, level: level } : item;
       });
       bandsRef.current = next;
       setBands(next);
@@ -471,7 +473,7 @@
           setTimeout(function () {
             try {
               R1WS.wsSend({ type: "set_eq_bandlevel", band: bandNo, level: level });
-            } catch (e) {}
+            } catch (error) {}
           }, delay);
         })(bs[bi].band, bs[bi].level, bi * 60);
       }
@@ -491,15 +493,15 @@
       R1WS.wsSend({ type: "set_eq_preset", preset: id });
       /* 标准(Normal)：设备不一定立即回包，直接本地置 0dB，UI 立刻呈现平直曲线 */
       var target = null;
-      for (var i = 0; i < presets.length; i++) {
-        if (presets[i].Preset === id) {
-          target = presets[i];
+      for (var index = 0; index < presets.length; index++) {
+        if (presets[index].Preset === id) {
+          target = presets[index];
           break;
         }
       }
       if (target && target.Name === "Normal") {
-        var next = bandsRef.current.map(function (b) {
-          return { band: b.band, freq: b.freq, level: 0 };
+        var next = bandsRef.current.map(function (item) {
+          return { band: item.band, freq: item.freq, level: 0 };
         });
         bandsRef.current = next;
         setBands(next);
@@ -510,38 +512,38 @@
         });
       }, 400);
     }
-    function toggleEq(v) {
-      setEqOn(v);
+    function toggleEq(value) {
+      setEqOn(value);
       /* 总开关沿用旧版 set_eq_enable（set_eq 负载里没有 enable 字段） */
       safe(function () {
-        R1WS.wsSend({ type: "set_eq_enable", enable: v });
+        R1WS.wsSend({ type: "set_eq_enable", enable: value });
       }, "均衡器开关失败");
     }
 
     /* ---------- 语音 / 提示音 ---------- */
-    function toggleTone(v) {
-      setBtTone(v);
+    function toggleTone(value) {
+      setBtTone(value);
       safe(function () {
-        R1WS.setBluetoothPromptTone(v);
+        R1WS.setBluetoothPromptTone(value);
       }, "蓝牙提示音设置失败");
-      toast(v ? "已开启蓝牙提示音" : "已关闭蓝牙提示音", "ok");
+      toast(value ? "已开启蓝牙提示音" : "已关闭蓝牙提示音", "ok");
     }
-    function commitAsr(v) {
-      var n = clamp(Math.round(v), 1, 30);
-      setAsr(n);
+    function commitAsr(value) {
+      var value2 = clamp(Math.round(value), 1, 30);
+      setAsr(value2);
       safe(function () {
-        R1WS.setAsrMaxDuration(n);
+        R1WS.setAsrMaxDuration(value2);
       }, "识别时长设置失败");
     }
 
-    if (!st.connected) return notConnectedPage("音效", "音量、均衡器与语音提示");
+    if (!store.connected) return notConnectedPage("音效", "音量、均衡器与语音提示");
 
-    var volPct = (volume / VOL_MAX) * 100;
+    var volPct = (volume / vOLMAX) * 100;
     var desc =
       "音量 " +
       volume +
       " / " +
-      VOL_MAX +
+      vOLMAX +
       " · " +
       (eqOn ? "均衡器已开启" : "均衡器已关闭") +
       " · 识别时长 " +
@@ -575,12 +577,12 @@
               h(
                 "div",
                 { className: "hint" },
-                "范围 0 – " + VOL_MAX + "，超过 " + VOL_WARN + " 需要二次确认",
+                "范围 0 – " + vOLMAX + "，超过 " + vOLWARN + " 需要二次确认",
               ),
               h(Slider, {
                 value: volume,
                 min: 0,
-                max: VOL_MAX,
+                max: vOLMAX,
                 step: 1,
                 label: "音量",
                 onChange: volChange,
@@ -650,13 +652,13 @@
               ? h(
                   "div",
                   { className: "eq-list" },
-                  bands.map(function (b, i) {
-                    var hz = b.freq || 0;
-                    var name = HZ_NAMES[hz];
-                    var db = b.level / 100;
+                  bands.map(function (item, index) {
+                    var hz = item.freq || 0;
+                    var name = hZNAMES[hz];
+                    var db = item.level / 100;
                     return h(
                       "div",
-                      { className: "eq-row", key: i },
+                      { className: "eq-row", key: index },
                       h(
                         "div",
                         { className: "eq-band" },
@@ -672,9 +674,9 @@
                           max: bandRange.max / 100,
                           step: 0.1,
                           showValue: false,
-                          label: "频段 " + (name || i),
-                          onChange: function (v) {
-                            changeBand(i, Math.round(v * 100));
+                          label: "频段 " + (name || index),
+                          onChange: function (value) {
+                            changeBand(index, Math.round(value * 100));
                           },
                           onCommit: commitBand,
                         }),
@@ -703,18 +705,18 @@
                   },
                   "自定义",
                 ),
-                presets.map(function (p) {
-                  if (p.Preset < 0) return null;
+                presets.map(function (item) {
+                  if (item.Preset < 0) return null;
                   return h(
                     Chip,
                     {
-                      key: p.Preset,
-                      on: currentPreset === p.Preset,
+                      key: item.Preset,
+                      on: currentPreset === item.Preset,
                       onClick: function () {
-                        applyPreset(p.Preset);
+                        applyPreset(item.Preset);
                       },
                     },
-                    presetLabel(p.Name),
+                    presetLabel(item.Name),
                   );
                 }),
               )
@@ -762,8 +764,8 @@
                   step: 1,
                   showValue: false,
                   label: "语音识别时长",
-                  onChange: function (v) {
-                    setAsr(v);
+                  onChange: function (value) {
+                    setAsr(value);
                   },
                   onCommit: commitAsr,
                 }),
@@ -779,35 +781,35 @@
    * 蓝牙页（移植旧版 BluetoothPanel：轮询 + 防回弹 + 分组展示）
    * =================================================================== */
   function BluetoothPanel() {
-    var st = C.useStore();
+    var store = r1Core.useStore();
 
-    var _enabled = useState(false),
-      enabled = _enabled[0],
-      setEnabled = _enabled[1];
-    var _wait = useState(false),
-      wait = _wait[0],
-      setWait = _wait[1];
-    var _scanning = useState(false),
-      scanning = _scanning[0],
-      setScanning = _scanning[1];
-    var _mode = useState(0),
-      scanMode = _mode[0],
-      setScanMode = _mode[1];
-    var _bonded = useState([]),
-      bonded = _bonded[0],
-      setBonded = _bonded[1];
-    var _scanned = useState([]),
-      scanned = _scanned[0],
-      setScanned = _scanned[1];
-    var _addr = useState(""),
-      connectedAddr = _addr[0],
-      setConnectedAddr = _addr[1];
-    var _a2dp = useState([]),
-      a2dpList = _a2dp[0],
-      setA2dpList = _a2dp[1];
-    var _sink = useState([]),
-      sinkList = _sink[0],
-      setSinkList = _sink[1];
+    var enabledState = useState(false),
+      enabled = enabledState[0],
+      setEnabled = enabledState[1];
+    var waitState = useState(false),
+      wait = waitState[0],
+      setWait = waitState[1];
+    var scanningState = useState(false),
+      scanning = scanningState[0],
+      setScanning = scanningState[1];
+    var scanModeState = useState(0),
+      scanMode = scanModeState[0],
+      setScanMode = scanModeState[1];
+    var bondedState = useState([]),
+      bonded = bondedState[0],
+      setBonded = bondedState[1];
+    var scannedState = useState([]),
+      scanned = scannedState[0],
+      setScanned = scannedState[1];
+    var connectedAddrState = useState(""),
+      connectedAddr = connectedAddrState[0],
+      setConnectedAddr = connectedAddrState[1];
+    var statePair = useState([]),
+      a2dpList = statePair[0],
+      setA2dpList = statePair[1];
+    var sinkListState = useState([]),
+      sinkList = sinkListState[0],
+      setSinkList = sinkListState[1];
 
     /* 同步到 ref：事件回调里要读"最新的开关等待状态"，避免闭包拿到旧值 */
     var waitRef = useRef(false);
@@ -822,9 +824,12 @@
     );
     useEffect(
       function () {
-        svcAlwaysRef.current = flag(st.deviceInfo && st.deviceInfo.Service_Normally_Open, false);
+        svcAlwaysRef.current = flag(
+          store.deviceInfo && store.deviceInfo.Service_Normally_Open,
+          false,
+        );
       },
-      [st.deviceInfo],
+      [store.deviceInfo],
     );
 
     /* ---------- 解析工具（原版 get_bluetooth_title / get_bluetooth_title_type） ---------- */
@@ -843,35 +848,35 @@
       };
       return map[major] || "";
     }
-    function deviceIcon(d) {
+    function deviceIcon(value) {
       /* 设备原始数据没有 DeviceType 字段，用 BluetoothClass 主类别推断 */
-      var t = getDeviceType(d.BluetoothClass);
-      if (t === "PHONE") return "smartphone";
-      if (t === "COMPUTER") return "monitor";
-      if (t === "PERIPHERAL") return "keyboard";
-      if (t === "AUDIO_VIDEO") return "music";
+      var deviceType = getDeviceType(value.BluetoothClass);
+      if (deviceType === "PHONE") return "smartphone";
+      if (deviceType === "COMPUTER") return "monitor";
+      if (deviceType === "PERIPHERAL") return "keyboard";
+      if (deviceType === "AUDIO_VIDEO") return "music";
       return "bluetooth";
     }
     function parseUuids(uuids) {
-      var src = false,
+      var source = false,
         sink = false;
       if (uuids) {
-        for (var i = 0; i < uuids.length; i++) {
-          var u = (uuids[i] && uuids[i].mUuid) || uuids[i] || "";
-          if (String(u).indexOf("110a-") > -1) src = true;
-          if (String(u).indexOf("110b-") > -1) sink = true;
+        for (var index = 0; index < uuids.length; index++) {
+          var uuidItem = (uuids[index] && uuids[index].mUuid) || uuids[index] || "";
+          if (String(uuidItem).indexOf("110a-") > -1) source = true;
+          if (String(uuidItem).indexOf("110b-") > -1) sink = true;
         }
       }
-      return { audioSource: src, audioSink: sink };
+      return { audioSource: source, audioSink: sink };
     }
-    function deviceTitle(d) {
-      var t = "";
-      if (d.BondState === 11) t += "[配对中] ";
-      t += d.name || d.Name || "未知设备";
-      return t;
+    function deviceTitle(value) {
+      var text2 = "";
+      if (value.BondState === 11) text2 += "[配对中] ";
+      text2 += value.name || value.Name || "未知设备";
+      return text2;
     }
-    function isConnected(d) {
-      return !!(d.A2dpConnect || d.A2dpSinkConnect || d.Address === connectedAddr);
+    function isConnected(value) {
+      return !!(value.A2dpConnect || value.A2dpSinkConnect || value.Address === connectedAddr);
     }
     /* 信号格：rssi 越大越强，三格对应 theme.css 的 .bars i */
     function bars(rssi) {
@@ -918,34 +923,35 @@
       var a2dp = data.A2dp_ConnectedDevices || [];
       var sink = data.A2dpSink_ConnectedDevices || [];
       var bondedList = (data.Bonded_Devices || []).map(function (raw) {
-        var d = Object.assign({}, raw); /* 不改写事件原始对象 */
-        d.DeviceType = getDeviceType(d.BluetoothClass || 0);
-        d.A2dpConnect = a2dp.indexOf(d.Address) > -1;
-        d.A2dpSinkConnect = sink.indexOf(d.Address) > -1;
-        d.rssi = d.rssi != null ? d.rssi : d.RSSI;
-        return d;
+        var value2 = Object.assign({}, raw); /* 不改写事件原始对象 */
+        value2.DeviceType = getDeviceType(value2.BluetoothClass || 0);
+        value2.A2dpConnect = a2dp.indexOf(value2.Address) > -1;
+        value2.A2dpSinkConnect = sink.indexOf(value2.Address) > -1;
+        value2.rssi = value2.rssi != null ? value2.rssi : value2.RSSI;
+        return value2;
       });
       /* 扫描列表去掉"已配对 + 自身重复" */
       var seen = {},
         inBonded = {};
-      for (var i = 0; i < bondedList.length; i++) inBonded[bondedList[i].Address] = true;
+      for (var index = 0; index < bondedList.length; index++)
+        inBonded[bondedList[index].Address] = true;
       var scanList = [];
       var scanRaw = data.Scan_Devices || [];
-      for (var j = 0; j < scanRaw.length; j++) {
-        var s = Object.assign({}, scanRaw[j]);
-        if (inBonded[s.Address] || seen[s.Address]) continue;
-        seen[s.Address] = true;
-        s.DeviceType = getDeviceType(s.BluetoothClass || 0);
-        s.rssi = s.rssi != null ? s.rssi : s.RSSI;
-        scanList.push(s);
+      for (var index2 = 0; index2 < scanRaw.length; index2++) {
+        var value = Object.assign({}, scanRaw[index2]);
+        if (inBonded[value.Address] || seen[value.Address]) continue;
+        seen[value.Address] = true;
+        value.DeviceType = getDeviceType(value.BluetoothClass || 0);
+        value.rssi = value.rssi != null ? value.rssi : value.RSSI;
+        scanList.push(value);
       }
       setBonded(bondedList);
       setScanned(scanList);
     }
 
     /* ---------- 事件 ---------- */
-    C.useR1Event("bluetooth_devices", handleBtData);
-    C.useR1Event("bluetooth_state", function (info) {
+    r1Core.useR1Event("bluetooth_devices", handleBtData);
+    r1Core.useR1Event("bluetooth_state", function (info) {
       if (info && info.enabled !== undefined) setEnabled(!!info.enabled);
       if (enableTimerRef.current) clearTimeout(enableTimerRef.current);
       /* BT_enable/disable 回包只代表命令送达，适配器真正开关需要 2.5 秒左右：
@@ -959,29 +965,34 @@
         });
       }, 2500);
     });
-    C.useR1Event("bluetooth_result", function (res) {
-      if (res && res.code !== undefined && res.code !== 200 && res.code !== "200") {
-        toast((res.msg || "蓝牙操作失败") + " [" + res.code + "]", "err");
+    r1Core.useR1Event("bluetooth_result", function (response) {
+      if (
+        response &&
+        response.code !== undefined &&
+        response.code !== 200 &&
+        response.code !== "200"
+      ) {
+        toast((response.msg || "蓝牙操作失败") + " [" + response.code + "]", "err");
       }
     });
 
     /* ---------- 1 秒轮询（卸载清理） ---------- */
     useEffect(
       function () {
-        if (!st.connected) return;
+        if (!store.connected) return;
         safe(function () {
           R1WS.requestBluetoothDevices();
         });
-        var t = setInterval(function () {
+        var intervalId = setInterval(function () {
           safe(function () {
             R1WS.requestBluetoothDevices();
           });
         }, 1000);
         return function () {
-          clearInterval(t);
+          clearInterval(intervalId);
         };
       },
-      [st.connected],
+      [store.connected],
     );
 
     useEffect(function () {
@@ -992,16 +1003,16 @@
     }, []);
 
     /* ---------- 操作 ---------- */
-    function toggleBluetooth(v) {
+    function toggleBluetooth(value) {
       setWait(true);
       waitRef.current = true;
       safe(
         function () {
-          R1WS.setBluetoothEnable(v);
+          R1WS.setBluetoothEnable(value);
         },
-        (v ? "开启" : "关闭") + "蓝牙失败",
+        (value ? "开启" : "关闭") + "蓝牙失败",
       );
-      toast(v ? "正在开启蓝牙…" : "正在关闭蓝牙…", "info");
+      toast(value ? "正在开启蓝牙…" : "正在关闭蓝牙…", "info");
       if (waitTimerRef.current) clearTimeout(waitTimerRef.current);
       /* 8 秒兜底：没收到响应也解锁，避免开关卡在 loading */
       waitTimerRef.current = setTimeout(function () {
@@ -1019,25 +1030,25 @@
       }, "扫描指令发送失败");
       toast("开始扫描附近的蓝牙设备…", "info", 1600);
     }
-    function toggleDiscoverable(v) {
+    function toggleDiscoverable(value) {
       /* 23 = 可被发现，20 = 不可被发现（原版取值） */
       safe(function () {
-        R1WS.setBluetoothScanMode(v ? 23 : 20);
+        R1WS.setBluetoothScanMode(value ? 23 : 20);
       }, "可发现模式切换失败");
     }
-    function doConnect(d) {
+    function doConnect(value) {
       /* 方向语义（与设备协议一致）：
        * - 周边提供 110a（A2DP 音源服务，手机/电脑）→ connectA2dp，音箱作 sink 接收播放
        * - 周边提供 110b（A2DP sink 服务，耳机/蓝牙音箱）→ connectA2dpSink，音箱推音频给它 */
-      var uuid = parseUuids(d.Uuids);
+      var uuid = parseUuids(value.Uuids);
       if (uuid.audioSource) {
         safe(function () {
-          R1WS.connectA2dp(d.Address);
+          R1WS.connectA2dp(value.Address);
         });
         toast("正在连接设备音频…", "info", 1600);
       } else if (uuid.audioSink) {
         safe(function () {
-          R1WS.connectA2dpSink(d.Address);
+          R1WS.connectA2dpSink(value.Address);
         });
         toast("正在推送音频…", "info", 1600);
       }
@@ -1045,40 +1056,42 @@
         R1WS.requestBluetoothDevices();
       });
     }
-    function doDisconnect(d) {
-      if (d.A2dpConnect)
+    function doDisconnect(value) {
+      if (value.A2dpConnect)
         safe(function () {
-          R1WS.disconnectA2dp(d.Address);
+          R1WS.disconnectA2dp(value.Address);
         });
-      else if (d.A2dpSinkConnect)
+      else if (value.A2dpSinkConnect)
         safe(function () {
-          R1WS.disconnectA2dpSink(d.Address);
+          R1WS.disconnectA2dpSink(value.Address);
         });
       safe(function () {
         R1WS.requestBluetoothDevices();
       });
       toast("正在断开…", "info", 1600);
     }
-    function doForget(d) {
-      C.confirm({
-        title: "忘记该设备",
-        desc: "将取消与「" + deviceTitle(d) + "」的配对关系，下次需要重新配对。",
-        okText: "忘记设备",
-        cancelText: "取消",
-      }).then(function (ok) {
-        if (!ok) return;
-        safe(function () {
-          R1WS.removeBond(d.Address);
+    function doForget(value) {
+      r1Core
+        .confirm({
+          title: "忘记该设备",
+          desc: "将取消与「" + deviceTitle(value) + "」的配对关系，下次需要重新配对。",
+          okText: "忘记设备",
+          cancelText: "取消",
+        })
+        .then(function (ok) {
+          if (!ok) return;
+          safe(function () {
+            R1WS.removeBond(value.Address);
+          });
+          safe(function () {
+            R1WS.requestBluetoothDevices();
+          });
+          toast("已发送取消配对指令", "ok");
         });
-        safe(function () {
-          R1WS.requestBluetoothDevices();
-        });
-        toast("已发送取消配对指令", "ok");
-      });
     }
-    function doPair(d) {
+    function doPair(value) {
       safe(function () {
-        R1WS.pairBluetooth(d.Address);
+        R1WS.pairBluetooth(value.Address);
       });
       safe(function () {
         R1WS.requestBluetoothDevices();
@@ -1087,15 +1100,16 @@
     }
 
     /* ---------- 设备卡片 ---------- */
-    function devCard(d, paired) {
-      var conn = isConnected(d);
+    function devCard(value, paired) {
+      var conn = isConnected(value);
       /* 连接能力判断：以设备广播的音频服务 UUID 为准（原数据的 A2dp/A2dpSink 标志
        * 依赖额外的服务状态信息，多数设备不会返回，导致所有手机/电脑都被判"不支持"。
        * 110a = 音源（手机/电脑可推音频给音箱），110b = sink（耳机等接收音箱音频） */
-      var uuid = parseUuids(d.Uuids);
+      var uuid = parseUuids(value.Uuids);
       var canLink = paired && uuid.audioSource;
       var canPush = paired && uuid.audioSink;
-      var canPair = !paired && (uuid.audioSource || uuid.audioSink || d.BluetoothClass === 7936);
+      var canPair =
+        !paired && (uuid.audioSource || uuid.audioSink || value.BluetoothClass === 7936);
       var btns = [];
       if (conn) {
         /* 已连接：不放大红实心按钮抢视觉，用描边按钮 + meta 行绿点标识 */
@@ -1107,7 +1121,7 @@
               size: "sm",
               variant: "ghost",
               onClick: function () {
-                doDisconnect(d);
+                doDisconnect(value);
               },
             },
             "断开",
@@ -1123,7 +1137,7 @@
                 size: "sm",
                 variant: "primary",
                 onClick: function () {
-                  doConnect(d);
+                  doConnect(value);
                 },
               },
               "连接设备",
@@ -1138,7 +1152,7 @@
                 size: "sm",
                 variant: "primary",
                 onClick: function () {
-                  doConnect(d);
+                  doConnect(value);
                 },
               },
               "推送音频",
@@ -1158,7 +1172,7 @@
               variant: "primary",
               disabled: !canPair,
               onClick: function () {
-                doPair(d);
+                doPair(value);
               },
             },
             "配对",
@@ -1175,7 +1189,7 @@
               variant: "ghost",
               icon: "trash",
               onClick: function () {
-                doForget(d);
+                doForget(value);
               },
             },
             "忘记",
@@ -1187,18 +1201,18 @@
         "div",
         {
           className: "dev" + (conn ? " linked" : ""),
-          key: (d.Address || "") + "-" + (paired ? "b" : "s"),
+          key: (value.Address || "") + "-" + (paired ? "b" : "s"),
         },
-        h("div", { className: "dev-ico" }, h(Icon, { name: deviceIcon(d) })),
+        h("div", { className: "dev-ico" }, h(Icon, { name: deviceIcon(value) })),
         h(
           "div",
           { className: "dev-main" },
-          h("div", { className: "dev-name" }, deviceTitle(d)),
+          h("div", { className: "dev-name" }, deviceTitle(value)),
           h(
             "div",
             { className: "dev-meta" },
-            h("span", { className: "dev-addr" }, d.Address || "--"),
-            bars(d.rssi),
+            h("span", { className: "dev-addr" }, value.Address || "--"),
+            bars(value.rssi),
             conn ? h(Pill, { tone: "ok", dot: true }, "已连接") : null,
           ),
         ),
@@ -1206,7 +1220,7 @@
       );
     }
 
-    if (!st.connected) return notConnectedPage("蓝牙", "连接手机、耳机等蓝牙音频设备");
+    if (!store.connected) return notConnectedPage("蓝牙", "连接手机、耳机等蓝牙音频设备");
 
     return h(
       "div",
@@ -1281,8 +1295,8 @@
             ? h(
                 "div",
                 { className: "dev-grid" },
-                bonded.map(function (d) {
-                  return devCard(d, true);
+                bonded.map(function (item) {
+                  return devCard(item, true);
                 }),
               )
             : h(Empty, {
@@ -1309,8 +1323,8 @@
               ? h(
                   "div",
                   { className: "dev-grid" },
-                  scanned.map(function (d) {
-                    return devCard(d, false);
+                  scanned.map(function (item) {
+                    return devCard(item, false);
                   }),
                 )
               : h(Empty, {
@@ -1346,9 +1360,9 @@
   ];
 
   function DevicePanel() {
-    var st = C.useStore();
-    var info = st.deviceInfo || {};
-    var api = st.apiInfo || {};
+    var store = r1Core.useStore();
+    var info = store.deviceInfo || {};
+    var api = store.apiInfo || {};
     var later = useTimers();
 
     /* 授权状态（原版 sq_type 语义） */
@@ -1373,7 +1387,7 @@
 
     var devName = info.dev_name || info.device_name || info.hostname || "R1 音箱";
     var ip =
-      info.ip || api.ip || (R1WS.getConnectIp ? R1WS.getConnectIp() : "") || st.lastIp || "--";
+      info.ip || api.ip || (R1WS.getConnectIp ? R1WS.getConnectIp() : "") || store.lastIp || "--";
     /* CPU：有使用率显示"xx% · 温度"，只有温度时显示"xx℃"（部分固件不回使用率） */
     var cpuText =
       info.cpu_usage !== undefined
@@ -1396,38 +1410,42 @@
       toast("已请求最新设备信息", "info", 1600);
     }
     function disconnectNow() {
-      C.confirm({
-        title: "断开连接",
-        desc: "断开后将无法控制音箱，可随时重新连接。",
-        okText: "断开",
-        cancelText: "取消",
-      }).then(function (ok) {
-        if (ok) {
-          C.disconnect();
-          toast("已断开连接", "ok");
-        }
-      });
+      r1Core
+        .confirm({
+          title: "断开连接",
+          desc: "断开后将无法控制音箱，可随时重新连接。",
+          okText: "断开",
+          cancelText: "取消",
+        })
+        .then(function (ok) {
+          if (ok) {
+            r1Core.disconnect();
+            toast("已断开连接", "ok");
+          }
+        });
     }
     function reconnectNow() {
-      C.confirm({
-        title: "重新连接",
-        desc: "将先断开当前连接，再重新连接 " + ip + "。",
-        okText: "重连",
-        cancelText: "取消",
-        danger: false,
-      }).then(function (ok) {
-        if (!ok) return;
-        C.disconnect();
-        later(function () {
-          C.connectTo(st.lastIp || ip);
-        }, 300);
-      });
+      r1Core
+        .confirm({
+          title: "重新连接",
+          desc: "将先断开当前连接，再重新连接 " + ip + "。",
+          okText: "重连",
+          cancelText: "取消",
+          danger: false,
+        })
+        .then(function (ok) {
+          if (!ok) return;
+          r1Core.disconnect();
+          later(function () {
+            r1Core.connectTo(store.lastIp || ip);
+          }, 300);
+        });
     }
-    function openTool(t) {
-      C.openSheet(t.sheet);
+    function openTool(value) {
+      r1Core.openSheet(value.sheet);
     }
 
-    if (!st.connected) return notConnectedPage("设备", "设备状态、服务开关与常用工具");
+    if (!store.connected) return notConnectedPage("设备", "设备状态、服务开关与常用工具");
 
     return h(
       "div",
@@ -1549,20 +1567,20 @@
           h(
             "div",
             { className: "tools-grid" },
-            TOOLS.map(function (t) {
+            TOOLS.map(function (item) {
               return h(
                 "div",
                 {
-                  key: t.sheet,
+                  key: item.sheet,
                   className: "tool",
                   style: { cursor: "pointer" },
                   onClick: function () {
-                    openTool(t);
+                    openTool(item);
                   },
                 },
-                h("div", { className: "t-ico" }, h(Icon, { name: t.icon })),
-                h("div", { className: "t-name" }, t.name),
-                h("div", { className: "t-desc" }, t.desc),
+                h("div", { className: "t-ico" }, h(Icon, { name: item.icon })),
+                h("div", { className: "t-name" }, item.name),
+                h("div", { className: "t-desc" }, item.desc),
               );
             }),
             h(
@@ -1593,40 +1611,40 @@
   function getUin(uin) {
     if (!uin) return "";
     uin = String(uin).substr(1);
-    for (var i = 0; i < uin.length; i++) {
-      if (uin[i] != 0) return uin.substr(i);
+    for (var index = 0; index < uin.length; index++) {
+      if (uin[index] != 0) return uin.substr(index);
     }
     return uin;
   }
 
   function LoginSheet(props) {
-    var st = C.useStore();
+    var store = r1Core.useStore();
     var later = useTimers();
 
-    var _src = useState(1),
-      src = _src[0],
-      setSrc = _src[1];
-    var _qr = useState(""),
-      qrSrc = _qr[0],
-      setQrSrc = _qr[1];
-    var _sig = useState(""),
-      qrsig = _sig[0],
-      setQrsig = _sig[1];
-    var _msg = useState("正在检测登录状态…"),
-      msg = _msg[0],
-      setMsg = _msg[1];
-    var _sub = useState(""),
-      sub = _sub[0],
-      setSub = _sub[1];
-    var _phase = useState("idle"),
-      phase = _phase[0],
-      setPhase = _phase[1];
-    var _user = useState(null),
-      user = _user[0],
-      setUser = _user[1];
-    var _loading = useState(false),
-      loading = _loading[0],
-      setLoading = _loading[1];
+    var sourceState = useState(1),
+      source = sourceState[0],
+      setSrc = sourceState[1];
+    var qrSrcState = useState(""),
+      qrSrc = qrSrcState[0],
+      setQrSrc = qrSrcState[1];
+    var qrsigState = useState(""),
+      qrsig = qrsigState[0],
+      setQrsig = qrsigState[1];
+    var messageState = useState("正在检测登录状态…"),
+      message = messageState[0],
+      setMsg = messageState[1];
+    var subState = useState(""),
+      sub = subState[0],
+      setSub = subState[1];
+    var phaseState = useState("idle"),
+      phase = phaseState[0],
+      setPhase = phaseState[1];
+    var userState = useState(null),
+      user = userState[0],
+      setUser = userState[1];
+    var loadingState = useState(false),
+      loading = loadingState[0],
+      setLoading = loadingState[1];
 
     var pollRef = useRef(null);
     var loginRef = useRef(null);
@@ -1643,17 +1661,17 @@
     );
     useEffect(
       function () {
-        srcRef.current = src;
+        srcRef.current = source;
       },
-      [src],
+      [source],
     );
 
     /* payload 可由调用方指定初始音源 */
     useEffect(function () {
-      var p = props && props.payload;
-      if (p && (p.source === 1 || p.source === 2 || p.source === 3)) {
-        srcRef.current = p.source;
-        setSrc(p.source);
+      var props2 = props && props.payload;
+      if (props2 && (props2.source === 1 || props2.source === 2 || props2.source === 3)) {
+        srcRef.current = props2.source;
+        setSrc(props2.source);
       }
     }, []);
 
@@ -1712,7 +1730,7 @@
     }
 
     /* ---------- 事件 ---------- */
-    C.useR1Event("qrcode", function (data) {
+    r1Core.useR1Event("qrcode", function (data) {
       if (!data) return;
       clearQrTimeout();
       setLoading(false);
@@ -1725,7 +1743,7 @@
       startPolling();
     });
 
-    C.useR1Event("qrcode_state", function (data) {
+    r1Core.useR1Event("qrcode_state", function (data) {
       if (!data) return;
       if (scannedRef.current) return;
       var qs = data.qrcode_state;
@@ -1740,13 +1758,13 @@
         var uin = "";
         try {
           uin = getUin(qs.location.cookies.p_uin);
-        } catch (e) {}
+        } catch (error) {}
         var nick = call ? call[5] : "";
         /* 扫码成功即缓存 QQ 号：设备上报 api_info 的时机不稳定，
          * 头像组件在拿到上报前先用这个缓存显示头像 */
         try {
           if (uin) localStorage.setItem("r1_qq_avatar", uin);
-        } catch (e) {}
+        } catch (error) {}
         setMsg("扫码成功：" + nick + (uin ? "（" + uin + "）" : ""));
         setSub("正在提交登录信息…");
         if (loginRef.current) clearTimeout(loginRef.current);
@@ -1796,8 +1814,8 @@
         autoQR(); /* 未登录：自动拉起一次二维码 */
       }
     }
-    C.useR1Event("login_state", onLoginState);
-    C.useR1Event("unisound_login_state", onLoginState);
+    r1Core.useR1Event("login_state", onLoginState);
+    r1Core.useR1Event("unisound_login_state", onLoginState);
 
     /* 登录结果（Unisound 与 API 两条通道） */
     function onLoginResult(data) {
@@ -1837,10 +1855,10 @@
         toast(loginMsg || "登录失败", "err");
       }
     }
-    C.useR1Event("unisound_login", onLoginResult);
-    C.useR1Event("login_result", onLoginResult);
+    r1Core.useR1Event("unisound_login", onLoginResult);
+    r1Core.useR1Event("login_result", onLoginResult);
 
-    C.useR1Event("exit_login", function () {
+    r1Core.useR1Event("exit_login", function () {
       stopPolling();
       setUser(null);
       setPhase("idle");
@@ -1864,37 +1882,39 @@
       };
     }, []);
 
-    function pickSource(v) {
-      setSrc(v);
-      srcRef.current = v;
+    function pickSource(value) {
+      setSrc(value);
+      srcRef.current = value;
       autoRef.current = false;
       scannedRef.current = false;
       refreshQR();
     }
     function doLogout() {
-      C.confirm({
-        title: "退出登录",
-        desc: "将退出当前音源账号，之后需要重新扫码登录。",
-        okText: "退出登录",
-        cancelText: "取消",
-      }).then(function (ok) {
-        if (!ok) return;
-        safe(function () {
-          R1WS.logout(srcRef.current);
-        }, "退出登录指令发送失败");
-        /* 同步清掉本地头像缓存，徽标立即回退 R1 字样 */
-        try {
-          localStorage.removeItem("r1_qq_avatar");
-        } catch (e) {}
-        setUser(null);
-        setPhase("idle");
-        setQrSrc("");
-        stopPolling();
-        autoRef.current = false;
-        setMsg("已发送退出登录请求");
-        setSub("");
-        toast("已退出登录", "ok");
-      });
+      r1Core
+        .confirm({
+          title: "退出登录",
+          desc: "将退出当前音源账号，之后需要重新扫码登录。",
+          okText: "退出登录",
+          cancelText: "取消",
+        })
+        .then(function (ok) {
+          if (!ok) return;
+          safe(function () {
+            R1WS.logout(srcRef.current);
+          }, "退出登录指令发送失败");
+          /* 同步清掉本地头像缓存，徽标立即回退 R1 字样 */
+          try {
+            localStorage.removeItem("r1_qq_avatar");
+          } catch (error) {}
+          setUser(null);
+          setPhase("idle");
+          setQrSrc("");
+          stopPolling();
+          autoRef.current = false;
+          setMsg("已发送退出登录请求");
+          setSub("");
+          toast("已退出登录", "ok");
+        });
     }
     function calibrateTime() {
       safe(function () {
@@ -1907,9 +1927,9 @@
       toast("正在校准音箱时间…", "info");
     }
 
-    var api = st.apiInfo || {};
+    var api = store.apiInfo || {};
     var logged = phase === "success" || !!(user && user.nick) || api.qqmusic_login_state === 1;
-    var srcLabel = { 1: "QQ 音乐", 2: "网易云音乐", 3: "酷我音乐" }[src] || "QQ 音乐";
+    var srcLabel = { 1: "QQ 音乐", 2: "网易云音乐", 3: "酷我音乐" }[source] || "QQ 音乐";
 
     return h(
       "div",
@@ -1959,7 +1979,7 @@
                 className: "hint",
                 style: { textAlign: "center", marginTop: 10, fontWeight: 600, color: "var(--t2)" },
               },
-              msg,
+              message,
             ),
             sub
               ? h("div", { className: "hint", style: { textAlign: "center", marginTop: 4 } }, sub)
@@ -2013,21 +2033,21 @@
    * 弹层：本地音乐
    * =================================================================== */
   function LocalMusicSheet() {
-    var st = C.useStore();
+    var store = r1Core.useStore();
     var later = useTimers();
 
-    var _list = useState([]),
-      list = _list[0],
-      setList = _list[1];
-    var _scan = useState(false),
-      scanning = _scan[0],
-      setScanning = _scan[1];
-    var _path = useState(""),
-      path = _path[0],
-      setPath = _path[1];
-    var _kw = useState(""),
-      kw = _kw[0],
-      setKw = _kw[1];
+    var listState = useState([]),
+      list = listState[0],
+      setList = listState[1];
+    var scanningState = useState(false),
+      scanning = scanningState[0],
+      setScanning = scanningState[1];
+    var pathState = useState(""),
+      path = pathState[0],
+      setPath = pathState[1];
+    var keywordState = useState(""),
+      keyword = keywordState[0],
+      setKw = keywordState[1];
 
     function onList(data) {
       var items = [];
@@ -2050,8 +2070,8 @@
         toast("扫描失败", "err");
       }
     }
-    C.useR1Event("local_music_list", onList);
-    C.useR1Event("local_music_scan", onScan);
+    r1Core.useR1Event("local_music_list", onList);
+    r1Core.useR1Event("local_music_scan", onScan);
 
     useEffect(function () {
       safe(function () {
@@ -2060,7 +2080,7 @@
     }, []);
 
     function doScan() {
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
@@ -2079,7 +2099,7 @@
       }, 8000);
     }
     function play(item) {
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
@@ -2094,25 +2114,25 @@
       toast("开始播放：" + ((item && (item.name || item.title)) || ""), "ok");
     }
     function playPath() {
-      var p = (path || "").trim();
-      if (!p) {
+      var text2 = (path || "").trim();
+      if (!text2) {
         toast("请输入文件路径", "err");
         return;
       }
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
       safe(function () {
-        R1WS.playLocalMusic(p);
+        R1WS.playLocalMusic(text2);
       }, "播放指令发送失败");
       toast("已发送播放指令", "ok");
     }
 
-    var filtered = list.filter(function (m) {
-      if (!kw) return true;
-      var name = (m.name || m.title || m.path || "").toLowerCase();
-      return name.indexOf(kw.toLowerCase()) >= 0;
+    var filtered = list.filter(function (item) {
+      if (!keyword) return true;
+      var name = (item.name || item.title || item.path || "").toLowerCase();
+      return name.indexOf(keyword.toLowerCase()) >= 0;
     });
 
     return h(
@@ -2130,7 +2150,7 @@
           "div",
           { style: { flex: 1, minWidth: 180 } },
           h(SearchBar, {
-            value: kw,
+            value: keyword,
             onChange: setKw,
             placeholder: "搜索本地音乐（" + list.length + " 首）",
           }),
@@ -2147,8 +2167,8 @@
             value: path,
             onChange: setPath,
             placeholder: "输入文件路径，如 /sdcard/Music/xxx.mp3",
-            onKeyDown: function (e) {
-              if (e.key === "Enter") playPath();
+            onKeyDown: function (value) {
+              if (value.key === "Enter") playPath();
             },
           }),
         ),
@@ -2159,15 +2179,15 @@
         ? h(
             "div",
             { className: "rows" },
-            filtered.map(function (m, i) {
+            filtered.map(function (track, index) {
               return h(Row, {
-                key: i,
+                key: index,
                 icon: "music",
                 accent: true,
-                title: m.name || m.title || m.path || "未知文件",
-                sub: m.artist || m.album || m.path || "",
+                title: track.name || track.title || track.path || "未知文件",
+                sub: track.artist || track.album || track.path || "",
                 onClick: function () {
-                  play(m);
+                  play(track);
                 },
                 end: h(Button, { size: "sm", variant: "soft", icon: "play" }, "播放"),
               });
@@ -2185,24 +2205,24 @@
    * 弹层：备忘 / 闹钟 / 提醒
    * =================================================================== */
   function MemoSheet() {
-    var st = C.useStore();
+    var store = r1Core.useStore();
     var later = useTimers();
 
-    var _memos = useState([]),
-      memos = _memos[0],
-      setMemos = _memos[1];
-    var _filter = useState("all"),
-      filter = _filter[0],
-      setFilter = _filter[1];
-    var _type = useState(0),
-      mType = _type[0],
-      setMType = _type[1];
-    var _time = useState("08:00"),
-      mTime = _time[0],
-      setMTime = _time[1];
-    var _text = useState(""),
-      mText = _text[0],
-      setMText = _text[1];
+    var memosState = useState([]),
+      memos = memosState[0],
+      setMemos = memosState[1];
+    var filterState = useState("all"),
+      filter = filterState[0],
+      setFilter = filterState[1];
+    var mTypeState = useState(0),
+      mType = mTypeState[0],
+      setMType = mTypeState[1];
+    var mTimeState = useState("08:00"),
+      mTime = mTimeState[0],
+      setMTime = mTimeState[1];
+    var mTextState = useState(""),
+      mText = mTextState[0],
+      setMText = mTextState[1];
 
     function onMemo(data) {
       if (!data) return;
@@ -2210,8 +2230,8 @@
       else if (Array.isArray(data)) setMemos(data);
     }
     /* 不同固件通道回的事件名不同：两条都监听，处理是幂等的 */
-    C.useR1Event("memo_info", onMemo);
-    C.useR1Event("memo", onMemo);
+    r1Core.useR1Event("memo_info", onMemo);
+    r1Core.useR1Event("memo", onMemo);
 
     useEffect(function () {
       safe(function () {
@@ -2227,24 +2247,24 @@
       }, 500);
     }
     function add() {
-      var t = (mText || "").trim();
-      if (!t) {
+      var text2 = (mText || "").trim();
+      if (!text2) {
         toast("请输入内容", "err");
         return;
       }
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
       safe(function () {
-        R1WS.addMemo({ type: Number(mType), time: mTime || "08:00", text: t });
+        R1WS.addMemo({ type: Number(mType), time: mTime || "08:00", text: text2 });
       }, "添加失败");
       toast("已添加", "ok");
       setMText("");
       reload();
     }
     function del(item) {
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
@@ -2255,26 +2275,28 @@
       reload();
     }
     function clearAlarms() {
-      C.confirm({
-        title: "清空闹钟与提醒",
-        desc: "将删除设备上所有闹钟（type=1）与提醒（type=0），备忘不受影响。",
-        okText: "清空",
-        cancelText: "取消",
-      }).then(function (ok) {
-        if (!ok) return;
-        safe(function () {
-          R1WS.clearAlarms();
-        }, "清空失败");
-        toast("已发送清空指令", "ok");
-        reload();
-      });
+      r1Core
+        .confirm({
+          title: "清空闹钟与提醒",
+          desc: "将删除设备上所有闹钟（type=1）与提醒（type=0），备忘不受影响。",
+          okText: "清空",
+          cancelText: "取消",
+        })
+        .then(function (ok) {
+          if (!ok) return;
+          safe(function () {
+            R1WS.clearAlarms();
+          }, "清空失败");
+          toast("已发送清空指令", "ok");
+          reload();
+        });
     }
 
     var typeNames = { 0: "提醒", 1: "闹钟", 2: "备忘" };
     var typeIcons = { 0: "clock", 1: "clock", 2: "note" };
-    var shown = memos.filter(function (m) {
+    var shown = memos.filter(function (item) {
       if (filter === "all") return true;
-      return String(m.type) === filter;
+      return String(item.type) === filter;
     });
 
     return h(
@@ -2323,8 +2345,8 @@
               { label: "类型" },
               h(Seg, {
                 value: String(mType),
-                onChange: function (k) {
-                  setMType(Number(k));
+                onChange: function (value) {
+                  setMType(Number(value));
                 },
                 items: [
                   { key: "0", label: "提醒" },
@@ -2355,8 +2377,8 @@
               value: mText,
               onChange: setMText,
               placeholder: "例如：8 点提醒我吃药",
-              onKeyDown: function (e) {
-                if (e.key === "Enter") add();
+              onKeyDown: function (value) {
+                if (value.key === "Enter") add();
               },
             }),
           ),
@@ -2367,18 +2389,18 @@
         ? h(
             "div",
             { className: "rows" },
-            shown.map(function (m, i) {
+            shown.map(function (item, index) {
               return h(Row, {
-                key: m.id != null ? m.id : i,
-                icon: typeIcons[m.type] || "note",
-                accent: m.type === 1,
-                title: m.text || m.content || m.title || "（无内容）",
-                sub: (m.time || "") + " · " + (typeNames[m.type] || "备忘"),
+                key: item.id != null ? item.id : index,
+                icon: typeIcons[item.type] || "note",
+                accent: item.type === 1,
+                title: item.text || item.content || item.title || "（无内容）",
+                sub: (item.time || "") + " · " + (typeNames[item.type] || "备忘"),
                 end: h(IconBtn, {
                   icon: "trash",
                   title: "删除",
                   onClick: function () {
-                    del(m);
+                    del(item);
                   },
                 }),
               });
@@ -2396,28 +2418,28 @@
    * 弹层：语音报时
    * =================================================================== */
   function VoiceSheet() {
-    var st = C.useStore();
-    var _en = useState(false),
-      enable = _en[0],
-      setEnable = _en[1];
-    var _hour = useState(true),
-      hour = _hour[0],
-      setHour = _hour[1];
-    var _half = useState(false),
-      halfHour = _half[0],
-      setHalfHour = _half[1];
-    var _h12 = useState(false),
-      time12h = _h12[0],
-      setTime12h = _h12[1];
-    var _start = useState("08:00"),
-      startTime = _start[0],
-      setStartTime = _start[1];
-    var _end = useState("22:00"),
-      endTime = _end[0],
-      setEndTime = _end[1];
+    var store = r1Core.useStore();
+    var enableState = useState(false),
+      enable = enableState[0],
+      setEnable = enableState[1];
+    var hourState = useState(true),
+      hour = hourState[0],
+      setHour = hourState[1];
+    var halfHourState = useState(false),
+      halfHour = halfHourState[0],
+      setHalfHour = halfHourState[1];
+    var statePair = useState(false),
+      time12h = statePair[0],
+      setTime12h = statePair[1];
+    var startTimeState = useState("08:00"),
+      startTime = startTimeState[0],
+      setStartTime = startTimeState[1];
+    var endTimeState = useState("22:00"),
+      endTime = endTimeState[0],
+      setEndTime = endTimeState[1];
 
     function save() {
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
@@ -2520,16 +2542,16 @@
    * 弹层：自动重启 + 手动重启
    * =================================================================== */
   function RestartSheet() {
-    var st = C.useStore();
-    var _en = useState(false),
-      enable = _en[0],
-      setEnable = _en[1];
-    var _time = useState("03:00"),
-      time = _time[0],
-      setTime = _time[1];
+    var store = r1Core.useStore();
+    var enableState = useState(false),
+      enable = enableState[0],
+      setEnable = enableState[1];
+    var timeState = useState("03:00"),
+      time = timeState[0],
+      setTime = timeState[1];
 
     function save() {
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
@@ -2564,15 +2586,15 @@
       };
       var item = map[kind];
       if (!item) return;
-      C.confirm({ title: item.t, desc: item.d, okText: "确认重启", cancelText: "取消" }).then(
-        function (ok) {
+      r1Core
+        .confirm({ title: item.t, desc: item.d, okText: "确认重启", cancelText: "取消" })
+        .then(function (ok) {
           if (!ok) return;
           safe(function () {
             item.fn();
           }, item.t + "指令发送失败");
           toast("已发送：" + item.t, "ok");
-        },
-      );
+        });
     }
 
     return h(
@@ -2668,26 +2690,26 @@
    * 弹层：高级工具（DLNA / mDNS / ADB / 配网 / 背景 / 小爱 / 休眠麦克风）
    * =================================================================== */
   function AdvancedSheet() {
-    var _bg = useState(C.getCustomBg ? C.getCustomBg() : ""),
-      bg = _bg[0],
-      setBg = _bg[1];
-    var _xiaoai = useState(true),
-      xiaoai = _xiaoai[0],
-      setXiaoai = _xiaoai[1];
-    var _uni = useState({}),
-      uni = _uni[0],
-      setUni = _uni[1];
+    var backgroundState = useState(r1Core.getCustomBg ? r1Core.getCustomBg() : ""),
+      background = backgroundState[0],
+      setBg = backgroundState[1];
+    var xiaoaiState = useState(true),
+      xiaoai = xiaoaiState[0],
+      setXiaoai = xiaoaiState[1];
+    var uniState = useState({}),
+      uni = uniState[0],
+      setUni = uniState[1];
     var fileRef = useRef(null);
 
-    C.useR1Event("xiaoai_state", function (info) {
+    r1Core.useR1Event("xiaoai_state", function (info) {
       if (!info) return;
       if (info.is_xiaoai !== undefined) setXiaoai(!!info.is_xiaoai);
       else if (info.data && info.data.is_xiaoai !== undefined) setXiaoai(!!info.data.is_xiaoai);
     });
-    C.useR1Event("unisound_device_info", function (info) {
+    r1Core.useR1Event("unisound_device_info", function (info) {
       if (info)
-        setUni(function (p) {
-          return Object.assign({}, p, info);
+        setUni(function (value) {
+          return Object.assign({}, value, info);
         });
     });
 
@@ -2719,7 +2741,7 @@
         name: "ADB 控制台",
         desc: "在页面内执行 Shell 命令",
         act: function () {
-          C.openSheet("adb");
+          r1Core.openSheet("adb");
         },
       },
       {
@@ -2736,31 +2758,31 @@
 
     /* 选图 → canvas 压缩（最长边 1920、JPEG 0.82）→ 存为网页背景。
      * 压缩是为了塞进 localStorage（原始 base64 动辄几 MB 会存不下）。 */
-    function compressImage(dataUrl, cb) {
-      var img = new Image();
-      img.onload = function () {
+    function compressImage(dataUrl, callback) {
+      var image = new Image();
+      image.onload = function () {
         try {
           var max = 1920;
-          var w = img.width,
-            hgt = img.height;
-          var scale = Math.min(1, max / Math.max(w, hgt));
+          var width = image.width,
+            hgt = image.height;
+          var scale = Math.min(1, max / Math.max(width, hgt));
           var cv = document.createElement("canvas");
-          cv.width = Math.round(w * scale);
+          cv.width = Math.round(width * scale);
           cv.height = Math.round(hgt * scale);
-          cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
-          cb(cv.toDataURL("image/jpeg", 0.82));
-        } catch (err) {
-          cb(dataUrl);
+          cv.getContext("2d").drawImage(image, 0, 0, cv.width, cv.height);
+          callback(cv.toDataURL("image/jpeg", 0.82));
+        } catch (error) {
+          callback(dataUrl);
         }
       };
-      img.onerror = function () {
-        cb(dataUrl);
+      image.onerror = function () {
+        callback(dataUrl);
       };
-      img.src = dataUrl;
+      image.src = dataUrl;
     }
-    function pickBg(e) {
+    function pickBg(event) {
       try {
-        var file = e && e.target && e.target.files && e.target.files[0];
+        var file = event && event.target && event.target.files && event.target.files[0];
         if (!file) return;
         if (file.size > 5 * 1024 * 1024) {
           toast("图片大小不能超过 5MB", "err");
@@ -2770,25 +2792,25 @@
         reader.onload = function (ev) {
           compressImage(ev.target.result, function (small) {
             setBg(small);
-            C.setCustomBg(small);
+            r1Core.setCustomBg(small);
             toast("网页背景已更新", "ok");
           });
         };
         reader.readAsDataURL(file);
-        if (e.target) e.target.value = "";
-      } catch (err) {
-        toast("读取文件失败：" + (err && err.message), "err");
+        if (event.target) event.target.value = "";
+      } catch (error) {
+        toast("读取文件失败：" + (error && error.message), "err");
       }
     }
 
-    function confirmThen(title, desc, fn) {
-      C.confirm({ title: title, desc: desc, okText: "确认执行", cancelText: "取消" }).then(
-        function (ok) {
+    function confirmThen(title, desc, callback) {
+      r1Core
+        .confirm({ title: title, desc: desc, okText: "确认执行", cancelText: "取消" })
+        .then(function (ok) {
           if (!ok) return;
-          safe(fn, title + "失败");
+          safe(callback, title + "失败");
           toast("已发送指令", "ok");
-        },
-      );
+        });
     }
 
     return h(
@@ -2804,18 +2826,18 @@
           h(
             "div",
             { className: "tools-grid" },
-            tools.map(function (t) {
+            tools.map(function (item) {
               return h(
                 "div",
                 {
-                  key: t.name,
+                  key: item.name,
                   className: "tool",
                   style: { cursor: "pointer" },
-                  onClick: t.act,
+                  onClick: item.act,
                 },
-                h("div", { className: "t-ico" }, h(Icon, { name: t.icon })),
-                h("div", { className: "t-name" }, t.name),
-                h("div", { className: "t-desc" }, t.desc),
+                h("div", { className: "t-ico" }, h(Icon, { name: item.icon })),
+                h("div", { className: "t-name" }, item.name),
+                h("div", { className: "t-desc" }, item.desc),
               );
             }),
           ),
@@ -2864,20 +2886,20 @@
               },
               "选择图片",
             ),
-            bg
+            background
               ? h("div", {
                   style: {
                     width: 56,
                     height: 56,
                     borderRadius: 8,
                     border: "1px solid var(--stroke)",
-                    backgroundImage: "url(" + bg + ")",
+                    backgroundImage: "url(" + background + ")",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   },
                 })
               : null,
-            bg
+            background
               ? h(
                   Button,
                   {
@@ -2886,7 +2908,7 @@
                     icon: "trash",
                     onClick: function () {
                       setBg("");
-                      C.setCustomBg("");
+                      r1Core.setCustomBg("");
                       toast("已恢复默认背景", "ok");
                     },
                   },
@@ -2914,12 +2936,12 @@
               sub: xiaoai ? "已开启，可通过语音唤醒" : "已关闭",
               end: h(Switch, {
                 on: xiaoai,
-                onChange: function (v) {
-                  setXiaoai(v);
+                onChange: function (value) {
+                  setXiaoai(value);
                   safe(function () {
-                    R1WS.setWakeupXiaoai(v);
+                    R1WS.setWakeupXiaoai(value);
                   }, "小爱唤醒设置失败");
-                  toast(v ? "已开启小爱唤醒" : "已关闭小爱唤醒", "ok");
+                  toast(value ? "已开启小爱唤醒" : "已关闭小爱唤醒", "ok");
                 },
               }),
             }),
@@ -3060,39 +3082,43 @@
    * 弹层：设置（外观 + 快捷入口 + 本地数据 + 调试）
    * =================================================================== */
   function SettingsSheet() {
-    var st = C.useStore();
+    var store = r1Core.useStore();
 
     function clearHistory() {
-      C.confirm({
-        title: "清除连接历史",
-        desc: "将删除本机保存的 IP 连接记录，下次需要重新输入。",
-        okText: "清除",
-        cancelText: "取消",
-      }).then(function (ok) {
-        if (!ok) return;
-        try {
-          localStorage.removeItem("r1_connect_history");
-        } catch (e) {}
-        C.setState({ history: [] });
-        toast("连接历史已清除", "ok");
-      });
+      r1Core
+        .confirm({
+          title: "清除连接历史",
+          desc: "将删除本机保存的 IP 连接记录，下次需要重新输入。",
+          okText: "清除",
+          cancelText: "取消",
+        })
+        .then(function (ok) {
+          if (!ok) return;
+          try {
+            localStorage.removeItem("r1_connect_history");
+          } catch (error) {}
+          r1Core.setState({ history: [] });
+          toast("连接历史已清除", "ok");
+        });
     }
     function clearLocalCache() {
-      C.confirm({
-        title: "清除本地缓存",
-        desc: "将删除收藏标记、登录昵称、自定义 EQ 等保存在浏览器里的数据，不影响设备。",
-        okText: "清除",
-        cancelText: "取消",
-      }).then(function (ok) {
-        if (!ok) return;
-        try {
-          localStorage.removeItem("r1_collected");
-          localStorage.removeItem("r1_login_nick");
-          localStorage.removeItem("r1_custom_eqs");
-          localStorage.removeItem("r1_song_list_cache");
-        } catch (e) {}
-        toast("本地缓存已清除", "ok");
-      });
+      r1Core
+        .confirm({
+          title: "清除本地缓存",
+          desc: "将删除收藏标记、登录昵称、自定义 EQ 等保存在浏览器里的数据，不影响设备。",
+          okText: "清除",
+          cancelText: "取消",
+        })
+        .then(function (ok) {
+          if (!ok) return;
+          try {
+            localStorage.removeItem("r1_collected");
+            localStorage.removeItem("r1_login_nick");
+            localStorage.removeItem("r1_custom_eqs");
+            localStorage.removeItem("r1_song_list_cache");
+          } catch (error) {}
+          toast("本地缓存已清除", "ok");
+        });
     }
     function debugInfo() {
       safe(function () {
@@ -3110,7 +3136,7 @@
         name: "账号登录",
         desc: "扫码登录音乐账号",
         act: function () {
-          C.openSheet("login");
+          r1Core.openSheet("login");
         },
       },
       {
@@ -3118,7 +3144,7 @@
         name: "蓝牙",
         desc: "连接与配对管理",
         act: function () {
-          C.goRoute("bluetooth");
+          r1Core.goRoute("bluetooth");
         },
       },
       {
@@ -3126,7 +3152,7 @@
         name: "本地音乐",
         desc: "扫描并播放设备音频",
         act: function () {
-          C.openSheet("local");
+          r1Core.openSheet("local");
         },
       },
       {
@@ -3134,7 +3160,7 @@
         name: "备忘闹钟",
         desc: "提醒、闹钟与备忘",
         act: function () {
-          C.openSheet("memo");
+          r1Core.openSheet("memo");
         },
       },
       {
@@ -3142,7 +3168,7 @@
         name: "语音报时",
         desc: "整点 / 半点语音播报",
         act: function () {
-          C.openSheet("voice");
+          r1Core.openSheet("voice");
         },
       },
       {
@@ -3150,7 +3176,7 @@
         name: "自动重启",
         desc: "定时自检与重启策略",
         act: function () {
-          C.openSheet("restart");
+          r1Core.openSheet("restart");
         },
       },
       {
@@ -3158,7 +3184,7 @@
         name: "高级工具",
         desc: "DLNA / mDNS / 配网 / 小爱",
         act: function () {
-          C.openSheet("advanced");
+          r1Core.openSheet("advanced");
         },
       },
       {
@@ -3166,7 +3192,7 @@
         name: "ADB 控制台",
         desc: "在设备上执行 Shell",
         act: function () {
-          C.openSheet("adb");
+          r1Core.openSheet("adb");
         },
       },
       {
@@ -3174,7 +3200,7 @@
         name: "关于",
         desc: "版本信息",
         act: function () {
-          C.openSheet("about");
+          r1Core.openSheet("about");
         },
       },
     ];
@@ -3188,26 +3214,26 @@
         { className: "section" },
         h(
           Card,
-          { title: "外观", icon: st.dark ? "moon" : "sun", tight: true },
+          { title: "外观", icon: store.dark ? "moon" : "sun", tight: true },
           h(
             "div",
             { className: "rows" },
             h(Row, {
-              icon: st.dark ? "moon" : "sun",
+              icon: store.dark ? "moon" : "sun",
               accent: true,
               title: "暗色模式",
-              sub: st.followSystem
+              sub: store.followSystem
                 ? "已跟随系统，手动切换将自动关闭跟随"
-                : st.dark
+                : store.dark
                   ? "当前为暗色"
                   : "当前为亮色",
               end: h(Switch, {
-                on: !!st.dark,
-                onChange: function (v) {
+                on: !!store.dark,
+                onChange: function (value) {
                   /* 手动切换时自动关闭"跟随系统"，否则刷新后系统主题又覆盖回来，
                    * 用户会觉得开关"失灵/颜色乱跳" */
-                  if (st.followSystem) C.setFollowSystem(false);
-                  C.applyTheme(v);
+                  if (store.followSystem) r1Core.setFollowSystem(false);
+                  r1Core.applyTheme(value);
                 },
               }),
             }),
@@ -3216,9 +3242,9 @@
               title: "跟随系统",
               sub: "自动跟随操作系统的深浅色设置",
               end: h(Switch, {
-                on: !!st.followSystem,
-                onChange: function (v) {
-                  C.setFollowSystem(v);
+                on: !!store.followSystem,
+                onChange: function (value) {
+                  r1Core.setFollowSystem(value);
                 },
               }),
             }),
@@ -3236,13 +3262,13 @@
           h(
             "div",
             { className: "rows" },
-            entries.map(function (e) {
+            entries.map(function (item) {
               return h(Row, {
-                key: e.name,
-                icon: e.icon,
-                title: e.name,
-                sub: e.desc,
-                onClick: e.act,
+                key: item.name,
+                icon: item.icon,
+                title: item.name,
+                sub: item.desc,
+                onClick: item.act,
                 end: h(Icon, { name: "chevronR" }),
               });
             }),
@@ -3263,7 +3289,7 @@
             h(Row, {
               icon: "link",
               title: "清除连接历史",
-              sub: "删除本机保存的 " + (st.history ? st.history.length : 0) + " 条 IP 记录",
+              sub: "删除本机保存的 " + (store.history ? store.history.length : 0) + " 条 IP 记录",
               end: h(Button, { size: "sm", variant: "ghost", onClick: clearHistory }, "清除"),
             }),
             h(Row, {
@@ -3307,21 +3333,21 @@
    * 弹层：关于
    * =================================================================== */
   function AboutSheet() {
-    var st = C.useStore();
-    var info = st.deviceInfo || {};
+    var store = r1Core.useStore();
+    var info = store.deviceInfo || {};
 
     var ver = "",
       uver = "",
       uni = "";
     try {
       ver = R1WS.getVer ? R1WS.getVer() : "";
-    } catch (e) {}
+    } catch (error) {}
     try {
       uver = R1WS.getUVer ? R1WS.getUVer() : "";
-    } catch (e) {}
+    } catch (error) {}
     try {
       uni = R1WS.isUnisound ? (R1WS.isUnisound() ? "是" : "否") : "--";
-    } catch (e) {}
+    } catch (error) {}
 
     return h(
       "div",
@@ -3345,7 +3371,7 @@
           sub: "ver " + text(ver) + " · u_ver " + text(uver),
         }),
         h(Row, { icon: "box", title: "新版小讯", sub: uni }),
-        h(Row, { icon: "link", title: "连接地址", sub: st.lastIp || "--" }),
+        h(Row, { icon: "link", title: "连接地址", sub: store.lastIp || "--" }),
       ),
     );
   }
@@ -3354,33 +3380,33 @@
    * 弹层：音乐源
    * =================================================================== */
   function SourceSheet() {
-    var st = C.useStore();
-    var _src = useState(2),
-      src = _src[0],
-      setSrc = _src[1];
+    var store = r1Core.useStore();
+    var sourceState = useState(2),
+      source = sourceState[0],
+      setSrc = sourceState[1];
 
-    function toNum(v) {
-      if (typeof v === "string") return { qq: 1, netease: 2, kuwo: 3 }[v] || 0;
-      return Number(v) || 0;
+    function toNum(value) {
+      if (typeof value === "string") return { qq: 1, netease: 2, kuwo: 3 }[value] || 0;
+      return Number(value) || 0;
     }
 
     useEffect(function () {
       try {
         var mi = R1WS.getMusicInfo && R1WS.getMusicInfo();
-        var n = mi ? toNum(mi.music_source) : 0;
-        if (n >= 1 && n <= 3) setSrc(n);
-      } catch (e) {}
+        var numericValue = mi ? toNum(mi.music_source) : 0;
+        if (numericValue >= 1 && numericValue <= 3) setSrc(numericValue);
+      } catch (error) {}
     }, []);
 
-    C.useR1Event("music_info", function (info) {
+    r1Core.useR1Event("music_info", function (info) {
       if (!info || info.music_source === undefined || info.music_source === null) return;
-      var n = toNum(info.music_source);
-      if (n >= 1 && n <= 3) setSrc(n);
+      var value = toNum(info.music_source);
+      if (value >= 1 && value <= 3) setSrc(value);
     });
 
     function pick(item) {
       setSrc(item.v);
-      if (!st.connected) {
+      if (!store.connected) {
         toast("请先连接设备", "err");
         return;
       }
@@ -3397,17 +3423,17 @@
       h(
         "div",
         { className: "rows" },
-        C.SOURCES.map(function (s) {
+        r1Core.SOURCES.map(function (item) {
           return h(Row, {
-            key: s.v,
-            icon: s.icon,
-            accent: src === s.v,
-            title: s.label,
-            sub: src === s.v ? "当前音源 · 影响点播、歌单与登录" : "点播与歌单将使用该音源",
+            key: item.v,
+            icon: item.icon,
+            accent: source === item.v,
+            title: item.label,
+            sub: source === item.v ? "当前音源 · 影响点播、歌单与登录" : "点播与歌单将使用该音源",
             onClick: function () {
-              pick(s);
+              pick(item);
             },
-            end: src === s.v ? h(Icon, { name: "check" }) : h(Icon, { name: "chevronR" }),
+            end: source === item.v ? h(Icon, { name: "check" }) : h(Icon, { name: "chevronR" }),
           });
         }),
       ),
@@ -3423,7 +3449,7 @@
   /* =====================================================================
    * 弹层：ADB 控制台
    * =================================================================== */
-  var QUICK_CMDS = [
+  var qUICKCMDS = [
     { label: "包列表", cmd: "pm list packages" },
     { label: "内存", cmd: "cat /proc/meminfo | head -5" },
     { label: "分辨率", cmd: "wm size" },
@@ -3433,30 +3459,30 @@
   ];
 
   function AdbSheet() {
-    var st = C.useStore();
+    var store = r1Core.useStore();
     var later = useTimers();
 
-    var _cmd = useState(""),
-      cmd = _cmd[0],
-      setCmd = _cmd[1];
-    var _logs = useState([]),
-      logs = _logs[0],
-      setLogs = _logs[1];
-    var _running = useState(false),
-      running = _running[0],
-      setRunning = _running[1];
+    var cmdState = useState(""),
+      cmd = cmdState[0],
+      setCmd = cmdState[1];
+    var logsState = useState([]),
+      logs = logsState[0],
+      setLogs = logsState[1];
+    var runningState = useState(false),
+      running = runningState[0],
+      setRunning = runningState[1];
     var logRef = useRef(null);
     var runRef = useRef(false);
 
     function push(kind, textStr) {
-      setLogs(function (prev) {
-        var next = prev.concat([{ kind: kind, text: textStr }]);
+      setLogs(function (previous) {
+        var next = previous.concat([{ kind: kind, text: textStr }]);
         /* 只留最近 400 条，避免长时间会话把内存撑爆 */
         return next.length > 400 ? next.slice(next.length - 400) : next;
       });
     }
 
-    C.useR1Event("shell_output", function (data) {
+    r1Core.useR1Event("shell_output", function (data) {
       if (!data) return;
       var tid = data.type_id || "";
       /* 只回显本控制台发出的命令（type_id 形如 adb_1699999999999） */
@@ -3480,29 +3506,29 @@
     /* 输出自动滚到底部 */
     useEffect(
       function () {
-        var el = logRef.current;
-        if (el) el.scrollTop = el.scrollHeight;
+        var element = logRef.current;
+        if (element) element.scrollTop = element.scrollHeight;
       },
       [logs],
     );
 
     function run(textStr) {
-      var c = (textStr || "").trim();
-      if (!c) return;
-      if (!st.connected) {
+      var text2 = (textStr || "").trim();
+      if (!text2) return;
+      if (!store.connected) {
         push("err", "设备未连接，无法执行命令");
         return;
       }
-      push("cmd", c);
+      push("cmd", text2);
       setCmd("");
       setRunning(true);
       runRef.current = true;
       var sent = true;
       try {
-        R1WS.executeShell(c, "adb_" + Date.now());
-      } catch (e) {
+        R1WS.executeShell(text2, "adb_" + Date.now());
+      } catch (error) {
         sent = false;
-        push("err", "发送失败：" + (e && e.message));
+        push("err", "发送失败：" + (error && error.message));
       }
       if (!sent) {
         runRef.current = false;
@@ -3533,16 +3559,16 @@
       h(
         "div",
         { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 } },
-        QUICK_CMDS.map(function (q) {
+        qUICKCMDS.map(function (query) {
           return h(
             Chip,
             {
-              key: q.label,
+              key: query.label,
               onClick: function () {
-                run(q.cmd);
+                run(query.cmd);
               },
             },
-            q.label,
+            query.label,
           );
         }),
       ),
@@ -3551,12 +3577,12 @@
         "div",
         { className: "log", ref: logRef },
         logs.length
-          ? logs.map(function (l, i) {
-              var cls = l.kind === "cmd" ? "k" : l.kind === "err" ? "e" : "";
+          ? logs.map(function (item, index) {
+              var className = item.kind === "cmd" ? "k" : item.kind === "err" ? "e" : "";
               return h(
                 "div",
-                { key: i, className: cls },
-                l.kind === "cmd" ? "$ " + l.text : l.text,
+                { key: index, className: className },
+                item.kind === "cmd" ? "$ " + item.text : item.text,
               );
             })
           : h("span", { className: "hint" }, "暂无输出，输入命令或点击上方快捷指令开始。"),
@@ -3573,9 +3599,9 @@
             onChange: setCmd,
             placeholder: running ? "执行中…" : "输入命令，回车执行",
             disabled: running,
-            onKeyDown: function (e) {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
+            onKeyDown: function (event) {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
                 run(cmd);
               }
             },
@@ -3599,18 +3625,18 @@
   }
 
   /* ================= 导出 ================= */
-  P.SoundPanel = SoundPanel;
-  P.BluetoothPanel = BluetoothPanel;
-  P.DevicePanel = DevicePanel;
+  r1Panels.SoundPanel = SoundPanel;
+  r1Panels.BluetoothPanel = BluetoothPanel;
+  r1Panels.DevicePanel = DevicePanel;
 
-  P.LoginSheet = LoginSheet;
-  P.LocalMusicSheet = LocalMusicSheet;
-  P.MemoSheet = MemoSheet;
-  P.VoiceSheet = VoiceSheet;
-  P.RestartSheet = RestartSheet;
-  P.AdvancedSheet = AdvancedSheet;
-  P.SettingsSheet = SettingsSheet;
-  P.AboutSheet = AboutSheet;
-  P.SourceSheet = SourceSheet;
-  P.AdbSheet = AdbSheet;
+  r1Panels.LoginSheet = LoginSheet;
+  r1Panels.LocalMusicSheet = LocalMusicSheet;
+  r1Panels.MemoSheet = MemoSheet;
+  r1Panels.VoiceSheet = VoiceSheet;
+  r1Panels.RestartSheet = RestartSheet;
+  r1Panels.AdvancedSheet = AdvancedSheet;
+  r1Panels.SettingsSheet = SettingsSheet;
+  r1Panels.AboutSheet = AboutSheet;
+  r1Panels.SourceSheet = SourceSheet;
+  r1Panels.AdbSheet = AdbSheet;
 })(window);
