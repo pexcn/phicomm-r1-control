@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ADB设备控制台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<style>
+		* {
+		    margin: 0;
+		    padding: 0;
+		    box-sizing: border-box;
+		    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+		}
+
+		:root {
+		    --primary: #00c9ff;
+		    --secondary: #92fe9d;
+		    --danger: #ff416c;
+		    --warning: #ffb347;
+		    --dark: #1a2a6c;
+		    --darker: #0d1b3a;
+		    --success: #00e676;
+		}
+
+		body {
+		    background: linear-gradient(135deg, var(--darker), var(--dark));
+		    color: #fff;
+		    min-height: 100vh;
+		    padding: 0;
+		    overflow-x: hidden;
+		    font-size: 14px;
+		}
+
+		.container {
+		    max-width: 100%;
+		    margin: 0 auto;
+		    padding: 10px;
+		}
+
+		header {
+		    text-align: center;
+		    margin-bottom: 15px;
+		    padding: 15px;
+		    background: rgba(0, 0, 0, 0.2);
+		    border-radius: 16px;
+		    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+		    position: relative;
+		    overflow: hidden;
+		    border: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.header-bg {
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    background: radial-gradient(circle at top right,
+		            rgba(0, 201, 255, 0.1),
+		            transparent 70%);
+		    z-index: -1;
+		}
+
+		h1 {
+		    font-size: 29px;
+		    margin-bottom: 8px;
+		    background: linear-gradient(90deg, var(--primary), var(--secondary));
+		    -webkit-background-clip: text;
+		    -webkit-text-fill-color: transparent;
+		    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+		}
+
+		.subtitle {
+		    font-size: 15px;
+		    opacity: 0.8;
+		    margin-top: 5px;
+		}
+
+		.tab-container {
+		    display: flex;
+		    margin-bottom: 10px;
+		    background: rgba(0, 0, 0, 0.2);
+		    border-radius: 12px;
+		    overflow: hidden;
+		    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+
+		.tab {
+		    flex: 1;
+		    padding: 12px 10px;
+		    text-align: center;
+		    cursor: pointer;
+		    font-size: 15px;
+		    transition: all 0.3s ease;
+		    position: relative;
+		    overflow: hidden;
+		}
+
+		.tab.active {
+		    background: rgba(0, 201, 255, 0.25);
+		    font-weight: 500;
+		}
+
+		.tab.active::after {
+		    content: '';
+		    position: absolute;
+		    bottom: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 3px;
+		    background: linear-gradient(90deg, var(--primary), var(--secondary));
+		}
+
+		.tab-content {
+		    display: none;
+		    animation: fadeIn 0.3s ease;
+		}
+
+		@keyframes fadeIn {
+		    from { opacity: 0; transform: translateY(10px); }
+		    to { opacity: 1; transform: translateY(0); }
+		}
+
+		.tab-content.active {
+		    display: block;
+		}
+
+		.card {
+		    background: rgba(255, 255, 255, 0.08);
+		    border-radius: 16px;
+		    padding: 20px;
+		    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+		    backdrop-filter: blur(10px);
+		    border: 1px solid rgba(255, 255, 255, 0.1);
+		    margin-bottom: 15px;
+		    transition: transform 0.3s ease;
+		}
+
+		.card:hover {
+		    transform: translateY(-3px);
+		    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+		}
+
+		.card-title {
+		    display: flex;
+		    align-items: center;
+		    font-size: 19px;
+		    margin-bottom: 16px;
+		    color: var(--primary);
+		    padding-bottom: 10px;
+		    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.card-title i {
+		    margin-right: 10px;
+		    font-size: 22px;
+		    background: linear-gradient(90deg, var(--primary), var(--secondary));
+		    -webkit-background-clip: text;
+		    -webkit-text-fill-color: transparent;
+		}
+
+		.form-group {
+		    margin-bottom: 15px;
+		}
+
+		.form-label {
+		    display: block;
+		    margin-bottom: 8px;
+		    font-size: 15px;
+		    color: var(--primary);
+		    font-weight: 500;
+		}
+
+		.form-input, .form-select {
+		    width: 100%;
+		    padding: 12px 15px;
+		    border-radius: 10px;
+		    border: 1px solid rgba(255, 255, 255, 0.15);
+		    background: rgba(0, 0, 0, 0.2);
+		    color: #fff;
+		    font-size: 15px;
+		    transition: all 0.3s ease;
+		}
+
+		.form-input:focus, .form-select:focus {
+		    outline: none;
+		    border-color: var(--primary);
+		    box-shadow: 0 0 0 3px rgba(0, 201, 255, 0.2);
+		}
+
+		.btn-group {
+		    display: flex;
+		    gap: 10px;
+			margin-bottom: 15px;
+			margin: 15px 0 15px 0;
+			flex-wrap: wrap;
+			user-select: none;
+		}
+
+		button {
+		    flex: 1 0 auto;
+		    padding: 12px 15px;
+		    border: none;
+		    border-radius: 30px;
+		    font-size: 15px;
+		    font-weight: 500;
+		    cursor: pointer;
+		    transition: all 0.3s ease;
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    gap: 8px;
+		    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+		}
+
+		button:hover {
+		    transform: translateY(-2px);
+		    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+		}
+
+		button:active {
+		    transform: translateY(0);
+		}
+
+		.btn-primary {
+		    background: linear-gradient(90deg, var(--primary), var(--secondary));
+		    color: #1a2a6c;
+		}
+
+		.btn-danger {
+		    background: linear-gradient(90deg, var(--danger), #ff4b2b);
+		    color: white;
+		}
+
+		.btn-secondary {
+		    background: rgba(255, 255, 255, 0.1);
+		    color: #fff;
+		}
+
+		.btn-warning {
+		    background: linear-gradient(90deg, var(--warning), #ffcc33);
+		    color: #1a2a6c;
+		}
+
+		.btn-info {
+		    background: linear-gradient(90deg, #4facfe, #00f2fe);
+		    color: #1a2a6c;
+		}
+
+		.btn-success {
+		    background: linear-gradient(90deg, var(--success), #00c853);
+		    color: #1a2a6c;
+		}
+
+		button:disabled {
+		    opacity: 0.5;
+		    cursor: not-allowed;
+		    transform: none !important;
+		    box-shadow: none !important;
+		}
+
+		/* 控制台样式 */
+		.console-container {
+		    height: 250px;
+		    border: 1px solid rgba(255, 255, 255, 0.1);
+		    border-radius: 12px;
+		    padding: 15px;
+		    background: rgba(0, 0, 0, 0.2);
+		    margin-bottom: 15px;
+		    overflow-y: auto;
+		    font-family: 'Fira Code', 'Courier New', monospace;
+		    font-size: 14px;
+		    line-height: 22px;
+		    /*white-space: pre-wrap;*/
+			white-space: pre;
+		    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+		}
+
+		.command-line {
+		    color: var(--primary);
+		    font-weight: bold;
+		}
+
+		.command-line #message div {
+			height: 20px;
+		}
+
+		.success-output {
+		    color: #00e676;
+		}
+
+		.error-output {
+		    color: var(--danger);
+		}
+
+		.info-output {
+		    color: #4fc3f7;
+		}
+
+		.timestamp {
+		    color: #aaa;
+		    font-size: 13px;
+		    margin-right: 10px;
+			display: inline-block;
+			width: 60px;
+		}
+
+		/* 设备信息卡 */
+		.device-card {
+		    display: flex;
+		    flex-direction: column;
+		    gap: 15px;
+		    margin-bottom: 20px;
+		}
+
+		.device-info-row {
+		    display: flex;
+		    justify-content: space-between;
+		    padding: 10px 0;
+		    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		}
+
+		.device-info-label {
+		    color: #aaa;
+		    font-size: 15px;
+		}
+
+		.device-info-value {
+		    font-weight: 500;
+		    text-align: right;
+		    max-width: 80%;
+		    word-break: break-word;
+		}
+
+		/* 文件浏览器样式 */
+		.file-browser {
+		    height: 280px;
+		    border: 1px solid rgba(255, 255, 255, 0.1);
+		    border-radius: 12px;
+		    overflow-y: auto;
+		    background: rgba(0, 0, 0, 0.2);
+		    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+			margin-bottom: 15px;
+		}
+
+		.file-item {
+		    padding: 12px 15px;
+		    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		    display: flex;
+		    align-items: center;
+		    cursor: pointer;
+		    transition: background 0.2s;
+			user-select: none;
+		}
+
+		.file-item:hover {
+		    background: rgba(255, 255, 255, 0.05);
+		}
+
+		.file-icon {
+		    margin-right: 12px;
+		    font-size: 21px;
+		    width: 24px;
+		    text-align: center;
+		    color: var(--primary);
+		}
+
+		.file-name {
+		    flex: 1;
+		    word-break: break-all;
+		}
+
+		.file-size {
+		    font-size: 13px;
+		    color: #aaa;
+		    margin-left: 10px;
+		    min-width: 70px;
+		    text-align: right;
+		}
+
+		.selected {
+		    background: rgba(79, 195, 247, 0.15) !important;
+		}
+
+		/* 应用列表样式 */
+		.app-item {
+		    display: flex;
+		    align-items: center;
+		    padding: 10px 15px;
+		    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		    cursor: pointer;
+		}
+
+		.app-icon {
+		    width: 40px;
+		    height: 40px;
+		    border-radius: 8px;
+		    background: linear-gradient(135deg, var(--primary), var(--secondary));
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    margin-right: 12px;
+		    font-size: 18px;
+		    color: white;
+		}
+
+		.app-icon[status = "disabled"] {
+			background: #ff4b2b;
+		}
+
+		.app-icon[status = "hide"] {
+			background: #dcdcdc;
+		}
+
+		.app-info {
+		    flex: 1;
+		    overflow: hidden;
+		}
+
+		.app-name {
+		    font-weight: 500;
+		    white-space: nowrap;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
+		}
+
+		.app-package {
+		    font-size: 13px;
+		    color: #aaa;
+		    white-space: nowrap;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
+		}
+
+		.app-path {
+			display: none;
+		}
+
+		/* 进度条样式 */
+		.progress-container {
+		    height: 10px;
+		    background: rgba(255, 255, 255, 0.1);
+		    border-radius: 5px;
+		    margin: 15px 0 5px;
+		    overflow: hidden;
+		    display: none;
+		}
+
+		.progress-bar {
+		    height: 100%;
+		    width: 0%;
+		    background: linear-gradient(90deg, var(--primary), var(--secondary));
+		    transition: width 0.3s;
+			border-radius: 5px;
+		}
+
+		.progress-bar.indeterminate {
+            width: 100%;
+            animation: indeterminateAnimation 2s infinite linear;
+            transform-origin: left;
+        }
+
+        @keyframes indeterminateAnimation {
+            0% {
+                transform: translateX(0);
+                width: 0%;
+            }
+            50% {
+                transform: translateX(0);
+                width: 50%;
+            }
+            100% {
+                transform: translateX(200%);
+                width: 50%;
+            }
+        }
+
+		.progress-text {
+		    text-align: center;
+		    font-size: 14px;
+		    margin-bottom: 5px;
+		    display: none;
+		}
+
+		/* 设备选择器 */
+		.device-selector {
+		    display: block;
+		    margin: 15px 0 15px;
+		}
+
+		/* 连接状态 */
+		.connection-status {
+		    display: flex;
+		    align-items: center;
+		    padding: 10px 15px;
+		    border-radius: 10px;
+		    background: rgba(0, 0, 0, 0.2);
+		    margin: 10px 0;
+		}
+
+		.status-indicator {
+		    width: 12px;
+		    height: 12px;
+		    border-radius: 50%;
+		    margin-right: 10px;
+		}
+
+		.status-connected {
+		    background: #00e676;
+		    box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+		}
+
+		.status-disconnected {
+		    background: var(--danger);
+		}
+
+		/* 设备选择下拉框 */
+		.device-list {
+		    width: 100%;
+		    padding: 10px;
+		    background: rgba(0, 0, 0, 0.2);
+		    border: 1px solid rgba(255, 255, 255, 0.1);
+		    border-radius: 8px;
+		    color: white;
+		    margin: 10px 0;
+		}
+
+		/* 弹窗样式 */
+		.modal {
+		    display: none;
+		    position: fixed;
+		    z-index: 100;
+		    left: 0;
+		    top: 0;
+		    width: 100%;
+		    height: 100%;
+		    background-color: rgba(0, 0, 0, 0.7);
+		    animation: fadeIn 0.3s;
+		}
+
+		.modal-content {
+		    background: linear-gradient(135deg, var(--darker), var(--dark));
+		    margin: 15% auto;
+		    padding: 20px;
+		    border: 1px solid rgba(255, 255, 255, 0.1);
+		    border-radius: 16px;
+		    width: 80%;
+		    max-width: 400px;
+		    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+		}
+
+		.modal-header {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 15px;
+		    padding-bottom: 10px;
+		    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+			user-select: none;
+		}
+
+		.modal-header h3 {
+		    color: var(--primary);
+			word-wrap: break-word;
+			word-break: normal;
+			width: 90%;
+		}
+
+		.close {
+		    color: #aaa;
+		    font-size: 28px;
+		    font-weight: bold;
+		    cursor: pointer;
+			user-select: none;
+		}
+
+		.close:hover {
+		    color: white;
+		}
+
+		.modal-body {
+		    padding: 0px 0;
+		}
+
+		.modal-body p {
+			word-wrap: break-word;
+			word-break: normal;
+			width: 100%;
+			margin-bottom: 15px;
+		}
+
+		/* 响应式调整 */
+		@media (min-width: 600px) {
+		    .container {
+		        max-width: 600px;
+		        padding: 15px;
+		    }
+
+		    .console-container, .file-browser {
+		        height: 300px;
+		    }
+		}
+	</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-bg"></div>
+            <h1><i class="fas fa-mobile-alt"></i> ADB设备控制台</h1>
+        </header>
+
+        <div class="tab-container">
+            <div class="tab active" data-tab="console">控制台</div>
+            <div class="tab" data-tab="device">设备信息</div>
+            <div class="tab" data-tab="files">文件管理</div>
+            <div class="tab" data-tab="apps">应用管理</div>
+        </div>
+
+        <!-- 控制台标签页 -->
+        <div class="tab-content active" id="consoleTab">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-terminal"></i> ADB控制台
+                </div>
+
+                <div class="connection-status">
+                    <div id="statusIndicator" class="status-indicator status-disconnected"></div>
+                    <span id="statusText">设备状态: 等待ADB初始化</span>
+                </div>
+
+                <div id="consoleOutput" class="console-container"></div>
+                <div class="form-group">
+                    <input type="search" id="consoleInput" class="form-input" placeholder="输入ADB命令，按Enter执行" disabled>
+                </div>
+                <div class="btn-group">
+                    <button id="clearConsoleBtn" class="btn-secondary">
+                        <i class="fas fa-broom"></i> 清除控制台
+                    </button>
+                    <button id="shellBtn" class="btn-info" disabled>
+                        <i class="fas fa-terminal"></i> 进入Shell
+                    </button>
+                </div>
+
+				<div class="device-selector">
+
+                    <div class="form-group">
+                        <label class="form-label">连接方式</label>
+						<div class="tab-container" id="connectionTabContainer">
+						    <div class="tab" data-tab="usb">USB连接</div>
+						    <div class="tab active" data-tab="wifi">WiFi连接</div>
+						</div>
+                    </div>
+
+                    <div class="form-group" id="wifiSettings" style="display: none;">
+                        <label class="form-label">设备IP地址</label>
+                        <input type="text" id="ipAddress" class="form-input" placeholder="192.168.x.x">
+                    </div>
+
+					<div class="form-group" id="deviceListGroup" style="display:none;">
+						<label class="form-label">选择设备</label>
+						<select id="deviceSelect" class="form-select">
+							<option value="">-- 请选择设备 --</option>
+						</select>
+					</div>
+                </div>
+
+                <div class="btn-group">
+                    <button id="connectBtn" class="btn-primary" style="display: none;" disabled>
+                        <i class="fas fa-plug"></i> 连接
+                    </button>
+                    <button id="disconnectBtn" class="btn-danger" style="display: none;" disabled>
+                        <i class="fas fa-power-off"></i> 断开
+                    </button>
+                    <button id="refreshDevicesBtn" class="btn-secondary" style="display: none;" disabled>
+                        <i class="fas fa-sync-alt"></i> 刷新
+                    </button>
+					<button id="backHomeBtn" class="btn-secondary">
+                        <i class="fas fa-home"></i> 返回首页
+                    </button>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- 设备信息标签页 -->
+        <div class="tab-content" id="deviceTab">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-microchip"></i> 设备信息
+                </div>
+
+                <div class="device-card">
+                    <div class="device-info-row">
+                        <div class="device-info-label">设备名称:</div>
+                        <div class="device-info-value" id="deviceName">未知</div>
+                    </div>
+					<div class="device-info-row" style="display: none;">
+					    <div class="device-info-label">设备型号:</div>
+					    <div class="device-info-value" id="deviceModel">未知</div>
+					</div>
+                    <div class="device-info-row"  style="display: none;">
+                        <div class="device-info-label">设备ID:</div>
+                        <div class="device-info-value" id="deviceId">未连接</div>
+                    </div>
+					<div class="device-info-row">
+					    <div class="device-info-label">设备IP:</div>
+					    <div class="device-info-value" id="deviceIP">未连接</div>
+					</div>
+					<div class="device-info-row">
+					    <div class="device-info-label">设备SN:</div>
+					    <div class="device-info-value" id="deviceSN">未连接</div>
+					</div>
+					<div class="device-info-row">
+					    <div class="device-info-label">固件版本:</div>
+					    <div class="device-info-value" id="firmwareVersion">未知</div>
+					</div>
+                    <div class="device-info-row">
+                        <div class="device-info-label">Android版本:</div>
+                        <div class="device-info-value" id="androidVersion">未知</div>
+                    </div>
+                    <div class="device-info-row" style="display: none;">
+                        <div class="device-info-label">CPU信息:</div>
+                        <div class="device-info-value" id="cpuInfo">未知</div>
+                    </div>
+                    <div class="device-info-row">
+                        <div class="device-info-label">内存信息:</div>
+                        <div class="device-info-value" id="memoryInfo">未知</div>
+                    </div>
+                    <div class="device-info-row">
+                        <div class="device-info-label">存储空间:</div>
+                        <div class="device-info-value" id="storageInfo">未知</div>
+                    </div>
+                    <div class="device-info-row" style="display: none;">
+                        <div class="device-info-label">电池状态:</div>
+                        <div class="device-info-value" id="batteryStatus">未知</div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button id="rebootDeviceBtn" class="btn-warning">
+                        <i class="fas fa-power-off"></i> 重启设备
+                    </button>
+					<button id="refreshDeviceInfoBtn" class="btn-secondary">
+					    <i class="fas fa-sync-alt"></i> 刷新信息
+					</button>
+                </div>
+				<div class="progress-text" id="deviceProgressText"></div>
+                <div class="progress-container" id="deviceProgress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 文件管理标签页 -->
+        <div class="tab-content" id="filesTab">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-folder-open"></i> 文件浏览器
+                </div>
+                <div class="form-group">
+                    <div class="btn-group">
+						<button id="homeBtn" class="btn-secondary">
+						    <i class="fas fa-home"></i> 主目录
+						</button>
+                        <button id="refreshFilesBtn" class="btn-secondary">
+                            <i class="fas fa-sync-alt"></i> 刷新目录
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="currentPath" class="form-input" value="/sdcard/">
+                </div>
+                <div id="fileBrowser" class="file-browser"></div>
+                <div class="btn-group">
+                    <button id="uploadFileBtn" class="btn-primary" disabled>
+                        <i class="fas fa-upload"></i> 上传文件
+                    </button>
+					<button id="createFolderBtn" class="btn-secondary">
+                        <i class="fas fa-folder-plus"></i> 新建文件夹
+                    </button>
+                </div>
+                <div class="progress-text" id="fileProgressText"></div>
+                <div class="progress-container" id="fileProgress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+		<!-- 文件操作弹窗 -->
+		<div id="fileActionModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 id="fileActionTitle">文件操作</h3>
+					<span id="fileActionClose" class="close">&times;</span>
+				</div>
+				<div class="modal-body">
+					<p id="fileActionPath" style="display: none;"></p>
+					<p id="fileActionPerm" style="display: none;"></p>
+					<div class="btn-group">
+						<button id="installFileAppBtn" class="btn-primary" style="display: none;">
+                            <i class="fas fa-download"></i> 安装
+                        </button>
+						<button id="downloadFileBtn" class="btn-warning">
+							<i class="fas fa-download"></i> 下载
+						</button>
+						<button id="deleteFileBtn" class="btn-danger">
+							<i class="fas fa-trash"></i> 删除
+						</button>
+						<button id="ReNameFileBtn" class="btn-danger">
+							<i class="fas fa-edit"></i> 重命名
+						</button>
+						<button id="SetFilePermissionBtn" class="btn-danger">
+							<i class="fas fa-cog"></i> 设置权限
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+        <!-- 应用管理标签页 -->
+        <div class="tab-content" id="appsTab">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-mobile"></i> 应用管理
+                </div>
+                <div class="form-group">
+                    <div class="btn-group">
+						<button id="installAppBtn" class="btn-primary">
+                            <i class="fas fa-download"></i> 安装应用
+                        </button>
+                        <button id="refreshAppsBtn" class="btn-secondary">
+                            <i class="fas fa-sync-alt"></i> 刷新应用
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="appSearch" class="form-input" placeholder="搜索应用...">
+                </div>
+                <div id="appList" class="file-browser"></div>
+                <div class="progress-text" id="appProgressText"></div>
+                <div class="progress-container" id="appProgress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+		<!-- 应用操作弹窗 -->
+		<div id="appActionModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 id="appActionTitle">应用操作</h3>
+					<span id="appActionClose" class="close">&times;</span>
+				</div>
+				<div class="modal-body">
+					<p id="appActionPackage" style="display: none;"></p>
+					<p id="appActionPath"></p>
+					<div class="btn-group">
+						<!--<button id="launchAppBtn" class="btn-success">
+							<i class="fas fa-play"></i> 启动应用
+						</button>-->
+						<button id="enableAppBtn" class="btn-info" disabled>
+							<i class="fas fa-play"></i> 启用应用
+						</button>
+						<button id="disabledAppBtn" class="btn-warning" disabled>
+							<i class="fas fa-ban"></i> 停用应用
+						</button>
+						<button id="unHideAppBtn" class="btn-info" disabled>
+							<i class="fas fa-eye"></i> 显示应用
+						</button>
+						<button id="hideAppBtn" class="btn-warning" disabled>
+							<i class="fas fa-eye-slash"></i> 隐藏应用
+						</button>
+						<button id="clearAppBtn" class="btn-danger">
+							<i class="fas fa-trash"></i> 清除数据
+						</button>
+						<button id="uninstallAppBtn" class="btn-danger">
+							<i class="fas fa-trash"></i> 卸载应用
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+    <script>
+		/*document.getElementById('refreshPageBtn').addEventListener('click', (e) => {
+			if (!confirm(`确定要刷新页面吗？`)) return;
+			location.reload();
+        });*/
+		var closeWebview = (e) => {
+			if (!confirm(`确定要返回首页吗？`)) return;
+			plus.webview.currentWebview().close();
+			//location.pathname = '';
+        };
+		document.getElementById('backHomeBtn').addEventListener('click', (e) => {
+			closeWebview();
+		});
+		window.onerror = function (message, source, lineno, colno, error) {
+			const errorDisplay = `
+				<h3>发生错误</h3>
+				<p><strong>消息:</strong> ${message}</p>
+				<p><strong>文件:</strong> ${source}</p>
+				<p><strong>行号:</strong> ${lineno}:${colno}</p>
+				${error ? `<p><strong>堆栈:</strong> ${error.stack}</p>` : ''}
+			`;
+
+			const consoleOutput = document.getElementById('consoleOutput');
+			const line = document.createElement('div');
+			line.className = `console-line error-output`;
+			line.innerHTML = errorDisplay;
+			consoleOutput.appendChild(line);
+			consoleOutput.scrollTop = consoleOutput.scrollHeight;
+
+			// 返回true阻止默认错误处理
+			return true;
+		};
+
+		window.addEventListener('unhandledrejection', event => {
+			const consoleOutput = document.getElementById('consoleOutput');
+			const line = document.createElement('div');
+			line.className = `console-line error-output`;
+			line.innerHTML = `未处理的Promise拒绝: ${event.reason}`;
+			consoleOutput.appendChild(line);
+			consoleOutput.scrollTop = consoleOutput.scrollHeight;
+			// 可选: 防止默认控制台错误输出
+			//event.preventDefault();
+		});
+
+		// 保存原始的 console 方法
+		const originalConsole = {
+			log: console.log,
+			info: console.info,
+			warn: console.warn,
+			error: console.error,
+			clear: console.clear
+		};
+
+		// 格式化输出
+		function formatOutput(args) {
+			let output = '';
+			for (let i = 0; i < args.length; i++) {
+				if (typeof args[i] === 'object') {
+					output += JSON.stringify(args[i], null, 2) + ' ';
+				} else {
+					output += args[i] + ' ';
+				}
+			}
+			const now = new Date();
+			const timeStr = now.toTimeString().substr(0, 8);
+			return `<span class="timestamp">[${timeStr}]</span> ${output}`;
+		}
+
+		// 重写 console 方法
+		console.log = function () {
+			originalConsole.log.apply(console, arguments);
+			const consoleOutput = document.getElementById('consoleOutput');
+			const line = document.createElement('div');
+			line.className = `console-line info-output`;
+			line.innerHTML = formatOutput(arguments);
+			consoleOutput.appendChild(line);
+			consoleOutput.scrollTop = consoleOutput.scrollHeight;
+		};
+
+		console.info = function() {
+            originalConsole.info.apply(console, arguments);
+            const consoleOutput = document.getElementById('consoleOutput');
+			const line = document.createElement('div');
+			line.className = `console-line info-output`;
+			line.innerHTML = formatOutput(arguments);
+			consoleOutput.appendChild(line);
+			consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+
+        console.warn = function() {
+            originalConsole.warn.apply(console, arguments);
+            const consoleOutput = document.getElementById('consoleOutput');
+			const line = document.createElement('div');
+			line.className = `console-line warn-output`;
+			line.innerHTML = formatOutput(arguments);
+			consoleOutput.appendChild(line);
+			consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+
+        console.error = function() {
+            originalConsole.error.apply(console, arguments);
+            const consoleOutput = document.getElementById('consoleOutput');
+			const line = document.createElement('div');
+			line.className = `console-line error-output`;
+			line.innerHTML = formatOutput(arguments);
+			consoleOutput.appendChild(line);
+			consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+
+        console.clear = function() {
+            originalConsole.clear.apply(console);
+        };
+
+		const script = document.createElement("script");
+		script.src = "./adb-console.js?t=" + Date.now();
+		document.body.appendChild(script);
+	</script>
+</body>
+</html>
