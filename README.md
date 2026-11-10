@@ -2,7 +2,7 @@
 
 需配合音箱上的 `new_EchoService`；部分功能还需 `new_Unisound` 或 Android App 的 HTML5+ 宿主。
 
-`next` 已整合作者 2026-11-10 公开发布的网页快照（网页版本 `2863`），
+`master` 已整合作者 2026-11-10 公开发布的网页快照（网页版本 `2863`），
 包含原控制界面、新 UI、配网、设备扫描和 ADB 工具页面。
 主程序保存为可读的 [assets/js/classic/controller.js](assets/js/classic/controller.js)。
 
@@ -113,4 +113,4 @@ python3 -m unittest discover -s tests -v
 作者入口：<https://r1.wxfsq.com/>；原项目介绍：
 <https://www.right.com.cn/forum/thread-4072249-1-1.html>。
 
-后续开发在 `next` 分支进行。
+后续开发在 `master` 分支进行。

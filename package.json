@@ -1,5 +1,5 @@
 {
-  "name": "r1-control",
+  "name": "phicomm-r1-control",
   "private": true,
   "description": "Static control pages for the Phicomm R1 speaker",
   "scripts": {
