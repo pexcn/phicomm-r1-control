@@ -1,0 +1,910 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-10",
+  "scope": "Static comparison of two uploaded files; no device install/execution.",
+  "user_reported_installation": "Original firmware; installed through normal ADB or the web update page.",
+  "containers": {
+    "artifacts": [
+      {
+        "version_label": "1.8.73",
+        "original_sha256": "7292fcd4e2d381087fcfa19a74d83a011ab3ba6a7cdc2260301cdf66d3b6aa9f",
+        "original_bytes": 7042950,
+        "outer_dex_header_file_size": 7042950,
+        "outer_dex_sha1_valid": true,
+        "outer_dex_adler32_valid": true,
+        "zip_start": 5881432,
+        "zip_container_view_sha256": "7ac275e304d8ae132a02a833db15fcce6bd30211263071549ec830577ce0b807",
+        "members": [
+          {
+            "name": "META-INF/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 5881432
+          },
+          {
+            "name": "res/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 5881471
+          },
+          {
+            "name": "AndroidManifest.xml",
+            "bytes": 6160,
+            "sha256": "9255cbc73b782846100af55894ca8a8686c708447a19f36e9036e4c82ca2aa2c",
+            "header_offset": 5881505
+          },
+          {
+            "name": "classes.dex",
+            "bytes": 2496580,
+            "sha256": "c6f87d0fa637ce6a090b442053797fc27b40ad1f39c9eae3f2f6fd7520447867",
+            "header_offset": 5883162
+          },
+          {
+            "name": "resources.arsc",
+            "bytes": 2040,
+            "sha256": "401d6d36d207443bb652dae82af2dcb5532820e353393b6a74b0ed8f02e2ac11",
+            "header_offset": 6974085
+          },
+          {
+            "name": "META-INF/CERT.RSA",
+            "bytes": 1549,
+            "sha256": "ff472bc951c1dfde5dfab865fac6f1938b6033ed0d6110783294b2d2546f1aca",
+            "header_offset": 6974712
+          },
+          {
+            "name": "META-INF/MANIFEST.MF",
+            "bytes": 1319,
+            "sha256": "3a14de568c3c0a4a93821ffddfab2bea44a400d7d76c3b3199bdb583e81eaf92",
+            "header_offset": 6975918
+          },
+          {
+            "name": "META-INF/CERT.SF",
+            "bytes": 1382,
+            "sha256": "b7fd87148ba979e3bed04fd68c97f8c5f0b60220fd3ae7d216fa10a4a3972389",
+            "header_offset": 6976601
+          },
+          {
+            "name": "res/mipmap-mdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 6977316
+          },
+          {
+            "name": "res/mipmap-xhdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 6977365
+          },
+          {
+            "name": "res/mipmap-xxhdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 6977415
+          },
+          {
+            "name": "res/mipmap-hdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 6977466
+          },
+          {
+            "name": "res/mipmap-xxxhdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 6977515
+          },
+          {
+            "name": "res/mipmap-mdpi-v4/ic_launcher_round.png",
+            "bytes": 2862,
+            "sha256": "624c4908858cc652fa4ec56b65cb04dc507e712ebd23c76675b5fed9d2faf312",
+            "header_offset": 6977567
+          },
+          {
+            "name": "res/mipmap-mdpi-v4/ic_launcher.png",
+            "bytes": 1956,
+            "sha256": "37f74447bc4bf2a98fef87ed3e0620ca1b90d22dcd730b34bfa88f7afd1b6fec",
+            "header_offset": 6980504
+          },
+          {
+            "name": "res/mipmap-xhdpi-v4/ic_launcher.png",
+            "bytes": 4366,
+            "sha256": "d2c57ef44ca92374b76c92494097e8eba9cb7b0395c02e8ce2a3c8caba51c17a",
+            "header_offset": 6982529
+          },
+          {
+            "name": "res/mipmap-xhdpi-v4/ic_launcher_round.png",
+            "bytes": 7160,
+            "sha256": "4ea48b95be927b840d83216425086681d8f3faa6b69f90486e944b14725897fe",
+            "header_offset": 6986965
+          },
+          {
+            "name": "res/mipmap-xxhdpi-v4/ic_launcher.png",
+            "bytes": 7007,
+            "sha256": "d3ae909287bd05da576694fdf6a2081b298f09baac50b5b0d591083244a9cebc",
+            "header_offset": 6994199
+          },
+          {
+            "name": "res/mipmap-xxhdpi-v4/ic_launcher_round.png",
+            "bytes": 11383,
+            "sha256": "dca091af796c8952782468f219f1e1be703e2af88c9ea9bdf9185109e3bc433d",
+            "header_offset": 7001277
+          },
+          {
+            "name": "res/mipmap-hdpi-v4/ic_launcher.png",
+            "bytes": 3122,
+            "sha256": "4384d9e4e5d5eb24aa2ce48d21d486659d314fdecb65abd9a6c2ee4a9870285d",
+            "header_offset": 7012691
+          },
+          {
+            "name": "res/mipmap-xxxhdpi-v4/ic_launcher.png",
+            "bytes": 9490,
+            "sha256": "a9ca2573500e80796ebdd5301c6d747e637996d130fa68cdaef1cd9fe8b0b170",
+            "header_offset": 7015882
+          },
+          {
+            "name": "res/mipmap-xxxhdpi-v4/ic_launcher_round.png",
+            "bytes": 15997,
+            "sha256": "d20007c572bb9ca0d9085dd118f7f7c1bdc78636bd3390c42fca3e8a5a8fd4ea",
+            "header_offset": 7025397
+          }
+        ]
+      },
+      {
+        "version_label": "1.8.87",
+        "original_sha256": "54b81d9a7f9f5e11b42672aa3868eb2c40773e66961d1dc9a35dcde8993b1f20",
+        "original_bytes": 7245246,
+        "outer_dex_header_file_size": 7245246,
+        "outer_dex_sha1_valid": true,
+        "outer_dex_adler32_valid": true,
+        "zip_start": 6083728,
+        "zip_container_view_sha256": "7ac275e304d8ae132a02a833db15fcce6bd30211263071549ec830577ce0b807",
+        "members": [
+          {
+            "name": "META-INF/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 6083728
+          },
+          {
+            "name": "res/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 6083767
+          },
+          {
+            "name": "AndroidManifest.xml",
+            "bytes": 6160,
+            "sha256": "9255cbc73b782846100af55894ca8a8686c708447a19f36e9036e4c82ca2aa2c",
+            "header_offset": 6083801
+          },
+          {
+            "name": "classes.dex",
+            "bytes": 2496580,
+            "sha256": "c6f87d0fa637ce6a090b442053797fc27b40ad1f39c9eae3f2f6fd7520447867",
+            "header_offset": 6085458
+          },
+          {
+            "name": "resources.arsc",
+            "bytes": 2040,
+            "sha256": "401d6d36d207443bb652dae82af2dcb5532820e353393b6a74b0ed8f02e2ac11",
+            "header_offset": 7176381
+          },
+          {
+            "name": "META-INF/CERT.RSA",
+            "bytes": 1549,
+            "sha256": "ff472bc951c1dfde5dfab865fac6f1938b6033ed0d6110783294b2d2546f1aca",
+            "header_offset": 7177008
+          },
+          {
+            "name": "META-INF/MANIFEST.MF",
+            "bytes": 1319,
+            "sha256": "3a14de568c3c0a4a93821ffddfab2bea44a400d7d76c3b3199bdb583e81eaf92",
+            "header_offset": 7178214
+          },
+          {
+            "name": "META-INF/CERT.SF",
+            "bytes": 1382,
+            "sha256": "b7fd87148ba979e3bed04fd68c97f8c5f0b60220fd3ae7d216fa10a4a3972389",
+            "header_offset": 7178897
+          },
+          {
+            "name": "res/mipmap-mdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 7179612
+          },
+          {
+            "name": "res/mipmap-xhdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 7179661
+          },
+          {
+            "name": "res/mipmap-xxhdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 7179711
+          },
+          {
+            "name": "res/mipmap-hdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 7179762
+          },
+          {
+            "name": "res/mipmap-xxxhdpi-v4/",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "header_offset": 7179811
+          },
+          {
+            "name": "res/mipmap-mdpi-v4/ic_launcher_round.png",
+            "bytes": 2862,
+            "sha256": "624c4908858cc652fa4ec56b65cb04dc507e712ebd23c76675b5fed9d2faf312",
+            "header_offset": 7179863
+          },
+          {
+            "name": "res/mipmap-mdpi-v4/ic_launcher.png",
+            "bytes": 1956,
+            "sha256": "37f74447bc4bf2a98fef87ed3e0620ca1b90d22dcd730b34bfa88f7afd1b6fec",
+            "header_offset": 7182800
+          },
+          {
+            "name": "res/mipmap-xhdpi-v4/ic_launcher.png",
+            "bytes": 4366,
+            "sha256": "d2c57ef44ca92374b76c92494097e8eba9cb7b0395c02e8ce2a3c8caba51c17a",
+            "header_offset": 7184825
+          },
+          {
+            "name": "res/mipmap-xhdpi-v4/ic_launcher_round.png",
+            "bytes": 7160,
+            "sha256": "4ea48b95be927b840d83216425086681d8f3faa6b69f90486e944b14725897fe",
+            "header_offset": 7189261
+          },
+          {
+            "name": "res/mipmap-xxhdpi-v4/ic_launcher.png",
+            "bytes": 7007,
+            "sha256": "d3ae909287bd05da576694fdf6a2081b298f09baac50b5b0d591083244a9cebc",
+            "header_offset": 7196495
+          },
+          {
+            "name": "res/mipmap-xxhdpi-v4/ic_launcher_round.png",
+            "bytes": 11383,
+            "sha256": "dca091af796c8952782468f219f1e1be703e2af88c9ea9bdf9185109e3bc433d",
+            "header_offset": 7203573
+          },
+          {
+            "name": "res/mipmap-hdpi-v4/ic_launcher.png",
+            "bytes": 3122,
+            "sha256": "4384d9e4e5d5eb24aa2ce48d21d486659d314fdecb65abd9a6c2ee4a9870285d",
+            "header_offset": 7214987
+          },
+          {
+            "name": "res/mipmap-xxxhdpi-v4/ic_launcher.png",
+            "bytes": 9490,
+            "sha256": "a9ca2573500e80796ebdd5301c6d747e637996d130fa68cdaef1cd9fe8b0b170",
+            "header_offset": 7218178
+          },
+          {
+            "name": "res/mipmap-xxxhdpi-v4/ic_launcher_round.png",
+            "bytes": 15997,
+            "sha256": "d20007c572bb9ca0d9085dd118f7f7c1bdc78636bd3390c42fca3e8a5a8fd4ea",
+            "header_offset": 7227693
+          }
+        ]
+      }
+    ],
+    "zip_member_comparison": {
+      "added": [],
+      "removed": [],
+      "changed": [],
+      "unchanged": [
+        "AndroidManifest.xml",
+        "META-INF/",
+        "META-INF/CERT.RSA",
+        "META-INF/CERT.SF",
+        "META-INF/MANIFEST.MF",
+        "classes.dex",
+        "res/",
+        "res/mipmap-hdpi-v4/",
+        "res/mipmap-hdpi-v4/ic_launcher.png",
+        "res/mipmap-mdpi-v4/",
+        "res/mipmap-mdpi-v4/ic_launcher.png",
+        "res/mipmap-mdpi-v4/ic_launcher_round.png",
+        "res/mipmap-xhdpi-v4/",
+        "res/mipmap-xhdpi-v4/ic_launcher.png",
+        "res/mipmap-xhdpi-v4/ic_launcher_round.png",
+        "res/mipmap-xxhdpi-v4/",
+        "res/mipmap-xxhdpi-v4/ic_launcher.png",
+        "res/mipmap-xxhdpi-v4/ic_launcher_round.png",
+        "res/mipmap-xxxhdpi-v4/",
+        "res/mipmap-xxxhdpi-v4/ic_launcher.png",
+        "res/mipmap-xxxhdpi-v4/ic_launcher_round.png",
+        "resources.arsc"
+      ]
+    }
+  },
+  "tool_versions": {
+    "REA": "6.8.0",
+    "Craft Anything": "0.6.0",
+    "JADX CLI": "1.5.6",
+    "JADX headless bridge": "0.7.1"
+  },
+  "versions": {
+    "1.8.73": {
+      "business_ver": 1873,
+      "package": "com.phicomm.speaker.player",
+      "version_name": "0.2.5",
+      "version_code": "100025",
+      "shared_user_id": "android.uid.system",
+      "min_sdk": "22",
+      "target_sdk": "22",
+      "signer_certificate_sha256": "34a2d2fe899656af5df3fbf68e805477b3df3708ca65c842baec2de8e578bc33",
+      "signer_subject": "EMAILADDRESS=phicomm@phicomm.com, CN=R1, OU=ShenZhen RD Center, O=Company, L=ShenZhen, ST=GuangDong, C=CN",
+      "v1_verified_by_apksigner": true,
+      "v2_verified": false,
+      "v3_verified": false,
+      "outer_dex_classes": 5304,
+      "jadx_java_files": 2171,
+      "jadx_errors": 19,
+      "exo_player_version": "2.18.0",
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_PRIVILEGED",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.CHANGE_WIFI_STATE",
+        "android.permission.INTERNET",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK",
+        "android.permission.WRITE_SECURE_SETTINGS",
+        "android.permission.WRITE_SETTINGS",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+        "android.permission.READ_DREAM_STATE",
+        "android.permission.READ_PHONE_STATE",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.READ_LOGS"
+      ]
+    },
+    "1.8.87": {
+      "business_ver": 1887,
+      "package": "com.phicomm.speaker.player",
+      "version_name": "0.2.5",
+      "version_code": "100025",
+      "shared_user_id": "android.uid.system",
+      "min_sdk": "22",
+      "target_sdk": "22",
+      "signer_certificate_sha256": "34a2d2fe899656af5df3fbf68e805477b3df3708ca65c842baec2de8e578bc33",
+      "signer_subject": "EMAILADDRESS=phicomm@phicomm.com, CN=R1, OU=ShenZhen RD Center, O=Company, L=ShenZhen, ST=GuangDong, C=CN",
+      "v1_verified_by_apksigner": true,
+      "v2_verified": false,
+      "v3_verified": false,
+      "outer_dex_classes": 5487,
+      "jadx_java_files": 2201,
+      "jadx_errors": 22,
+      "exo_player_version": "2.18.0",
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_PRIVILEGED",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.CHANGE_WIFI_STATE",
+        "android.permission.INTERNET",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK",
+        "android.permission.WRITE_SECURE_SETTINGS",
+        "android.permission.WRITE_SETTINGS",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+        "android.permission.READ_DREAM_STATE",
+        "android.permission.READ_PHONE_STATE",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.READ_LOGS"
+      ]
+    }
+  },
+  "tool_evidence": {
+    "1.8.87.rea-package.json": {
+      "evidence_id": "ev_fdc8657829fd1deec56ac3fae15cce57c3b02cce6ef1328baffc608931ede7b9",
+      "operation": "inspect_android_package",
+      "authority": "shipped-artifact",
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; DEX prototypes come from frozen JADX metadata. Display names may be aliases, and overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Incoming reference totals count JADX using nodes. Direct invoke entries within a using method report raw DEX code-unit offsets and method indexes, but coverage is limited to those nodes and directly matched invokes; it does not establish every possible dynamic or reflective call site.",
+        "Manifest summaries are parsed once by REA's bridge from the exact root AndroidManifest.xml resource, using namespace-aware XML attributes; decoded XML is retained. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ]
+    },
+    "1.8.73.craft-container-package.json": {
+      "id": "ev_ec12dae9b88376aa2c6d455946a8e89e68800c0b3312fdea69fa30e607ea82b5",
+      "operation": "android_package_show",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 22,
+        "status": "complete",
+        "total": 22
+      },
+      "limitations": [
+        {
+          "code": "verification_scope",
+          "message": "Signatures ARE verified cryptographically here (v2/v3 signature over the signed data plus a recomputed APK content digest; v1 PKCS#7 over the .SF plus MANIFEST.MF per-file digests). NOT checked: certificate revocation, v3 key-rotation lineage/proof-of-rotation, rollback protection, source-stamp, and whether the signing certificate is one you trust (the certificate SHA-256 fingerprint is reported so you can compare it yourself)."
+        }
+      ]
+    },
+    "1.8.73.signature.summary.json": {
+      "evidence_id": "ev_29a92515214edea8ddb0ccac8afcf732449fd50cbbd37d5fa8fc5c762cdb321b",
+      "operation": "inspect_analysis_view",
+      "authority": "shipped-artifact",
+      "confidence": "derived",
+      "limitations": [
+        "No signature is verified: signer, rotation-lineage and source-stamp signatures are NOT cryptographically checked, and certificate chains, revocation and authenticity are NOT evaluated. Certificates and lineages are what the APK declares.",
+        "Not read: v4 .apk.idsig, verity digests (matches_apk null), and the v1 X-Android-APK-Signed marker, so v1_only cannot distinguish a v1-only APK from one whose v2/v3 block was removed.",
+        "Static structural inspection only. No Android code executes, no device or adb is involved, and odex/vdex/oat/cdex are not read.",
+        "matches_apk and self_consistent only show that the declared content digest equals the digest of the current bytes. This is not a signature verification: anyone who changes the bytes can recompute the digest and write it into the signed data. SHA-256 identifies the exact bytes, not the producer.",
+        "v1 signers are what each signature block's PKCS#7 SignedData declares: its signatures, the .SF and MANIFEST.MF digests and entry coverage are NOT verified."
+      ]
+    },
+    "1.8.73.craft-server-class.json": {
+      "id": "ev_02e51fc6dfca4f8deec58c3f155b4fbf42478e146f68139781b51497fddfecb2",
+      "operation": "android_class_show",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 1,
+        "status": "complete",
+        "total": 1
+      },
+      "limitations": []
+    },
+    "1.8.87.craft-server-class.json": {
+      "id": "ev_a80fbfe256b5e9f60a3a1d4978646bdbe0608459e69c55a782bd226bad02fc06",
+      "operation": "android_class_show",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 1,
+        "status": "complete",
+        "total": 1
+      },
+      "limitations": []
+    },
+    "1.8.73.rea-package.json": {
+      "evidence_id": "ev_5b041e4fb773594f24e41107298f564cb715dcb2f50285b3ef7593adda065e25",
+      "operation": "inspect_android_package",
+      "authority": "shipped-artifact",
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; DEX prototypes come from frozen JADX metadata. Display names may be aliases, and overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Incoming reference totals count JADX using nodes. Direct invoke entries within a using method report raw DEX code-unit offsets and method indexes, but coverage is limited to those nodes and directly matched invokes; it does not establish every possible dynamic or reflective call site.",
+        "Manifest summaries are parsed once by REA's bridge from the exact root AndroidManifest.xml resource, using namespace-aware XML attributes; decoded XML is retained. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ]
+    },
+    "1.8.73.craft-classes.json": {
+      "id": "ev_d505d4ba34c6e3c9b5de546c56d1f0b6a813e17c051765a553b3fe472f27e669",
+      "operation": "android_classes_find",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 5000,
+        "next_offset": 5000,
+        "status": "partial",
+        "total": 5304
+      },
+      "limitations": []
+    },
+    "1.8.87.signature.summary.json": {
+      "evidence_id": "ev_089c75eff6a0b0e809927accddd1cd4cc35c3bb676bf8fc00325662ae3dde197",
+      "operation": "inspect_analysis_view",
+      "authority": "shipped-artifact",
+      "confidence": "derived",
+      "limitations": [
+        "No signature is verified: signer, rotation-lineage and source-stamp signatures are NOT cryptographically checked, and certificate chains, revocation and authenticity are NOT evaluated. Certificates and lineages are what the APK declares.",
+        "Not read: v4 .apk.idsig, verity digests (matches_apk null), and the v1 X-Android-APK-Signed marker, so v1_only cannot distinguish a v1-only APK from one whose v2/v3 block was removed.",
+        "Static structural inspection only. No Android code executes, no device or adb is involved, and odex/vdex/oat/cdex are not read.",
+        "matches_apk and self_consistent only show that the declared content digest equals the digest of the current bytes. This is not a signature verification: anyone who changes the bytes can recompute the digest and write it into the signed data. SHA-256 identifies the exact bytes, not the producer.",
+        "v1 signers are what each signature block's PKCS#7 SignedData declares: its signatures, the .SF and MANIFEST.MF digests and entry coverage are NOT verified."
+      ]
+    },
+    "1.8.87.craft-handler-class.json": {
+      "id": "ev_99515b469ca4381905e1c019537ebcec2e6f0354a50ecb45de99f2981624dac0",
+      "operation": "android_class_show",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 1,
+        "status": "complete",
+        "total": 1
+      },
+      "limitations": []
+    },
+    "1.8.87.rea-original-echo-oncreate.json": {
+      "evidence_id": "ev_810fc033a88b69087e16e5da702d0a61b972422cb372060a649d441a73ec1480",
+      "operation": "inspect_android_method",
+      "authority": "shipped-artifact",
+      "confidence": "derived",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; DEX prototypes come from frozen JADX metadata. Display names may be aliases, and overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Incoming reference totals count JADX using nodes. Direct invoke entries within a using method report raw DEX code-unit offsets and method indexes, but coverage is limited to those nodes and directly matched invokes; it does not establish every possible dynamic or reflective call site.",
+        "Manifest summaries are parsed once by REA's bridge from the exact root AndroidManifest.xml resource, using namespace-aware XML attributes; decoded XML is retained. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ]
+    },
+    "inner-stock.rea-echo-oncreate.json": {
+      "evidence_id": "ev_d3fe2936e6b8292bc1fedaf378849a74bf9283592b458267f20144f5fd4eada8",
+      "operation": "inspect_android_method",
+      "authority": "shipped-artifact",
+      "confidence": "derived",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; DEX prototypes come from frozen JADX metadata. Display names may be aliases, and overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Incoming reference totals count JADX using nodes. Direct invoke entries within a using method report raw DEX code-unit offsets and method indexes, but coverage is limited to those nodes and directly matched invokes; it does not establish every possible dynamic or reflective call site.",
+        "Manifest summaries are parsed once by REA's bridge from the exact root AndroidManifest.xml resource, using namespace-aware XML attributes; decoded XML is retained. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ]
+    },
+    "1.8.73.craft-classes-tail.json": {
+      "id": "ev_20757fcdde82233f1f573f5e0e5fac975dda76a86b218146f0acabaccf30aed5",
+      "operation": "android_classes_find",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 304,
+        "status": "complete",
+        "total": 5304
+      },
+      "limitations": []
+    },
+    "1.8.87.craft-container-package.json": {
+      "id": "ev_1e82f4e889916cf04b9d98cc7df1b059251439060f8a932dc5f036c5470c80a1",
+      "operation": "android_package_show",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 22,
+        "status": "complete",
+        "total": 22
+      },
+      "limitations": [
+        {
+          "code": "verification_scope",
+          "message": "Signatures ARE verified cryptographically here (v2/v3 signature over the signed data plus a recomputed APK content digest; v1 PKCS#7 over the .SF plus MANIFEST.MF per-file digests). NOT checked: certificate revocation, v3 key-rotation lineage/proof-of-rotation, rollback protection, source-stamp, and whether the signing certificate is one you trust (the certificate SHA-256 fingerprint is reported so you can compare it yourself)."
+        }
+      ]
+    },
+    "1.8.87.craft-http-constructor.json": {
+      "id": "ev_4cd6e1b6e97e0feaf74e34a0d2ace616fb82c1409a39c8ff14962b07f6e1ce67",
+      "operation": "android_method_show",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 6,
+        "status": "complete",
+        "total": 6
+      },
+      "limitations": [
+        {
+          "code": "overload_chosen",
+          "message": "<init> has 2 overloads; showing overload_index 0. Pass overload_index to pick another."
+        }
+      ]
+    },
+    "1.8.87.craft-classes-tail.json": {
+      "id": "ev_f09ee6ca5c1eb3acd4517b17e94db8d555797e5deb59ad1180809d0de68337d5",
+      "operation": "android_classes_find",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 487,
+        "status": "complete",
+        "total": 5487
+      },
+      "limitations": []
+    },
+    "1.8.87.craft-classes.json": {
+      "id": "ev_81a7270d5b476a5d5dd982b321643ad25b008ef88ad1397e4ae551f05b08420c",
+      "operation": "android_classes_find",
+      "authority": "original-files",
+      "confidence": "observed",
+      "coverage": {
+        "examined": 5000,
+        "next_offset": 5000,
+        "status": "partial",
+        "total": 5487
+      },
+      "limitations": []
+    },
+    "1.8.87.rea-original-echo-class.json": {
+      "evidence_id": "ev_c699ba40a469b2a9c11a6ab24f6c3243fca4cb5f0732152d4fc65cd1543721ef",
+      "operation": "inspect_android_class",
+      "authority": "shipped-artifact",
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; DEX prototypes come from frozen JADX metadata. Display names may be aliases, and overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Incoming reference totals count JADX using nodes. Direct invoke entries within a using method report raw DEX code-unit offsets and method indexes, but coverage is limited to those nodes and directly matched invokes; it does not establish every possible dynamic or reflective call site.",
+        "Manifest summaries are parsed once by REA's bridge from the exact root AndroidManifest.xml resource, using namespace-aware XML attributes; decoded XML is retained. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ]
+    }
+  },
+  "source_findings": [
+    {
+      "finding": "same_component_adds_http_server",
+      "source_path": "com/phicomm/speaker/player/EchoService.java",
+      "needle": "server.getInstance()",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [
+          38
+        ],
+        "derived_source_sha256": "816d61a0103bcdc84b68a7181433dad24a00f0339bdd9695146e1be905d196cf"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          144
+        ],
+        "derived_source_sha256": "32bd269c86cda67867a819059afd12c96becd123ec090db86cd636b187e17120"
+      }
+    },
+    {
+      "finding": "new_miplay_bootstrap",
+      "source_path": "com/phicomm/speaker/player/EchoService.java",
+      "needle": "MiPlayHost.init(",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "816d61a0103bcdc84b68a7181433dad24a00f0339bdd9695146e1be905d196cf"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          160
+        ],
+        "derived_source_sha256": "32bd269c86cda67867a819059afd12c96becd123ec090db86cd636b187e17120"
+      }
+    },
+    {
+      "finding": "new_mixer_controller",
+      "source_path": "com/phicomm/speaker/player/EchoService.java",
+      "needle": "new TinyMixController(",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "816d61a0103bcdc84b68a7181433dad24a00f0339bdd9695146e1be905d196cf"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          156
+        ],
+        "derived_source_sha256": "32bd269c86cda67867a819059afd12c96becd123ec090db86cd636b187e17120"
+      }
+    },
+    {
+      "finding": "queue_27",
+      "source_path": "com/phicomm/speaker/player/MsgHandler.java",
+      "needle": "case 27:",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "44bb35bb903017791bee1f360b5e4a02e05d38b9e387f663fd5e82c3ef5a2471"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          198
+        ],
+        "derived_source_sha256": "45a880ae62a047a0edd0ba67b9ec937bbe2f4ea116b667f5fbae04a3afaf2f3d"
+      }
+    },
+    {
+      "finding": "queue_28",
+      "source_path": "com/phicomm/speaker/player/MsgHandler.java",
+      "needle": "case 28:",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "44bb35bb903017791bee1f360b5e4a02e05d38b9e387f663fd5e82c3ef5a2471"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          201
+        ],
+        "derived_source_sha256": "45a880ae62a047a0edd0ba67b9ec937bbe2f4ea116b667f5fbae04a3afaf2f3d"
+      }
+    },
+    {
+      "finding": "queue_29",
+      "source_path": "com/phicomm/speaker/player/MsgHandler.java",
+      "needle": "case 29:",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "44bb35bb903017791bee1f360b5e4a02e05d38b9e387f663fd5e82c3ef5a2471"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          204
+        ],
+        "derived_source_sha256": "45a880ae62a047a0edd0ba67b9ec937bbe2f4ea116b667f5fbae04a3afaf2f3d"
+      }
+    },
+    {
+      "finding": "bluetooth_service_switch",
+      "source_path": "com/xiaofei/server.java",
+      "needle": "\"Set_Bluetooth_Open\".equals(str)",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "53a1dc3f2db1ac5c3ac5f84cc263dca18fd3d198d66a0e224b53f0655b3265a7"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          4037
+        ],
+        "derived_source_sha256": "7cfe67c3dbaab974b678322fb9a6abbe2e63039716e98be9796bc85b2cbd2b28"
+      }
+    },
+    {
+      "finding": "miplay_service_switch",
+      "source_path": "com/xiaofei/server.java",
+      "needle": "\"Set_MiPlay_Open\".equals(str)",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "53a1dc3f2db1ac5c3ac5f84cc263dca18fd3d198d66a0e224b53f0655b3265a7"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          4095
+        ],
+        "derived_source_sha256": "7cfe67c3dbaab974b678322fb9a6abbe2e63039716e98be9796bc85b2cbd2b28"
+      }
+    },
+    {
+      "finding": "mixer_api",
+      "source_path": "com/xiaofei/server.java",
+      "needle": "\"setMixerValue\".equals(str)",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "53a1dc3f2db1ac5c3ac5f84cc263dca18fd3d198d66a0e224b53f0655b3265a7"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          4522
+        ],
+        "derived_source_sha256": "7cfe67c3dbaab974b678322fb9a6abbe2e63039716e98be9796bc85b2cbd2b28"
+      }
+    },
+    {
+      "finding": "upload_batch",
+      "source_path": "com/xiaofei/server.java",
+      "needle": "\"/upload/batch/begin\"",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "53a1dc3f2db1ac5c3ac5f84cc263dca18fd3d198d66a0e224b53f0655b3265a7"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          796
+        ],
+        "derived_source_sha256": "7cfe67c3dbaab974b678322fb9a6abbe2e63039716e98be9796bc85b2cbd2b28"
+      }
+    },
+    {
+      "finding": "upload_install_command",
+      "source_path": "com/xiaofei/upload/UploadTaskManager.java",
+      "needle": "new String[]{\"/system/bin/pm\", \"install\", \"-r\"",
+      "1.8.73": {
+        "file_observed": false
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          2072
+        ],
+        "derived_source_sha256": "e7a0b2055f47a2f8571338ff7bc60e610d1eec57a40ed2ce892827a4cbd5b38a"
+      }
+    },
+    {
+      "finding": "screenshot_actual_display_size",
+      "source_path": "com/xiaofei/Screencap.java",
+      "needle": "WindowManager windowManager",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "a844b3aa5da533e13b5fd56d25e2bc0b200fe96f93cfa338fa70e7d3c8969f18"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          43
+        ],
+        "derived_source_sha256": "71abda8e856a6e2edfe4fb736817ea963a7fe22c4f8a7a91eeaa2de756dfb0b1"
+      }
+    },
+    {
+      "finding": "external_session_takeover",
+      "source_path": "com/phicomm/speaker/player/model/ExternalSessionArbiter.java",
+      "needle": "boolean takeOver(",
+      "1.8.73": {
+        "file_observed": false
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          23
+        ],
+        "derived_source_sha256": "26fca7441b07f36e1caa2fc5d46efa91c87337e02418c965df3b08046a215f4d"
+      }
+    },
+    {
+      "finding": "current_session_guard",
+      "source_path": "com/phicomm/speaker/player/model/SessionCallbackGuard.java",
+      "needle": "isCurrentSessionCallback()",
+      "1.8.73": {
+        "file_observed": false
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          5
+        ],
+        "derived_source_sha256": "7f7049d76167d7d10ff5c7732f08f4194923ce571a73ffd9067cc6b8a32e691c"
+      }
+    },
+    {
+      "finding": "led_effect_refactor",
+      "source_path": "com/phicomm/speaker/player/PlayerVisualizer.java",
+      "needle": "VisualizerEffect.effect",
+      "1.8.73": {
+        "file_observed": true,
+        "matching_lines": [],
+        "derived_source_sha256": "d2482ae4845d62e8476e247f52cec42a499be3b15698a12fef0f792da4101bc5"
+      },
+      "1.8.87": {
+        "file_observed": true,
+        "matching_lines": [
+          69,
+          73,
+          77,
+          79,
+          84
+        ],
+        "derived_source_sha256": "3b153af67172575e28ae98104d54de579dac06e72338206387d4f0a67b6e9709"
+      }
+    }
+  ],
+  "limitations": [
+    "Certificate DN is not independent proof of OEM identity; original ROM APK not supplied.",
+    "DEX/APK polyglot strongly matches Janus; device patch level and actual package path not observed.",
+    "JADX errors: 19 in 1.8.73, 22 in 1.8.87; not every method recovered or reviewed.",
+    "XOR restoration uses verified inert expression templates; unresolved wrappers and branch reachability remain unknown.",
+    "Obfuscated class names are not stable identities or feature counts.",
+    "Uploaded changelog ends with version 1.8.72, dated 2022-08-10."
+  ]
+}
