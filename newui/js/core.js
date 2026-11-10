@@ -138,7 +138,8 @@
 
     function connectTo(ip) {
         ip = String(ip || '').trim();
-        if (!ip) { toast('请输入设备 IP 地址', 'err'); return; }
+        try { ip = R1Config.parseDeviceAddress(ip).address; }
+        catch (e) { toast(e.message, 'err'); return; }
         setState({ connecting: true, lastIp: ip });
         pushHistory(ip);
         try { R1WS.connect(ip); } catch (e) { toast('连接失败：' + (e && e.message), 'err'); }

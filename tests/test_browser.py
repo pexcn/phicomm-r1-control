@@ -71,6 +71,32 @@ class BrowserTests(unittest.TestCase):
         self.page.wait_for_selector("#ssid")
         self.assertTrue(self.page.url.startswith(self.base + "config_wifi/"))
         self.assertEqual(self.page.locator("#encryption option").count(), 3)
+        self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
+
+    def test_wifi_local_jquery_and_cdn_fallback(self):
+        fallback = []
+        def cdn(route):
+            fallback.append(route.request.url)
+            route.fulfill(path=ROOT / "jquery-3.6.0.min.js")
+        self.context.route("https://cdnjs.cloudflare.com/ajax/libs/jquery/**", cdn)
+        self.page.goto(self.base + "config_wifi/")
+        self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
+        self.assertEqual(fallback, [])
+        self.context.route(self.base + "jquery-3.6.0.min.js", lambda route: route.abort())
+        self.page.reload()
+        self.page.wait_for_function("typeof jQuery !== 'undefined'")
+        self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
+        self.assertEqual(len(fallback), 1)
+        # 兼容旧配网入口；资源基址应取脚本所在目录。
+        self.context.route(self.base + "legacy-wifi.html", lambda route: route.fulfill(
+            content_type="text/html", body='<html><head></head><body>'
+            '<script src="config_wifi/main.js"></script></body></html>'))
+        self.page.goto(self.base + "legacy-wifi.html")
+        self.page.wait_for_function("typeof jQuery !== 'undefined'")
+        self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
+        self.assertEqual(len(fallback), 2)
+        self.assertEqual(self.page.locator('link[rel="stylesheet"]').get_attribute("href"),
+                         self.base + "new_r1_control.css")
 
     def test_queue_deletion_uses_current_confirmed_connection(self):
         self.classic()
@@ -150,8 +176,9 @@ class BrowserTests(unittest.TestCase):
         self.page.goto(self.origin + "/device/?no_jump")
         self.page.wait_for_function("typeof App !== 'undefined'")
         self.assertEqual(self.page.evaluate("R1Config.assetBaseUrl"), self.base)
+        self.assertEqual(self.page.evaluate("control_host"), urlsplit(self.base).netloc)
 
-    def test_https_subdirectory_keeps_apple_entry_on_site(self):
+    def test_https_subdirectory_wss_reconnect_and_assets(self):
         base = "https://r1-control.test/project/"
         def resource(route):
             path = urlsplit(route.request.url).path.removeprefix("/project/")
@@ -160,14 +187,72 @@ class BrowserTests(unittest.TestCase):
             target = ROOT / path
             route.fulfill(path=target) if target.is_file() else route.fulfill(status=404)
         self.context.route(base + "**", resource)
-        self.page.add_init_script("Object.defineProperty(navigator,'userAgent',{value:'iPhone Safari'})")
+        self.page.add_init_script("""(() => {
+            Object.defineProperty(navigator,'userAgent',{value:'iPhone Safari'});
+            window.sockets=[];
+            window.WebSocket=class {
+                static CONNECTING=0; static OPEN=1; static CLOSED=3;
+                constructor(url) { this.url=url; this.readyState=0; sockets.push(this); }
+                close() { this.readyState=3; }
+                send() {}
+            };
+        })();""")
         self.page.goto(base + "?no_auto_connect")
         self.page.wait_for_selector("#input")
         self.assertTrue(self.page.url.startswith(base))
+        endpoint = "wss://speaker.example.test/devices/living/ws?key=a%2Fb"
+        self.page.locator("#input").fill(endpoint)
+        self.page.get_by_role("button", name="连接音箱", exact=True).click()
+        self.page.wait_for_function("sockets.length===1")
+        self.assertEqual(self.page.evaluate("sockets[0].url"), endpoint)
+        self.page.evaluate("""() => {
+            sockets[0].readyState=1; sockets[0].onopen();
+            handleHostnameUpdate({data:'\\r\\nPhicomm_R1_ABCD\\r\\nwlan0 inet 192.0.2.10/24'});
+            sockets[0].readyState=3; sockets[0].onclose({code:1006});
+        }""")
+        self.page.wait_for_function("sockets.length===2")
+        self.assertEqual(self.page.evaluate("sockets[1].url"), endpoint)
+        self.assertEqual(self.page.evaluate("state.localIp"), "192.0.2.10")
+        self.assertEqual(self.page.evaluate("localStorage.r1_endpoint"), endpoint)
+        self.assertEqual(self.page.evaluate("R1Config.deviceHttpUrl(state.ip,'upload')"),
+                         "https://speaker.example.test/devices/living/upload?key=a%2Fb")
+        self.assertTrue(self.page.url.startswith(base))
+        self.page.goto(base + "?no_auto_connect")
+        self.page.wait_for_selector("#input")
+        self.assertEqual(self.page.locator("#input").input_value(), endpoint)
+        # 即使旧权限流程传入跳转标志，也留在当前 HTTPS 页面。
+        self.page.evaluate("currentPermission='denied'")
+        self.page.locator("#input").fill("192.0.2.10:9090")
+        self.page.get_by_role("button", name="连接音箱", exact=True).click()
+        self.page.wait_for_function("sockets.length===1")
+        self.assertEqual(self.page.evaluate("sockets[0].url"), "ws://192.0.2.10:9090/")
+        self.assertTrue(self.page.url.startswith(base))
+        self.page.get_by_role("button", name="取消连接", exact=True).click()
+        self.page.locator("#input").fill("192.0.2.10:80")
+        self.page.get_by_role("button", name="连接音箱", exact=True).click()
+        self.page.wait_for_function("sockets.length===2")
+        self.assertEqual(self.page.evaluate("sockets[1].url"), "ws://192.0.2.10/")
+        self.assertEqual(self.page.evaluate("R1Config.parseDeviceAddress(state.ip).url"),
+                         "ws://192.0.2.10/")
         self.page.goto(base + "newui/")
         self.page.get_by_role("button", name="关闭", exact=True).wait_for()
         self.assertEqual(self.page.url, base + "newui/")
         self.assertEqual(self.page.evaluate("R1Config.assetBaseUrl"), base)
+        self.page.get_by_placeholder("IP、主机名或 wss://代理地址").fill(endpoint)
+        self.page.get_by_role("dialog").get_by_role("button", name="连接", exact=True).click()
+        self.page.wait_for_function("sockets.length===1")
+        self.assertEqual(self.page.evaluate("sockets[0].url"), endpoint)
+        self.page.evaluate("""() => {
+            sockets[0].readyState=1; sockets[0].onopen();
+            sockets[0].readyState=3; sockets[0].onclose({code:1006});
+        }""")
+        self.page.wait_for_function("sockets.length===2")
+        self.assertEqual(self.page.evaluate("sockets[1].url"), endpoint)
+        self.assertEqual(self.page.evaluate("localStorage.r1_last_ip"), endpoint)
+        self.assertEqual(self.page.get_by_role("button", name="切换到 HTTP").count(), 0)
+        self.page.goto(base + "config_wifi/")
+        self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
+        self.assertTrue(self.page.url.startswith(base))
 
 
 if __name__ == "__main__":

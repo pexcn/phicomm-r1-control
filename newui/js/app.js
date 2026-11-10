@@ -31,7 +31,7 @@
     function sheetConfig(type) {
         var Pn = R1Panels || {};
         var map = {
-            connect: { title: '连接 R1 音箱', sub: '同一局域网内输入 IP，或自动扫描发现', Comp: ConnectSheet, center: true },
+            connect: { title: '连接 R1 音箱', sub: '输入设备地址，或扫描局域网设备', Comp: ConnectSheet, center: true },
             source: { title: '音乐源', sub: '切换点播与歌单使用的音源', Comp: Pn.SourceSheet, center: true },
             light: { title: '氛围灯设置', sub: '效果 / 亮度 / 渐变速度 / 颜色', Comp: Pn.LightSheet, center: true },
             tts: { title: '选择发音人', sub: '设备朗读文本时使用的声音', Comp: Pn.TtsSpeakerSheet, center: true },
@@ -56,19 +56,17 @@
         var _ip = useState(''), ip = _ip[0], setIp = _ip[1];
         var scan = st.scan || { running: false, devices: [], scanned: 0, total: 0 };
         var isHttps = location.protocol === 'https:';
-        var isApple = /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent || '');
 
         function doConnect(target) {
             var v = String(target != null ? target : ip).trim();
-            if (!v) { C.toast('请输入设备 IP', 'err'); return; }
+            if (!v) { C.toast('请输入设备地址', 'err'); return; }
             C.connectTo(v);
         }
 
         return h('div', null,
             h('div', { style: { display: 'flex', gap: '10px', marginBottom: '14px' } },
                 h(Input, {
-                    value: ip, onChange: setIp, placeholder: '例如 192.168.2.97',
-                    inputMode: 'decimal',
+                    value: ip, onChange: setIp, placeholder: 'IP、主机名或 wss://代理地址',
                     onKeyDown: function (e) { if (e.key === 'Enter') doConnect(); }
                 }),
                 h(Button, { variant: 'primary', loading: st.connecting && !st.connected, onClick: function () { doConnect(); } }, '连接')
@@ -130,19 +128,12 @@
                     '不知道 IP？可以先点上面的「扫描局域网设备」，或查看路由器后台的设备列表。'
                 ),
 
-            isHttps && isApple
+            isHttps
                 ? h('div', { className: 'divider' })
                 : null,
-            isHttps && isApple
+            isHttps
                 ? h('div', { className: 'hint' },
-                    '当前是 HTTPS，iPhone/iPad 上可能无法直连设备，建议切换到 HTTP。 ',
-                    h('button', {
-                        style: { color: 'var(--accent)', fontWeight: 600 },
-                        onClick: function () {
-                            try { sessionStorage.setItem('r1_protocol_choice', 'http'); } catch (e) {}
-                            location.replace(location.href.replace(/^https:/, 'http:'));
-                        }
-                    }, '切换到 HTTP')
+                    'HTTPS 页面可填写 wss:// 代理地址。直连音箱需要浏览器支持并允许本地网络访问。'
                 )
                 : null
         );

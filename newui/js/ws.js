@@ -6,7 +6,6 @@
     'use strict';
 
     /* ========== 配置常量 ========== */
-    var DEFAULT_HOST = 'r1.wxfsq.com';
     var RECONNECT_DELAY = 3000;       // 重连间隔(ms)
     var HEARTBEAT_INTERVAL = 30000;   // 心跳间隔(ms)
     var REQUEST_TIMEOUT = 10000;      // 请求超时(ms)
@@ -102,9 +101,8 @@
     }
 
     function buildWsUrl(ip) {
-        if (ip) return 'ws://' + ip + ':8080';
-        var host = window.control_host || DEFAULT_HOST;
-        return 'ws://' + host + '/ws';
+        if (ip) return R1Config.parseDeviceAddress(ip).url;
+        return R1Config.serviceUrl('ws').replace(/^http/, 'ws');
     }
 
     /* 执行实际的 WebSocket 创建与连接绑定 */
@@ -165,7 +163,8 @@
 
     /* connect: 入口函数，带 local-network-access 权限检查 */
     function connect(ip) {
-        if (connected && connectIp === ip) return;
+        var target = ip ? R1Config.parseDeviceAddress(ip).address : '';
+        if (connected && connectIp === target) return;
         if (connecting && ws) {
             try { ws.onclose = null; ws.close(); } catch (e) {}
             ws = null;
@@ -174,7 +173,7 @@
         clearTimers();
         connecting = true;
         connected = false;
-        connectIp = ip || '';
+        connectIp = target;
         wsUrl = buildWsUrl(ip);
         initDone = false;
         emit('connecting', { url: wsUrl });
@@ -182,7 +181,7 @@
 
         /* 根据权限状态决定连接策略 */
         var isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
-        if (!isHttps || _lnPermissionState === 'granted' || _lnPermissionState === 'unsupported') {
+        if (/^wss:/.test(wsUrl) || !isHttps || _lnPermissionState === 'granted' || _lnPermissionState === 'unsupported') {
             /* HTTP 页面 / 已授权 / 不支持权限API → 直接连接 */
             doConnect(wsUrl);
             return;
@@ -1130,7 +1129,7 @@
                         try {
                             var devEntry = {
                                 hostname: hostname,
-                                ip: apiInfo.ip || (connectIp ? connectIp.split(':')[0] : ''),
+                                ip: apiInfo.ip || localIp || (connectIp ? R1Config.parseDeviceAddress(connectIp).host : ''),
                                 dev_name: deviceInfo.device_name || deviceInfo.dev_name || '',
                                 url: location.href.indexOf('?') > -1 ? location.href.split('?')[0] : location.href.split('#')[0],
                                 device_sid: apiInfo.device_sid || '',
@@ -1374,7 +1373,7 @@
                     try {
                         var devEntry = {
                             hostname: hostname,
-                            ip: deviceInfo.ip || (connectIp ? connectIp.split(':')[0] : ''),
+                            ip: deviceInfo.ip || (connectIp ? R1Config.parseDeviceAddress(connectIp).host : ''),
                             dev_name: deviceInfo.device_name || deviceInfo.dev_name || '',
                             url: location.href.indexOf('?') > -1 ? location.href.split('?')[0] : location.href.split('#')[0]
                         };
@@ -2047,7 +2046,7 @@
      */
     function openADB() {
         /* 打开独立 ADB 控制台页面，自动传入当前设备 IP */
-        var ip = connectIp || '';
+        var ip = localIp || (connectIp ? R1Config.parseDeviceAddress(connectIp).host : '');
         var url = R1Config.assetUrl('adb/?ip=' + encodeURIComponent(ip) + '&t=' + Date.now());
         window.open(url, '_blank');
     }

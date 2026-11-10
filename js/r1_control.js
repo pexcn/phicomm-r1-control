@@ -1,4 +1,4 @@
-var DEFAULT_CONTROL_HOST = "r1.wxfsq.com",
+var DEFAULT_CONTROL_HOST = new URL(R1Config.assetBaseUrl).host,
   IP_PATTERN =
     /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/,
   HOSTNAME_PATTERN = /^phicomm_r1_\S+$/i,
@@ -7210,7 +7210,7 @@ function loadDeviceInfo() {
           urlParams.put({ connect_id: a.device_msid, connect_ip: state.ip }),
         updateDeviceList({
           hostname: state.hostname,
-          ip: state.ip.substring(0, state.ip.indexOf(":")),
+          ip: state.localIp || R1Config.parseDeviceAddress(state.ip).host,
           dev_name: state.info.device_name,
           url: location.href.split("?")[0],
           device_sid: a.device_sid,
@@ -9912,12 +9912,12 @@ function handleHostnameUpdate(e) {
             var o = n[a].split("/")[0];
             n[a] &&
               IP_PATTERN.test(o) &&
-              ((state.localIp = o), (state.ip = o + ":8080"));
+              (state.localIp = o);
           }
       (state.hostname &&
         (updateDeviceList({
           hostname: state.hostname,
-          ip: state.ip.substring(0, state.ip.indexOf(":")),
+          ip: state.localIp || R1Config.parseDeviceAddress(state.ip).host,
           dev_name: state.info.device_name,
           url: location.href.split("?")[0],
         }),
@@ -11497,9 +11497,7 @@ function onItemClick(e, t, i) {
           if ("open_net_config" !== n) {
             if ("upload_page" === n) {
               var a = new URL(
-                  location.href.indexOf(state.controlHost) > -1
-                    ? "http://" + state.ip + "/upload"
-                    : "/upload",
+                  R1Config.deviceHttpUrl(state.ip, "upload"),
                   location.href,
                 ),
                 o = "",
@@ -12102,12 +12100,11 @@ function connectSpeaker() {
       urlParams.del(["no_auto_connect", "connect_ip", "connect_id"]),
       !state.ip)
     ) {
-      var e =
+      var e = localStorage.getItem("r1_endpoint") ||
         localStorage.getItem("ip") || localStorage.getItem("hostname") || "";
       if (e) {
-        var t = e.split(":")[0];
-        (IP_PATTERN.test(t) || HOSTNAME_PATTERN.test(t.toLowerCase())) &&
-          (state.ip = e.indexOf(":") > -1 ? e : e + ":8080");
+        try { state.ip = R1Config.parseDeviceAddress(e).address; }
+        catch (error) { /* 忽略旧的无效地址，保留连接页供用户修正。 */ }
       }
     }
     if (!state.ip) {
@@ -12123,7 +12120,7 @@ function connectSpeaker() {
         urlParams.put(n));
     }
     (state.ws && state.ws.readyState !== WebSocket.CLOSED) ||
-      ((state.ws = createWebSocket("ws://" + state.ip)),
+      ((state.ws = createWebSocket(R1Config.parseDeviceAddress(state.ip).url)),
       setPageTitle("正在连接音箱，请稍候。。。"),
       showConnectionNotice(
         "正在连接音箱",
@@ -12136,7 +12133,8 @@ function connectSpeaker() {
       ((a.onopen = function () {
         if (a === state.ws) {
           if (state.ip) {
-            var e = state.ip.split(":")[0];
+            localStorage.setItem("r1_endpoint", state.ip);
+            var e = R1Config.parseDeviceAddress(state.ip).host;
             IP_PATTERN.test(e)
               ? (localStorage.setItem("ip", e),
                 localStorage.removeItem("hostname"))
@@ -12416,9 +12414,9 @@ function renderConnectPage() {
         ((this.ondblclick = function () {}), loadConsole());
       }));
   var e = makeEl("div", { id: "custom_ip_page" }),
-    t = localStorage.getItem("ip") || localStorage.getItem("hostname") || "";
-  (-1 != state.connectIp && (t = state.connectIp),
-    t && t.indexOf(":") > -1 && (t = t.substring(0, t.indexOf(":"))));
+    t = localStorage.getItem("r1_endpoint") ||
+      localStorage.getItem("ip") || localStorage.getItem("hostname") || "";
+  -1 != state.connectIp && (t = state.connectIp);
   var i = null;
   state.controlHost.indexOf("r1.wxfsq.com") > -1 &&
     window.jQuery &&
@@ -12471,7 +12469,7 @@ function renderConnectPage() {
       }),
       e.appendChild(n));
   } else state.connectId = null;
-  e.appendChild(makeText("IP(不需要输入端口)："));
+  e.appendChild(makeText("IP、主机名或 WebSocket 地址："));
   var o = makeEl("input", { type: "text", id: "input" });
   ((o.oninput = function () {
     handleIpInput(this);
@@ -12526,8 +12524,9 @@ function renderConnectPage() {
       )),
     e.appendChild(makeDiv("height:10px")),
     ui.container && ui.container.appendChild(e));
-  var l = t ? String(t).toLowerCase() : "";
-  if (t && (IP_PATTERN.test(t) || HOSTNAME_PATTERN.test(l))) {
+  var validAddress = false;
+  try { validAddress = !!R1Config.parseDeviceAddress(t); } catch (error) {}
+  if (validAddress) {
     if (((o.value = t), -1 === location.href.indexOf("no_auto_connect"))) {
       var u,
         c = function () {
@@ -12566,117 +12565,87 @@ function attemptSpeakerConnection(e) {
     hideDisconnectedActions();
     var t = $("#input");
     if (t) {
-      var i = (null == t.value ? "" : String(t.value)).replace(
-        /^\s+|\s+$/g,
-        "",
-      );
-      if (
-        (i.indexOf("://") > -1 && (i = i.substring(i.indexOf("://") + 3)),
-        i.indexOf(":") > -1 &&
-          /\d+\.\d+\.\d+\.\d+/.test(i) &&
-          (i = i.substring(0, i.indexOf(":"))),
-        (i = i.replace(/\/.*$/, "")),
-        (state.ip = i),
-        state.ip)
-      )
-        if (
-          IP_PATTERN.test(state.ip) ||
-          HOSTNAME_PATTERN.test(state.ip.toLowerCase())
-        ) {
-          var n = IP_PATTERN.test(state.ip);
-          if (
-            (state.ws &&
-              (clearTimeout(timers.connectTimeout),
-              (timers.connectTimeout = -1),
-              (state.ws.onclose = function () {}),
+      var endpoint;
+      try {
+        endpoint = R1Config.parseDeviceAddress(t.value);
+      } catch (error) {
+        showAppAlert(error.message);
+        return;
+      }
+      var i = endpoint.host;
+      state.ip = endpoint.address;
+      var n = IP_PATTERN.test(i);
+      state.ws &&
+        (clearTimeout(timers.connectTimeout),
+        (timers.connectTimeout = -1),
+        (state.ws.onclose = function () {}),
+        state.ws.close(),
+        cleanupSpeakerConnection(state.ws),
+        (state.ws = null));
+      ui.main && (ui.main.onclick = function () {});
+      setPageTitle("请稍候，正在连接音箱。。。");
+      state.ws = createWebSocket(endpoint.url);
+      if (!state.ws) return;
+      var a = state.ws;
+      (showConnectionNotice(
+        "正在连接音箱",
+        "正在连接 " + state.ip + "，请稍候。",
+        testSpeakerConnection,
+        "取消连接",
+      ),
+        (state.ws.onopen = function () {
+          if (state.ws === a) {
+            var e = $("#input");
+            ((state.connectId = (e && e.getAttribute("connect_id")) || null),
+              clearTimeout(timers.connectTimeout),
+              (state.testConnectState = !0),
+              (state.connectInitialized = !0),
+              loginFlowActive() ||
+                (showFlowNotice(
+                  "connection",
+                  "正在初始化",
+                  "连接音箱成功，正在等待设备初始化，请稍候。",
+                ),
+                showRebootEchoButton(!0),
+                setPageTitle("连接音箱成功，正在初始化。。。")),
+              localStorage.setItem("r1_endpoint", endpoint.address),
+              n
+                ? (localStorage.removeItem("hostname"),
+                  localStorage.setItem("ip", i))
+                : (localStorage.removeItem("ip"),
+                  localStorage.setItem("hostname", i)),
+              initLogin(),
+              connectSpeaker(),
+              sendWs({ type: "get_info" }),
+              removeEl($("#custom_ip_page")));
+          }
+        }),
+        (state.ws.onclose = function (e) {
+          state.ws === a &&
+            (clearTimeout(timers.connectTimeout),
+            (state.testConnectState = !0),
+            1006 === e.code &&
+              (cleanupSpeakerConnection(state.ws),
+              clearFlowNotice("connection"),
+              setPageTitle("请输入音箱IP进行连接！"),
+              showAppAlert(
+                "连接音箱失败，请确保已安装new_EchoService到音箱！\n请检查音箱IP是否正确或重启音箱再试！",
+              )));
+        }),
+        clearTimeout(timers.connectTimeout),
+        (timers.connectTimeout = setTimeout(function () {
+          state.ws !== a ||
+            state.testConnectState ||
+            (clearFlowNotice("connection"),
+            setPageTitle("请输入音箱IP进行连接！"),
+            state.ws &&
+              ((state.ws.onclose = function () {}),
               state.ws.close(),
-              cleanupSpeakerConnection(state.ws),
-              (state.ws = null)),
-            ui.main && (ui.main.onclick = function () {}),
-            setPageTitle("请稍候，正在连接音箱。。。"),
-            (state.ip = state.ip + ":8080"),
-            e && -1 === location.search.indexOf("no_jump"))
-          )
-            return (
-              showConnectionNotice(
-                "正在跳转音箱",
-                "正在打开 " + state.ip + "，请稍候。",
-                null,
-                "取消连接",
-              ),
-              void setTimeout(function () {
-                (n
-                  ? (localStorage.removeItem("hostname"),
-                    localStorage.setItem("ip", i))
-                  : (localStorage.removeItem("ip"),
-                    localStorage.setItem("hostname", i)),
-                  (location.href = "http://" + state.ip + "/?no_jump"));
-              }, 100)
-            );
-          state.ws = createWebSocket("ws://" + state.ip);
-          var a = state.ws;
-          (showConnectionNotice(
-            "正在连接音箱",
-            "正在连接 " + state.ip + "，请稍候。",
-            testSpeakerConnection,
-            "取消连接",
-          ),
-            (state.ws.onopen = function () {
-              if (state.ws === a) {
-                var e = $("#input");
-                ((state.connectId =
-                  (e && e.getAttribute("connect_id")) || null),
-                  clearTimeout(timers.connectTimeout),
-                  (state.testConnectState = !0),
-                  (state.connectInitialized = !0),
-                  loginFlowActive() ||
-                    (showFlowNotice(
-                      "connection",
-                      "正在初始化",
-                      "连接音箱成功，正在等待设备初始化，请稍候。",
-                    ),
-                    showRebootEchoButton(!0),
-                    setPageTitle("连接音箱成功，正在初始化。。。")),
-                  n
-                    ? (localStorage.removeItem("hostname"),
-                      localStorage.setItem("ip", i))
-                    : (localStorage.removeItem("ip"),
-                      localStorage.setItem("hostname", i)),
-                  initLogin(),
-                  connectSpeaker(),
-                  sendWs({ type: "get_info" }),
-                  removeEl($("#custom_ip_page")));
-              }
-            }),
-            (state.ws.onclose = function (e) {
-              state.ws === a &&
-                (clearTimeout(timers.connectTimeout),
-                (state.testConnectState = !0),
-                1006 === e.code &&
-                  (cleanupSpeakerConnection(state.ws),
-                  clearFlowNotice("connection"),
-                  setPageTitle("请输入音箱IP进行连接！"),
-                  showAppAlert(
-                    "连接音箱失败，请确保已安装new_EchoService到音箱！\n请检查音箱IP是否正确或重启音箱再试！",
-                  )));
-            }),
-            clearTimeout(timers.connectTimeout),
-            (timers.connectTimeout = setTimeout(function () {
-              state.ws !== a ||
-                state.testConnectState ||
-                (clearFlowNotice("connection"),
-                setPageTitle("请输入音箱IP进行连接！"),
-                state.ws &&
-                  ((state.ws.onclose = function () {}),
-                  state.ws.close(),
-                  cleanupSpeakerConnection(state.ws)),
-                showAppAlert(
-                  "连接音箱超时，请确保已安装new_EchoService到音箱！\n请检查音箱IP是否正确或重启音箱再试！",
-                ));
-            }, 25e3)));
-        } else
-          showAppAlert("请输入正确的IP！\n例如：192.168.1.100（不需要加端口）");
-      else showAppAlert("请输入正确的IP！");
+              cleanupSpeakerConnection(state.ws)),
+            showAppAlert(
+              "连接音箱超时，请确保已安装new_EchoService到音箱！\n请检查音箱IP是否正确或重启音箱再试！",
+            ));
+        }, 25e3)));
     } else showAppAlert("请先输入音箱IP！");
   }
 }
@@ -12684,8 +12653,13 @@ function createWebSocket(e) {
   try {
     return new WebSocket(e);
   } catch (t) {
-    "https:" === location.protocol &&
-      urlParams.put({ connect_ip: e.substring(5), noCheckPermission: 1 });
+    showAppAlert(
+      "连接失败：" +
+        t.message +
+        ("https:" === location.protocol && /^ws:/.test(e)
+          ? "\n可改用 wss:// 代理地址；页面将保留 HTTPS。"
+          : ""),
+    );
   }
 }
 var permissionStatus = null,
@@ -12735,6 +12709,13 @@ function applyPermissionState(e) {
       )));
 }
 function requestAndConnect(e) {
+  try {
+    var input = $("#input");
+    if (/^wss:/.test(R1Config.parseDeviceAddress(input ? input.value : state.ip).url)) {
+      e();
+      return;
+    }
+  } catch (error) { /* 地址校验由连接入口显示。 */ }
   "granted" !== currentPermission
     ? "prompt" !== currentPermission
       ? "denied" !== currentPermission
@@ -13881,10 +13862,10 @@ function load() {
             !n.no_auto_connect &&
             (n.connect_id && (state.connectId = n.connect_id),
             n.connect_ip &&
-              ((state.connectIp = n.connect_ip.split(":")[0] || ""),
-              IP_PATTERN.test(state.connectIp) ||
-                HOSTNAME_PATTERN.test(state.connectIp.toLowerCase()) ||
-                (state.connectIp = -1)),
+              (function () {
+                try { state.connectIp = R1Config.parseDeviceAddress(n.connect_ip).address; }
+                catch (error) { state.connectIp = -1; }
+              })(),
             n.ver && ((state.ver = n.ver), urlParams.del("ver"))),
           window.custom_ip ? renderConnectPage() : connectSpeaker(),
           window.plus &&
