@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "snapshot_date": "2026-11-10",
+  "web_version": 2863,
+  "baseline_commit": "68f293ad3b3e714e1ab1a4a96caac656918e762a",
+  "entries": [
+    {
+      "target_path": "index.html",
+      "source_url": "https://r1.wxfsq.com/index.html",
+      "source_sha256": "5bf4d8f7820d8818eb67970e9278405da1835292de07c6a7e48ac29c5423848e",
+      "imported_sha256": "ba3a9797bcad027c8d72b5919cd05e87e0a122720bf5e216a9493dc8d99cd9e1",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "refresh.js",
+      "source_url": "https://r1.wxfsq.com/refresh.js",
+      "source_sha256": "ad45e7a2c6de38ddb46f19de6a01a14602c8a6ea2168849af829e0fef4d38cc3",
+      "imported_sha256": "d941751f6d5a1785651f070e857b47aedfe7b11cfe0c69cfb8d4e472c4da4e31",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "new_r1_control.js",
+      "source_url": "https://r1.wxfsq.com/new_r1_control.js",
+      "source_sha256": "8c73c8152fa50a126acd01734a85c471fc1d0fc472e1d8e93fafa5b3ef0c97b5",
+      "imported_sha256": "f9c318a1baa89ff318d9ff671711833ef4fd9e88e6ef7098244224a7a0c907ba",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "js/connect.js",
+      "source_url": "https://r1.wxfsq.com/js/connect.js",
+      "source_sha256": "4138d99c2dff10a2d1e069c73d60aef818c87526ddaef2358aec8dc96aa08605",
+      "imported_sha256": "5c61b4036e1da663fcd11b15f1d00a833fbae06cd9e0a606b82cf6d7f1b121a4",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "new_r1_control.css",
+      "source_url": "https://r1.wxfsq.com/new_r1_control.css",
+      "source_sha256": "186de67469d48c82ff22aecda1f204770facca01644218928edbaae60d551075",
+      "imported_sha256": "68d1128f8958d62aea2567dff54b47661f49abafbc669b91133ec927dfd2eca5",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "config_wifi/index.html",
+      "source_url": "https://r1.wxfsq.com/config_wifi/index.html",
+      "source_sha256": "1d085a3e773186009a0f2f7bfea034378f29502ca73f80223fbdae5881cb9364",
+      "imported_sha256": "444f31b08020a2bb7b96a91dcf14030e657291bc2bd9ef922acafb30e84e9a55",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "config_wifi/main.js",
+      "source_url": "https://r1.wxfsq.com/config_wifi/main.js",
+      "source_sha256": "5d07f20fb8d79452e563992eca23ea058ee42acd2f4c848657610f54e42f673e",
+      "imported_sha256": "fa33ef57df10590bb723cc513eedac64ae3cd5a954fd117ce0f897708d123c83",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "dlna.html",
+      "source_url": "https://r1.wxfsq.com/dlna.html",
+      "source_sha256": "850ca702e38d16c4b9bfed8cac94b1163eb313694461481f177a745890ea62c4",
+      "imported_sha256": "61714ac24abb1f8fa502158a1bca38d19a4cb339985ac7c412e5f51ab46ca613",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "mdns.html",
+      "source_url": "https://r1.wxfsq.com/mdns.html",
+      "source_sha256": "07059c3cc245d61fbc8464d7aaee02e23da1211ad0d7a4e79743593fde8d2570",
+      "imported_sha256": "e2702baa68a19e4b1d96c397107be43c1c60fcb4d26a168bd56725aa6195c3f3",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "device_scan.html",
+      "source_url": "https://r1.wxfsq.com/device_scan.html",
+      "source_sha256": "754a489c3945110645d24cd4328ecc48b7297715020f393ea4852dfe5fbcf8ec",
+      "imported_sha256": "b7188fef3d5d814b24f1aef55b8c48c2dd0fde011058fd99c8f27982058b96d2",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "manifest.json",
+      "source_url": "https://r1.wxfsq.com/manifest.json",
+      "source_sha256": "e73bb8c6a83389db6ab099f7a0d68afe9fb2647961bb936e4ddad5b6ce6d56b2",
+      "imported_sha256": "b4bdb281a833306dae404698ed67f7f68d264e98ebf2b20005fc1b2ca9668d97",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "sw.js",
+      "source_url": "https://r1.wxfsq.com/sw.js",
+      "source_sha256": "a916ee9d0da6654370379850fe9dee5b0a9d2114f3bca54ab5f9ea38d6706d11",
+      "imported_sha256": "a916ee9d0da6654370379850fe9dee5b0a9d2114f3bca54ab5f9ea38d6706d11",
+      "transformation": "Normalize text line endings; deployment adaptations as documented in upstream-merge-2026-11-10.md"
+    },
+    {
+      "target_path": "js/r1_control.js",
+      "source_url": "https://r1.wxfsq.com/js/r1_control.min.js",
+      "source_sha256": "5c780f047a2149931abb638cd6a1b7c7003d4bc9a95e99cd4d1c1ee02f94d9ba",
+      "imported_sha256": "9bf7ac18b25ead8271cb7ffbac05f0104825ba60b502d0fb416f078a84118aa1",
+      "transformation": "Prettier 3.9.10 readable formatting; deployment adaptations"
+    },
+    {
+      "target_path": "newui/css/app.css",
+      "source_url": "https://r1.wxfsq.com/newui/css/app.css",
+      "source_sha256": "9dd79c3bc84735578cbacad463ef08d4d8f21b3f98f4a2afa4d6e18cb74d5a3d",
+      "imported_sha256": "9dd79c3bc84735578cbacad463ef08d4d8f21b3f98f4a2afa4d6e18cb74d5a3d",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/css/player-fix.css",
+      "source_url": "https://r1.wxfsq.com/newui/css/player-fix.css",
+      "source_sha256": "5c7c84c337ac1f8a933b56863c0a09bc8acce87240fdfa74236a23943c5c98f2",
+      "imported_sha256": "5c7c84c337ac1f8a933b56863c0a09bc8acce87240fdfa74236a23943c5c98f2",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/css/theme.css",
+      "source_url": "https://r1.wxfsq.com/newui/css/theme.css",
+      "source_sha256": "19df69cd7b6a8025657c8b77dda8b90f527804f6a7b5834db6a8d1b3fcdfec80",
+      "imported_sha256": "0a83f7b81e88c1e3c7f5c333e9ecc9eae936d83e6e7aa1bf90f0b91c77bff8e2",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/index.html",
+      "source_url": "https://r1.wxfsq.com/newui/index.html",
+      "source_sha256": "a2d6fccccdc6bec99014683282d933bc4dad4ad4268967a624c84e80336d663d",
+      "imported_sha256": "dfc9728f868e2c0692ee4aaaeaacf83bb5ff521f116988f1e7ee22ea7beb4ca9",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/app.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/app.js",
+      "source_sha256": "a46c033e69ee60d4079040c1dc9a0d4e90b9c5364d9205effe21d5ec8663e2e9",
+      "imported_sha256": "a46c033e69ee60d4079040c1dc9a0d4e90b9c5364d9205effe21d5ec8663e2e9",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/core.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/core.js",
+      "source_sha256": "592652b14b55eee056e45d053e62870aa0e2cae7e2da40e58781e2b352250d6f",
+      "imported_sha256": "d40f47a4452f4b36eedfe708f9cc46fbc09b2c41901551763c2db7e0f13c9463",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/icons.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/icons.js",
+      "source_sha256": "36fcc178191938549a4679538f0fd5db396147a593b93e161cef5df1c3e61914",
+      "imported_sha256": "36fcc178191938549a4679538f0fd5db396147a593b93e161cef5df1c3e61914",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/panel-device.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/panel-device.js",
+      "source_sha256": "a5fbf253b9e4894418fe87c2cd376a24d101d57f9e915efa6a7adeae3438b28b",
+      "imported_sha256": "a5fbf253b9e4894418fe87c2cd376a24d101d57f9e915efa6a7adeae3438b28b",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/panel-music.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/panel-music.js",
+      "source_sha256": "462c4a5f8375095aae4881812ef061d0fa81b901b446379df8f70c67cc5ef2ee",
+      "imported_sha256": "4ececeb9a85555995bf217e555b2bd75a5d38d106b76e01197421776541414d6",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/ui.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/ui.js",
+      "source_sha256": "62088e4885134741ce48df03c7bda13b99ee11a88b1f16056c5445fd22744f72",
+      "imported_sha256": "62088e4885134741ce48df03c7bda13b99ee11a88b1f16056c5445fd22744f72",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/vendor/react-dom.production.min.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/vendor/react-dom.production.min.js",
+      "source_sha256": "21758ed084cd0e37e735722ee4f3957ea960628a29dfa6c3ce1a1d47a2d6e4f7",
+      "imported_sha256": "21758ed084cd0e37e735722ee4f3957ea960628a29dfa6c3ce1a1d47a2d6e4f7",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/vendor/react.production.min.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/vendor/react.production.min.js",
+      "source_sha256": "4b4969fa4ef3594324da2c6d78ce8766fbbc2fd121fff395aedf997db0a99a06",
+      "imported_sha256": "4b4969fa4ef3594324da2c6d78ce8766fbbc2fd121fff395aedf997db0a99a06",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "newui/js/ws.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/ws.js",
+      "source_sha256": "f3f1e4356e5c48ebc169c7f7541dd7a42b4b2506289a3466b79230d3f1e70c69",
+      "imported_sha256": "17fe11bd752dfd5f5b8d3bcc61e21ca18dfaa94e2031a32ecc77ac88e29a9664",
+      "transformation": "Retain published source; deployment adaptations where applicable"
+    },
+    {
+      "target_path": "icon.png",
+      "source_url": "https://r1.wxfsq.com/icon.png",
+      "source_sha256": "a694e76df77867d66b7d32890b151e10783f6e6f92c1e574d273576427e62695",
+      "imported_sha256": "a694e76df77867d66b7d32890b151e10783f6e6f92c1e574d273576427e62695",
+      "transformation": "Unmodified published image"
+    },
+    {
+      "target_path": "newui/images/disc-ip6.png",
+      "source_url": "https://r1.wxfsq.com/newui/images/disc-ip6.png",
+      "source_sha256": "6ac48111f6eee6fe72dd8c7d6ba3495e304212db107a901299238a149b0a724a",
+      "imported_sha256": "6ac48111f6eee6fe72dd8c7d6ba3495e304212db107a901299238a149b0a724a",
+      "transformation": "Unmodified published image"
+    },
+    {
+      "target_path": "newui/images/needle-ip6.png",
+      "source_url": "https://r1.wxfsq.com/newui/images/needle-ip6.png",
+      "source_sha256": "06eb28d256c0cd57ef90ca03977bef096c3cd1c2faf0a8c3a55800ed5d0dd45e",
+      "imported_sha256": "06eb28d256c0cd57ef90ca03977bef096c3cd1c2faf0a8c3a55800ed5d0dd45e",
+      "transformation": "Unmodified published image"
+    },
+    {
+      "target_path": "adb/index.html",
+      "source_url": "https://r1.wxfsq.com/adb/",
+      "source_sha256": "d0931823b8a3972fc9b8fbd253d03688975843f1d5648704057ec5ae459dcf53",
+      "imported_sha256": "9973de544f142216e48ff465a0fee0ec8385356f38cb284dc1eac75ccc3dcb3f",
+      "transformation": "Normalize text; load readable adb-console.js"
+    },
+    {
+      "target_path": "adb/adb-console.js",
+      "source_url": "https://r1.wxfsq.com/adb/adb-console.min.js",
+      "source_sha256": "f5592dbc9780a4f37b02ffc8bd61ec7504249d39a345a98fc3cda9a189d9bedb",
+      "imported_sha256": "5a338c71b42b262ea7f9390a358e883469a0b42f7da596ca0ba0cb59981571e7",
+      "transformation": "Prettier 3.9.10 readable formatting"
+    }
+  ],
+  "additional_local_files": [
+    "js/config.js",
+    "serve.py",
+    "tests/test_browser.py",
+    "tests/test_server.py"
+  ],
+  "react_license_source": "https://registry.npmjs.org/react/-/react-18.2.0.tgz (package/LICENSE)",
+  "retained_dependencies": [
+    "jquery-3.6.0.min.js",
+    "js/vconsole.min.js",
+    "pic/nopic.jpg"
+  ],
+  "notes": [
+    "Imported checksums describe this merge before future development.",
+    "Public accessibility and provenance do not establish a new license grant."
+  ]
+}
