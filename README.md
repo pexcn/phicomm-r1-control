@@ -24,7 +24,7 @@ python3 serve.py
 
 自部署设置位于 [js/config.js](js/config.js)：
 `musicApiUrl` 控制搜索、封面和歌词接口，`serviceBaseUrl` 控制排行榜等服务接口，
-`scanProxyBaseUrl` 可选，默认直接连接局域网设备；统计默认关闭。
+`scanProxyBaseUrl` 可选，默认直接连接局域网设备。
 资源地址从配置脚本所在目录推导，支持项目子目录部署。
 
 ## 设备兼容与限制

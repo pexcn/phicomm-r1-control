@@ -13142,15 +13142,7 @@ function load() {
       var i = makeEl("div", { id: "StatusBar", style: "display:none" });
       ((ui.statusBar = i),
         ui.main.appendChild(i),
-        "string" == typeof baidu_hm_id
-          ? ui.main.appendChild(
-              makeEl("script", {
-                src: "//hm.baidu.com/hm.js?" + baidu_hm_id,
-                onload: addNoReferrer,
-                onerror: addNoReferrer,
-              }),
-            )
-          : addNoReferrer(),
+        addNoReferrer(),
         location.href.indexOf("debug") > -1 && loadConsole(),
         ui.main.appendChild(ui.container),
         (ui.container.innerHTML = ""),
@@ -13160,30 +13152,6 @@ function load() {
         initLogin(),
         ui.container.appendChild(ui.loginPanel),
         loadJQuery());
-      var n = makeEl("div", {
-        id: "qun_div",
-        style:
-          window.screen.width > 800
-            ? "position:absolute;left:5px;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%"
-            : "position:absolute;left:5px;z-index:1",
-        html: '<a id="qun" target="_blank" href="https://jq.qq.com/?_wv=1027&k=hTbg34eR">交流群：772694950</a>',
-      });
-      if (
-        (ui.main.appendChild(n),
-        "string" == typeof beian && window.screen.width > 800)
-      ) {
-        var a = makeEl("div", { id: "beian_div", style: "position:relative" });
-        (a.appendChild(
-          makeEl("div", {
-            style: "position:absolute;left:0;right:0;text-align:center",
-            html:
-              '<a target="_blank" href="https://beian.miit.gov.cn/">' +
-              beian +
-              "</a>",
-          }),
-        ),
-          ui.main.appendChild(a));
-      }
       var o = makeEl("div", {
         id: "ver_div",
         style: "position:absolute;right:5px",

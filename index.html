@@ -88,8 +88,6 @@
       var control_host = location.host;
       var custom_ip = true;
       var ip = "";
-      var baidu_hm_id = R1Config.analyticsId || null;
-      //var beian = '';
       function loadjs() {
         if (!window._loadjs) {
           window._loadjs = true;
@@ -116,14 +114,6 @@
           location.reload();
         };
         temp_div.appendChild(btn);
-
-        if (typeof beian == "string") {
-          var div = document.createElement("div");
-          div.id = "beian_div";
-          div.style = "position: absolute; left: 5px;";
-          div.innerHTML = "<a href='//beian.miit.gov.cn/'>" + beian + "</a>";
-          temp_div.appendChild(div);
-        }
 
         var params = location.href
           .substr(location.href.indexOf("?") + 1)

@@ -6,8 +6,7 @@
     assetBaseUrl: base,
     musicApiUrl: 'https://r1.wxfsq.com/music',
     serviceBaseUrl: base,
-    scanProxyBaseUrl: '',
-    analyticsId: ''
+    scanProxyBaseUrl: ''
   }, supplied);
   config.assetUrl = function (path) {
     return new URL(path, config.assetBaseUrl).href;
