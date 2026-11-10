@@ -1,40 +1,41 @@
 html {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
-      .body {
-        background: linear-gradient(145deg, #4c7ec3, #9ac4e8, #4a8ec7);
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-attachment: fixed;
-        background-size: cover;
-      }
+.body {
+  background: linear-gradient(145deg, #4c7ec3, #9ac4e8, #4a8ec7);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  background-size: cover;
+}
 
-      a {
-        color: white;
-      }
+a {
+  color: white;
+}
 
-      h3 {
-        text-align: center;
-        color: white;
-      }
+h3 {
+  text-align: center;
+  color: white;
+}
 
-      .reload_btn {
-        margin: 15px 0px 15px 0px;
-        width: 100px;
-        height: 50px;
-        border-radius: 25px;
-        background: rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(4px);
-        border: none;
-        box-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.2),
-          0 6px 20px 0 rgba(0, 0, 0, 0.19);
-      }
+.reload_btn {
+  margin: 15px 0px 15px 0px;
+  width: 100px;
+  height: 50px;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  border: none;
+  box-shadow:
+    0 8px 10px 0 rgba(0, 0, 0, 0.2),
+    0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
 
-      .reload_btn:active {
-        background: rgba(255, 255, 255, 0.8);
-        transform: translateY(3px);
-      }
+.reload_btn:active {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(3px);
+}

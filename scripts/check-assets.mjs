@@ -33,7 +33,9 @@ const files = ["index.html", "new_r1_control.js", "service-worker.js"]
 for (const file of files) {
   const source = readFileSync(file, "utf8");
   if (file.endsWith(".html")) {
-    for (const match of source.matchAll(/<(?:script|link|img)\b[^>]*?\b(?:src|href)=["']([^"']+)["']/gi)) {
+    for (const match of source.matchAll(
+      /<(?:script|link|img)\b[^>]*?\b(?:src|href)=["']([^"']+)["']/gi,
+    )) {
       checkReference(match[1], file);
     }
   }

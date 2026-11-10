@@ -1,6 +1,5 @@
 var DEFAULT_CONTROL_HOST = new URL(R1Config.assetBaseUrl).host,
-  IP_PATTERN =
-    /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/,
+  IP_PATTERN = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/,
   HOSTNAME_PATTERN = /^phicomm_r1_\S+$/i,
   DEFAULT_BACKGROUND = "background: var(--background);",
   CHANGELOG = [
@@ -55,9 +54,7 @@ function readGlobal(e, t) {
     if (void 0 !== window[e]) return window[e];
   } catch (e) {}
   try {
-    var i = new Function(
-      "return typeof " + e + ' !== "undefined" ? ' + e + " : undefined;",
-    )();
+    var i = new Function("return typeof " + e + ' !== "undefined" ? ' + e + " : undefined;")();
     if (void 0 !== i) return i;
   } catch (e) {}
   return t;
@@ -82,8 +79,7 @@ var state = {
     reload: !1,
     unisoundSkipCheck: null,
     loginIntent: null,
-    controlHost:
-      readGlobal("control_host", DEFAULT_CONTROL_HOST) || DEFAULT_CONTROL_HOST,
+    controlHost: readGlobal("control_host", DEFAULT_CONTROL_HOST) || DEFAULT_CONTROL_HOST,
     info: {},
     deviceTag: "",
     hostname: "",
@@ -147,9 +143,7 @@ var state = {
       app: readGlobal("new_app_ver", 0) || 0,
       web: readGlobal("web_ver", 1e3) || 1e3,
     },
-    downurl:
-      readGlobal("downurl", "https://xfdown.lanzouq.com/") ||
-      "https://xfdown.lanzouq.com/",
+    downurl: readGlobal("downurl", "https://xfdown.lanzouq.com/") || "https://xfdown.lanzouq.com/",
     downids: {
       app: readGlobal("app_downid", "") || "",
       echo: readGlobal("echo_downid", "") || "",
@@ -257,8 +251,7 @@ function padZero(e, t) {
 }
 function flatten(e) {
   for (var t = [], i = 0; i < e.length; i++)
-    if (Array.isArray(e[i]))
-      for (var n = flatten(e[i]), a = 0; a < n.length; a++) t.push(n[a]);
+    if (Array.isArray(e[i])) for (var n = flatten(e[i]), a = 0; a < n.length; a++) t.push(n[a]);
     else t.push(e[i]);
   return t;
 }
@@ -295,8 +288,7 @@ function makeEl(e, t) {
         var o = t[a];
         if (void 0 !== o)
           if ("style" === a && "object" == typeof o)
-            for (var s in o)
-              Object.prototype.hasOwnProperty.call(o, s) && (n.style[s] = o[s]);
+            for (var s in o) Object.prototype.hasOwnProperty.call(o, s) && (n.style[s] = o[s]);
           else
             "class" === a || "className" === a
               ? (n.className = o)
@@ -313,9 +305,7 @@ function makeEl(e, t) {
   var r = String(n.type || "").toLowerCase();
   ("button" === e ||
     ("input" === e && /^(button|submit|reset)$/.test(r)) ||
-    (t &&
-      "function" == typeof t.onclick &&
-      !/^(input|select|textarea)$/.test(e))) &&
+    (t && "function" == typeof t.onclick && !/^(input|select|textarea)$/.test(e))) &&
     n.classList.add("app_btn");
   for (var l = flatten(i), u = 0; u < l.length; u++) {
     var c = l[u];
@@ -327,9 +317,7 @@ function makeEl(e, t) {
 }
 function makeButton(e, t, i) {
   var n = { type: "button", value: e, className: "btn", onclick: t };
-  if (i)
-    for (var a in i)
-      Object.prototype.hasOwnProperty.call(i, a) && (n[a] = i[a]);
+  if (i) for (var a in i) Object.prototype.hasOwnProperty.call(i, a) && (n[a] = i[a]);
   return makeEl("input", n);
 }
 function makeText(e, t, i = {}) {
@@ -348,13 +336,7 @@ function isEchoVer(e) {
   return isFinite(t) && isFinite(i) && t >= i;
 }
 function formatBuildTimestamp(e) {
-  if (
-    "number" != typeof e ||
-    !isFinite(e) ||
-    e <= 0 ||
-    Math.floor(e) !== e ||
-    e > 86399999712e5
-  )
+  if ("number" != typeof e || !isFinite(e) || e <= 0 || Math.floor(e) !== e || e > 86399999712e5)
     return "未知";
   var t = new Date(e + 288e5);
   if (!isFinite(t.getTime()) || t.getUTCFullYear() > 9999) return "未知";
@@ -400,9 +382,7 @@ function updateVersionFooter() {
         state.ws &&
         state.ws.readyState === WebSocket.OPEN,
       i = t
-        ? '<a href="javascript:openVersionInfo();">版本号：' +
-          state.confirmedEchoVersion +
-          "</a>"
+        ? '<a href="javascript:openVersionInfo();">版本号：' + state.confirmedEchoVersion + "</a>"
         : '<a href="javascript:app_down();">下载APP</a>';
     (window.plus &&
       (state.version && state.version.app > plus.runtime.versionCode
@@ -412,8 +392,7 @@ function updateVersionFooter() {
             "</a>")
         : t || (i = "")),
       e.innerHTML !== i &&
-        ((e.innerHTML = i),
-        ui.applyLyricsModeHeight && ui.applyLyricsModeHeight()),
+        ((e.innerHTML = i), ui.applyLyricsModeHeight && ui.applyLyricsModeHeight()),
       e.title && (e.title = ""));
   }
 }
@@ -443,15 +422,9 @@ function isMusicQueueContextCurrent(e) {
 }
 function confirmEchoVersion(e) {
   var t = e && e.ver,
-    i =
-      "number" == typeof t || ("string" == typeof t && "" !== t.trim())
-        ? Number(t)
-        : NaN;
+    i = "number" == typeof t || ("string" == typeof t && "" !== t.trim()) ? Number(t) : NaN;
   isFinite(i) || (i = null);
-  var n =
-      e && "未知" !== formatBuildTimestamp(e.build_timestamp)
-        ? e.build_timestamp
-        : null,
+  var n = e && "未知" !== formatBuildTimestamp(e.build_timestamp) ? e.build_timestamp : null,
     a =
       state.confirmedEchoVersion !== i ||
       state.confirmedEchoIp !== state.ip ||
@@ -465,9 +438,7 @@ function confirmEchoVersion(e) {
     (state.confirmedEchoIp = state.ip),
     (state.confirmedEchoWs = state.ws),
     (state.confirmedEchoBuildTimestamp = n),
-    a &&
-      "function" == typeof closeVersionInfoWindow &&
-      closeVersionInfoWindow(),
+    a && "function" == typeof closeVersionInfoWindow && closeVersionInfoWindow(),
     updateVersionFooter(),
     syncMusicQueueCapability());
 }
@@ -489,11 +460,7 @@ function syncMusicQueueCapability() {
     ui.playlistTable && ui.playlistTable._queueCapability !== e)
   ) {
     ui.playlistTable._queueCapability = e;
-    for (
-      var i = ui.playlistTable.querySelectorAll(".drag_handle"), n = 0;
-      n < i.length;
-      n++
-    )
+    for (var i = ui.playlistTable.querySelectorAll(".drag_handle"), n = 0; n < i.length; n++)
       i[n].style.display = e ? "inline-flex" : "none";
   }
   e ||
@@ -504,10 +471,7 @@ function syncMusicQueueCapability() {
       (attachQueueRowDrag.pending = null)),
     "function" == typeof MUSIC_SEARCH_CANCEL &&
       (MUSIC_SEARCH_CANCEL(),
-      $("#music_search_wrap") &&
-        ui.popup &&
-        ui.popup.onclose &&
-        ui.popup.onclose()));
+      $("#music_search_wrap") && ui.popup && ui.popup.onclose && ui.popup.onclose()));
 }
 function isUnisoundVer(e) {
   var t = Number(state.uVer);
@@ -521,37 +485,26 @@ var urlParams = {
     for (var i = t.split("&"), n = 0; n < i.length; n++)
       if (i[n]) {
         var a = i[n].split("=");
-        e[decodeURIComponent(a[0])] =
-          a.length > 1 ? decodeURIComponent(a[1]) : null;
+        e[decodeURIComponent(a[0])] = a.length > 1 ? decodeURIComponent(a[1]) : null;
       }
     return e;
   },
   get: function (e) {
     for (
-      var t = Array.isArray(e) ? e : [e],
-        i = urlParams.all(),
-        n = {},
-        a = 0,
-        o = 0;
+      var t = Array.isArray(e) ? e : [e], i = urlParams.all(), n = {}, a = 0, o = 0;
       o < t.length;
       o++
     )
-      Object.prototype.hasOwnProperty.call(i, t[o]) &&
-        ((n[t[o]] = i[t[o]]), a++);
+      Object.prototype.hasOwnProperty.call(i, t[o]) && ((n[t[o]] = i[t[o]]), a++);
     return a ? n : null;
   },
   put: function (e) {
     var t = urlParams.all();
-    for (var i in e)
-      Object.prototype.hasOwnProperty.call(e, i) && (t[i] = e[i]);
+    for (var i in e) Object.prototype.hasOwnProperty.call(e, i) && (t[i] = e[i]);
     urlParams.set(t);
   },
   del: function (e) {
-    for (
-      var t = urlParams.all(), i = Array.isArray(e) ? e : [e], n = 0;
-      n < i.length;
-      n++
-    )
+    for (var t = urlParams.all(), i = Array.isArray(e) ? e : [e], n = 0; n < i.length; n++)
       delete t[i[n]];
     urlParams.set(t);
   },
@@ -605,12 +558,10 @@ function sendWs(e, t, i) {
     )
       return (l(!1), !1);
     var u = {};
-    for (var c in e)
-      Object.prototype.hasOwnProperty.call(e, c) && (u[c] = e[c]);
+    for (var c in e) Object.prototype.hasOwnProperty.call(e, c) && (u[c] = e[c]);
     if (s) {
       if (
-        ((n =
-          u.type_id || u.type + "_" + Date.now() + "_" + ++wsCallbackSequence),
+        ((n = u.type_id || u.type + "_" + Date.now() + "_" + ++wsCallbackSequence),
         state.callbacks[n])
       )
         return (l(!1), !1);
@@ -641,9 +592,7 @@ function cancelWsCallbacks(e) {
 }
 function sendAction(e, t, i, n, a) {
   var o = { type: "send_message", what: e, arg1: t, arg2: i, obj: n };
-  if (a)
-    for (var s in a)
-      Object.prototype.hasOwnProperty.call(a, s) && (o[s] = a[s]);
+  if (a) for (var s in a) Object.prototype.hasOwnProperty.call(a, s) && (o[s] = a[s]);
   sendWs(o);
 }
 function sendToUnisound(e) {
@@ -695,8 +644,7 @@ function timeToMs(e) {
 function setPageTitle(e) {
   ui.pageTitle &&
     ((e = String(null == e ? "" : e)),
-    (ui.pageTitle._pageTitleText === e &&
-      ui.pageTitle._pageTitleHtml === ui.pageTitle.innerHTML) ||
+    (ui.pageTitle._pageTitleText === e && ui.pageTitle._pageTitleHtml === ui.pageTitle.innerHTML) ||
       ui.pageTitle.innerHTML === e ||
       ((ui.pageTitle.innerHTML = e),
       (ui.pageTitle._pageTitleText = e),
@@ -716,9 +664,7 @@ function safeBackgroundUrl(e) {
   return !(e = String(e || "").trim()) || /[\u0000-\u0020\u007f"'<>\\]/.test(e)
     ? ""
     : /^https?:\/\/[^/]+/i.test(e) ||
-        /^data:image\/(?:png|jpe?g|gif|webp|bmp|avif|x-icon);base64,[a-z0-9+/=]+$/i.test(
-          e,
-        )
+        /^data:image\/(?:png|jpe?g|gif|webp|bmp|avif|x-icon);base64,[a-z0-9+/=]+$/i.test(e)
       ? e
       : "";
 }
@@ -777,10 +723,8 @@ function cancelBackgroundLayers(e, t, i) {
     (n.sequence++,
       a ||
         (n.incoming &&
-          (null != n.incoming._opacityFrame &&
-            cancelAnimationFrame(n.incoming._opacityFrame),
-          (n.incoming._opacitySequence =
-            (n.incoming._opacitySequence || 0) + 1)),
+          (null != n.incoming._opacityFrame && cancelAnimationFrame(n.incoming._opacityFrame),
+          (n.incoming._opacitySequence = (n.incoming._opacitySequence || 0) + 1)),
         (n.fading = !1),
         clearTimeout(n.timer),
         null != n.frame && cancelAnimationFrame(n.frame),
@@ -809,8 +753,7 @@ function applyHomeBackgroundBlur(e, t) {
   var i = Math.max(0, Math.min(60, parseInt(t, 10) || 0)),
     n = Math.ceil((160 * i) / 50);
   ((e.style.left = e.style.top = -n + "px"),
-    (e.style.width = e.style.height =
-      n ? "calc(100% + " + 2 * n + "px)" : "100%"),
+    (e.style.width = e.style.height = n ? "calc(100% + " + 2 * n + "px)" : "100%"),
     (e.style.backgroundAttachment = "scroll"),
     (e.style.filter = e.style.webkitFilter = i ? "blur(" + i + "px)" : ""));
 }
@@ -818,20 +761,9 @@ function transitionBackground(e, t, i) {
   if (e) {
     i = i || {};
     var n = e._backgroundLayers;
-    n ||
-      (n = e._backgroundLayers =
-        { sequence: 0, current: null, incoming: null, url: "" });
-    var a =
-      (i.mode || "") +
-      ":" +
-      JSON.stringify(t.props) +
-      ":" +
-      (null == i.blur ? "" : i.blur);
-    if (
-      n.requestedKey !== a ||
-      n.hostname !== state.hostname ||
-      (n.guard && !n.guard())
-    ) {
+    n || (n = e._backgroundLayers = { sequence: 0, current: null, incoming: null, url: "" });
+    var a = (i.mode || "") + ":" + JSON.stringify(t.props) + ":" + (null == i.blur ? "" : i.blur);
+    if (n.requestedKey !== a || n.hostname !== state.hostname || (n.guard && !n.guard())) {
       cancelBackgroundLayers(e, !1, !0);
       var o = n.sequence,
         s = state.hostname;
@@ -847,9 +779,7 @@ function transitionBackground(e, t, i) {
         ((n.loader = r),
           (r.onload = function () {
             if (l())
-              if (
-                ((r.onload = r.onerror = null), "function" == typeof r.decode)
-              )
+              if (((r.onload = r.onerror = null), "function" == typeof r.decode))
                 try {
                   Promise.resolve(r.decode()).then(u, c);
                 } catch (e) {
@@ -881,10 +811,8 @@ function transitionBackground(e, t, i) {
       if (
         (a &&
           (n.incoming &&
-            (null != n.incoming._opacityFrame &&
-              cancelAnimationFrame(n.incoming._opacityFrame),
-            (n.incoming._opacitySequence =
-              (n.incoming._opacitySequence || 0) + 1)),
+            (null != n.incoming._opacityFrame && cancelAnimationFrame(n.incoming._opacityFrame),
+            (n.incoming._opacitySequence = (n.incoming._opacitySequence || 0) + 1)),
           clearTimeout(n.timer),
           null != n.frame && cancelAnimationFrame(n.frame),
           (n.timer = n.frame = null),
@@ -905,8 +833,7 @@ function transitionBackground(e, t, i) {
             o.style.setProperty(e, t.props[e]);
           }),
           i.cover &&
-            ((o.style.width = o.style.height = "120%"),
-            (o.style.transform = "translate(-8%,-5%)")),
+            ((o.style.width = o.style.height = "120%"), (o.style.transform = "translate(-8%,-5%)")),
           null != i.blur)
         )
           o.style.filter = o.style.webkitFilter = i.blur
@@ -917,19 +844,13 @@ function transitionBackground(e, t, i) {
             0,
             Math.min(
               60,
-              parseInt(
-                localStorage.getItem(state.hostname + "_BackgroundBlur"),
-                10,
-              ) || 0,
+              parseInt(localStorage.getItem(state.hostname + "_BackgroundBlur"), 10) || 0,
             ),
           );
           o.style.filter = o.style.webkitFilter = r ? "blur(" + r + "px)" : "";
         }
-        o._homeBackground &&
-          applyHomeBackgroundBlur(o, null == i.blur ? r : i.blur);
-        var c =
-          "function" == typeof prefersReducedDialogMotion &&
-          prefersReducedDialogMotion();
+        o._homeBackground && applyHomeBackgroundBlur(o, null == i.blur ? r : i.blur);
+        var c = "function" == typeof prefersReducedDialogMotion && prefersReducedDialogMotion();
         if (
           ((o.style.transition = c || a ? "none" : "opacity 0.2s ease"),
           (o.style.opacity = !n.current || c || a ? "1" : "0"),
@@ -954,8 +875,7 @@ function transitionBackground(e, t, i) {
                 l() &&
                   n.current === o &&
                   !n.incoming &&
-                  ((n.frame = null),
-                  (o.style.transform = "translate(-8%,-5%)"));
+                  ((n.frame = null), (o.style.transform = "translate(-8%,-5%)"));
               }))),
             void (i.onReady && i.onReady())
           );
@@ -988,9 +908,7 @@ function transitionBackground(e, t, i) {
                         state.hostname === s &&
                         !1 !== e.isConnected
                       ) {
-                        ((n.timer = null),
-                          (n.fading = !1),
-                          settleBackgroundLayers(e, n));
+                        ((n.timer = null), (n.fading = !1), settleBackgroundLayers(e, n));
                         var t = n.pendingReady;
                         ((n.pendingReady = null), t && t());
                       }
@@ -1035,19 +953,12 @@ function setBackgroundCss(e, t) {
       updateFullscreenBg(!0));
 }
 function restoreBackground() {
-  (setBackgroundCss(
-    localStorage.getItem(state.hostname + "_background") || DEFAULT_BACKGROUND,
-  ),
+  (setBackgroundCss(localStorage.getItem(state.hostname + "_background") || DEFAULT_BACKGROUND),
     ui.main &&
-      (ui.main.classList &&
-        ui.main.classList.contains("mask") &&
-        ui.main.classList.remove("mask"),
+      (ui.main.classList && ui.main.classList.contains("mask") && ui.main.classList.remove("mask"),
       ui.main.style &&
-        ((ui.main.style.backdropFilter = ""),
-        (ui.main.style.webkitBackdropFilter = ""))),
-    ui.qualitySelect &&
-      ui.qualitySelect.style &&
-      (ui.qualitySelect.style.backdropFilter = ""),
+        ((ui.main.style.backdropFilter = ""), (ui.main.style.webkitBackdropFilter = ""))),
+    ui.qualitySelect && ui.qualitySelect.style && (ui.qualitySelect.style.backdropFilter = ""),
     updateStatusBar());
 }
 function applyBackground(e) {
@@ -1058,8 +969,7 @@ function applyBackground(e) {
       localStorage.removeItem(state.hostname + "_background"),
       i && (i.value = "已恢复默认背景！"));
   else {
-    if (!(e = safeBackgroundUrl(e)))
-      return void (i && (i.value = "背景图片地址无效！"));
+    if (!(e = safeBackgroundUrl(e))) return void (i && (i.value = "背景图片地址无效！"));
     ((t = 'background: url("' + e + '") center top / cover no-repeat fixed;'),
       localStorage.setItem(state.hostname + "_background", t),
       i && (i.value = "设置背景图片成功！"));
@@ -1077,29 +987,24 @@ function supportsBackdropFilter() {
   );
 }
 function findTextColor(e) {
-  if (/^(rgb|RGB)/.test(e))
-    return resBgColor(e.replace(/(?:\(|\)|rgb|RGB)*/g, "").split(","));
+  if (/^(rgb|RGB)/.test(e)) return resBgColor(e.replace(/(?:\(|\)|rgb|RGB)*/g, "").split(","));
   if (!/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(e)) return !1;
   var t = e.toLowerCase();
   if (4 === t.length) {
     for (var i = "#", n = 1; n < 4; n++) i += t[n] + t[n];
     t = i;
   }
-  for (var a = [], o = 1; o < 7; o += 2)
-    a.push(parseInt("0x" + t.slice(o, o + 2), 16));
+  for (var a = [], o = 1; o < 7; o += 2) a.push(parseInt("0x" + t.slice(o, o + 2), 16));
   return resBgColor(a);
 }
 function resBgColor(e) {
-  return 0.213 * e[0] + 0.715 * e[1] + 0.072 * e[2] > 127.5
-    ? "#000000"
-    : "#ffffff";
+  return 0.213 * e[0] + 0.715 * e[1] + 0.072 * e[2] > 127.5 ? "#000000" : "#ffffff";
 }
 function getBackgroundData() {
   var e = ui.background,
     t = e && e._backgroundLayers;
   if (t) {
-    var i =
-      t.incoming && "1" === t.incoming.style.opacity ? t.incoming : t.current;
+    var i = t.incoming && "1" === t.incoming.style.opacity ? t.incoming : t.current;
     return (i && i._backgroundUrl) || "";
   }
   return e ? backgroundImageUrl(e.style.backgroundImage) : "";
@@ -1115,9 +1020,7 @@ function getBackgroundColorAt(e) {
         var n = t.getContext("2d");
         n.drawImage(i, 0, 0);
         for (
-          var a = n.getImageData(parseInt(t.width / 2, 10), 10, 1, 1).data,
-            o = "",
-            s = 0;
+          var a = n.getImageData(parseInt(t.width / 2, 10), 10, 1, 1).data, o = "", s = 0;
           s < 3;
           s++
         )
@@ -1141,13 +1044,7 @@ function updateStatusBar() {
   if (ui.main && ui.background && ui.container) {
     var e = Math.max(
       0,
-      Math.min(
-        60,
-        parseInt(
-          localStorage.getItem(state.hostname + "_BackgroundBlur"),
-          10,
-        ) || 0,
-      ),
+      Math.min(60, parseInt(localStorage.getItem(state.hostname + "_BackgroundBlur"), 10) || 0),
     );
     ui.background.style.filter = ui.background.style.webkitFilter = "";
     var t = ui.background._backgroundLayers;
@@ -1157,15 +1054,13 @@ function updateStatusBar() {
           ? applyHomeBackgroundBlur(t, e)
           : t &&
             !t._coverBackground &&
-            (t.style.filter = t.style.webkitFilter =
-              e ? "blur(" + e + "px)" : "");
+            (t.style.filter = t.style.webkitFilter = e ? "blur(" + e + "px)" : "");
       });
     if (window.plus) {
       var i = $("#StatusBar");
       if (i)
         if (plus.navigator.isImmersedStatusbar()) {
-          ((i.style.height =
-            parseInt(plus.navigator.getStatusbarHeight() / 2, 10) + 10 + "px"),
+          ((i.style.height = parseInt(plus.navigator.getStatusbarHeight() / 2, 10) + 10 + "px"),
             (i.style.display = "block"));
           try {
             var n = plus.android.importClass("android.graphics.Color");
@@ -1174,8 +1069,7 @@ function updateStatusBar() {
               o = plus.android.importClass("android.view.WindowManager"),
               s = plus.android.importClass("android.view.View");
             (a.clearFlags(
-              o.LayoutParams.FLAG_TRANSLUCENT_STATUS |
-                o.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+              o.LayoutParams.FLAG_TRANSLUCENT_STATUS | o.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
             ),
               a
                 .getDecorView()
@@ -1200,12 +1094,8 @@ function updateStatusBar() {
     ((ui.main.style =
       "position:fixed;z-index:1;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(var(--mask-color),0);"),
       (ui.container.style.width = "99%"),
-      ui.qualitySelect &&
-        ui.qualitySelect.style &&
-        (ui.qualitySelect.style.backdropFilter = ""),
-      ui.main.classList &&
-        ui.main.classList.contains("mask") &&
-        ui.main.classList.remove("mask"));
+      ui.qualitySelect && ui.qualitySelect.style && (ui.qualitySelect.style.backdropFilter = ""),
+      ui.main.classList && ui.main.classList.contains("mask") && ui.main.classList.remove("mask"));
   }
 }
 function setCookie(e, t, i) {
@@ -1214,11 +1104,7 @@ function setCookie(e, t, i) {
     (document.cookie = e + "=" + t + "; expires=" + n.toGMTString()));
 }
 function getCookie(e) {
-  for (
-    var t = e + "=", i = document.cookie.split(";"), n = 0;
-    n < i.length;
-    n++
-  ) {
+  for (var t = e + "=", i = document.cookie.split(";"), n = 0; n < i.length; n++) {
     var a = i[n].replace(/^\s+|\s+$/g, "");
     if (0 === a.indexOf(t)) return a.substring(t.length);
   }
@@ -1241,9 +1127,7 @@ function openAdb() {
   var e = new URL(location.href);
   ((e = new URL(R1Config.assetUrl("pages/adb/"))),
     (e.search = "?" + Date.now()),
-    window.plus
-      ? plus.webview.create(e.href).show()
-      : (location.href = e.href));
+    window.plus ? plus.webview.create(e.href).show() : (location.href = e.href));
 }
 function openDeviceScan() {
   goPage("pages/device-scan/");
@@ -1277,19 +1161,14 @@ function releasePopupLayer(e) {
 function createPopupHost(e) {
   var t = makeEl("div", {
     class: "popup2 app_popup_host",
-    style:
-      "text-align:center;display:" +
-      (!1 === (e = e || {}).open ? "none" : "block"),
+    style: "text-align:center;display:" + (!1 === (e = e || {}).open ? "none" : "block"),
   });
   if (
     ((t._popupBlur = makeEl("div", { class: "app_popup_blur" })),
     !1 === e.blur &&
-      (t._popupBlur.style.backdropFilter =
-        t._popupBlur.style.webkitBackdropFilter =
-          "none"),
+      (t._popupBlur.style.backdropFilter = t._popupBlur.style.webkitBackdropFilter = "none"),
     (t._popupDim = makeEl("div", { class: "app_popup_dim" })),
-    (t.content = t._popupContent =
-      makeEl("div", { class: "app_popup_content" })),
+    (t.content = t._popupContent = makeEl("div", { class: "app_popup_content" })),
     t.appendChild(t._popupBlur),
     t.appendChild(t._popupDim),
     t.appendChild(t.content),
@@ -1306,11 +1185,9 @@ function createPopupHost(e) {
           .slice(-1)[0] === t) ||
         (e.preventDefault(), e.stopImmediatePropagation());
     }
-    ["click", "pointerdown", "keydown", "submit", "focusin"].forEach(
-      function (e) {
-        t.addEventListener(e, i, !0);
-      },
-    );
+    ["click", "pointerdown", "keydown", "submit", "focusin"].forEach(function (e) {
+      t.addEventListener(e, i, !0);
+    });
   }
   return (
     (t.onclose = function () {
@@ -1374,8 +1251,7 @@ function showFlowNotice(e, t, i) {
       o.appendChild(s),
       a.content.appendChild(o),
       (a._popupSurface = s),
-      (n = ui.flowNotice =
-        { kind: e, host: a, panel: s, title: l, message: c, actions: d }),
+      (n = ui.flowNotice = { kind: e, host: a, panel: s, title: l, message: c, actions: d }),
       dialogContentMotion(s, !1));
   }
   return (
@@ -1409,24 +1285,17 @@ function clearFlowNotice(e) {
       (clearTimeout(timers.loginState),
       clearTimeout(timers.unisoundInit),
       clearTimeout(timers.unisoundInitBackup),
-      (timers.loginState =
-        timers.unisoundInit =
-        timers.unisoundInitBackup =
-          -1)),
+      (timers.loginState = timers.unisoundInit = timers.unisoundInitBackup = -1)),
     t &&
       ((ui.flowNotice = null),
       state.unisoundSkipCheck &&
         state.unisoundSkipCheck.notice === t &&
-        (clearTimeout(state.unisoundSkipCheck.timer),
-        (state.unisoundSkipCheck = null)),
+        (clearTimeout(state.unisoundSkipCheck.timer), (state.unisoundSkipCheck = null)),
       closePopupAnimated(t.host)));
 }
 function ensurePopupHost() {
   return (
-    (ui.popup &&
-      ui.popup._popupContent &&
-      ui.popup._popupOpen &&
-      !ui.popup._appDialogExit) ||
+    (ui.popup && ui.popup._popupContent && ui.popup._popupOpen && !ui.popup._appDialogExit) ||
       (!ui.popup ||
         ((ui.popup._popupContent || ui.popup.children.length) &&
           (!ui.popup._popupContent ||
@@ -1439,10 +1308,7 @@ function ensurePopupHost() {
   );
 }
 function registerPopupCleanup(e, t) {
-  return (
-    e && e._popupOpen && "function" == typeof t && e._popupCleanups.push(t),
-    e
-  );
+  return (e && e._popupOpen && "function" == typeof t && e._popupCleanups.push(t), e);
 }
 function restoreAnimatedDialog(e) {
   var t = e._appDialogExit;
@@ -1479,14 +1345,12 @@ function restoreAnimatedDialog(e) {
       "app_content_out",
       "app_content_in",
     ),
-    e._popupLightExit ||
-      Array.prototype.slice.call(e.children).forEach(restoreAnimatedDialog));
+    e._popupLightExit || Array.prototype.slice.call(e.children).forEach(restoreAnimatedDialog));
 }
 function dialogContentMotion(e, t) {
   if (e) {
     var i =
-      e.classList.contains("app_dialog_panel") ||
-      e.classList.contains("music_list_div")
+      e.classList.contains("app_dialog_panel") || e.classList.contains("music_list_div")
         ? e
         : e.querySelector(".app_dialog_panel");
     i &&
@@ -1503,10 +1367,7 @@ function enterAnimatedDialog(e, t) {
 }
 function reopenPopupHost(e) {
   return e && e._popupContent
-    ? (ui.popup !== e &&
-        ui.popup &&
-        ui.popup._popupOpen &&
-        closePopupAnimated(ui.popup),
+    ? (ui.popup !== e && ui.popup && ui.popup._popupOpen && closePopupAnimated(ui.popup),
       enterAnimatedDialog(e),
       (e._popupOpen = !0),
       (e.style.display = "block"),
@@ -1533,9 +1394,7 @@ function dismissAnimatedDialog(e, t, i) {
     e.setAttribute("aria-hidden", "true"),
     e._popupLightExit ||
       Array.prototype.slice
-        .call(
-          e.querySelectorAll("button,input,select,textarea,a[href],[tabindex]"),
-        )
+        .call(e.querySelectorAll("button,input,select,textarea,a[href],[tabindex]"))
         .forEach(function (e) {
           var t = {
             node: e,
@@ -1544,10 +1403,7 @@ function dismissAnimatedDialog(e, t, i) {
             tabIndex: e.getAttribute("tabindex"),
             visual: [],
           };
-          if (
-            "undefined" != typeof window &&
-            "function" == typeof window.getComputedStyle
-          ) {
+          if ("undefined" != typeof window && "function" == typeof window.getComputedStyle) {
             var i = window.getComputedStyle(e);
             [
               "opacity",
@@ -1606,25 +1462,18 @@ function dismissAnimatedDialog(e, t, i) {
     dialogContentMotion(i.surface || e, !0),
     e._popupDim && e._popupDim.classList.add("app_backdrop_out"),
     i.releaseIds &&
-      [e]
-        .concat(Array.prototype.slice.call(e.querySelectorAll("[id]")))
-        .forEach(function (e) {
-          e.id && (n.ids.push({ node: e, id: e.id }), e.removeAttribute("id"));
-        }));
+      [e].concat(Array.prototype.slice.call(e.querySelectorAll("[id]"))).forEach(function (e) {
+        e.id && (n.ids.push({ node: e, id: e.id }), e.removeAttribute("id"));
+      }));
   try {
-    document.activeElement &&
-      e.contains(document.activeElement) &&
-      document.activeElement.blur();
+    document.activeElement && e.contains(document.activeElement) && document.activeElement.blur();
   } catch (e) {}
   function a() {
     e._appDialogExit === n &&
-      (i.keepNode ? (e.style.display = "none") : e.remove(),
-      i.onFinish && i.onFinish());
+      (i.keepNode ? (e.style.display = "none") : e.remove(), i.onFinish && i.onFinish());
   }
   return (
-    prefersReducedDialogMotion()
-      ? a()
-      : (n.timer = setTimeout(a, APP_DIALOG_EXIT_MS)),
+    prefersReducedDialogMotion() ? a() : (n.timer = setTimeout(a, APP_DIALOG_EXIT_MS)),
     t && t(),
     !0
   );
@@ -1665,15 +1514,12 @@ function closePopupAnimated(e) {
   return !0;
 }
 function preparePopupDialog() {
-  return ui.popup &&
-    ui.popup._popupOpen &&
-    (ui.popup.content.children.length || ui.popup.call)
+  return ui.popup && ui.popup._popupOpen && (ui.popup.content.children.length || ui.popup.call)
     ? (closePopupAnimated(ui.popup), (ui.popup = createPopupHost()), ui.popup)
     : ensurePopupHost();
 }
 function createDialogPanel(e, t) {
-  var i =
-    (t = t || {}).host || (t.stack ? createPopupHost() : preparePopupDialog());
+  var i = (t = t || {}).host || (t.stack ? createPopupHost() : preparePopupDialog());
   ((i._sharedPopup = !0), (ui.popup = i));
   var n = makeEl("div", {
     class: "app_dialog_wrap",
@@ -1709,8 +1555,7 @@ function createDialogPanel(e, t) {
   });
   (s.appendChild(l), o.appendChild(s));
   var u = "flex:1;overflow-x:hidden;overflow-y:auto;";
-  ((u += t.noPadding ? "" : "padding:15px 20px;"),
-    t.bodyStyle && (u += t.bodyStyle));
+  ((u += t.noPadding ? "" : "padding:15px 20px;"), t.bodyStyle && (u += t.bodyStyle));
   var c = makeEl("div", { style: u });
   (o.appendChild(c), n.appendChild(o), dialogContentMotion(o, !1));
   var d = {
@@ -1769,8 +1614,7 @@ function createTextWindow(e, t, i) {
 }
 function createColorPicker() {
   if (ui.colorPicker)
-    ui.colorPicker._dialog.isOpen() ||
-      reopenPopupHost(ui.colorPicker._dialog.host);
+    ui.colorPicker._dialog.isOpen() || reopenPopupHost(ui.colorPicker._dialog.host);
   else {
     var e = createDialogPanel("设置氛围灯颜色");
     ((ui.colorPicker = e.wrap), (ui.colorPicker._dialog = e));
@@ -1822,8 +1666,7 @@ function createColorPicker() {
       ));
   }
   if (null != state.info.music_light_color) {
-    for (var i = state.info.music_light_color.toString(16); i.length < 6;)
-      i = "0" + i;
+    for (var i = state.info.music_light_color.toString(16); i.length < 6;) i = "0" + i;
     var n = "#" + i.toUpperCase(),
       a = ui.colorPicker._dialog.body.querySelector("#color_selection");
     a && (a.value = n);
@@ -1958,10 +1801,7 @@ function showAppDialog(e) {
           } catch (e) {}
       }, 80))));
   var v = makeEl("div", { style: "display:flex;gap:10px" }),
-    y =
-      e.buttons && e.buttons.length
-        ? e.buttons
-        : [{ text: "确定", style: "primary" }],
+    y = e.buttons && e.buttons.length ? e.buttons : [{ text: "确定", style: "primary" }],
     _ = y.filter(function (e) {
       return !e.cancel;
     }),
@@ -2017,9 +1857,7 @@ function showAppAlert(e, t, i) {
     title: i.title,
     width: i.width,
     onCancel: i.onCancel,
-    buttons: [
-      { text: i.okText || "确定", style: i.style || "primary", onClick: t },
-    ],
+    buttons: [{ text: i.okText || "确定", style: i.style || "primary", onClick: t }],
   });
 }
 function showAppConfirm(e, t, i) {
@@ -2104,10 +1942,7 @@ var BUTTON_DEFINITIONS = [
       succ: "好的，播放个性电台！",
     },
   ],
-  [
-    "我的歌单",
-    { type: -1, min_ver: 1600, min_uver: 1800, itemType: "get_song_list" },
-  ],
+  ["我的歌单", { type: -1, min_ver: 1600, min_uver: 1800, itemType: "get_song_list" }],
   [
     "小讯收藏",
     {
@@ -2183,10 +2018,7 @@ var BUTTON_DEFINITIONS = [
     {
       ws_type: "send_message",
       title: ["投放连接(关)", "投放连接(开)"],
-      tips: [
-        "打开已允许的蓝牙、DLNA、AirPlay、MiPlay服务",
-        "断开当前投放并退出连接模式",
-      ],
+      tips: ["打开已允许的蓝牙、DLNA、AirPlay、MiPlay服务", "断开当前投放并退出连接模式"],
       param: [
         { what: 64, arg1: 1, arg2: -1 },
         { what: 64, arg1: 2, arg2: -1 },
@@ -2297,12 +2129,7 @@ var BUTTON_DEFINITIONS = [
       type: 2,
       min_uver: 1837,
       succ: ["已开启小爱唤醒！", "已关闭小爱唤醒！"],
-      state: [
-        2,
-        "unisoundInfo.Wakeup_Xiaoai",
-        [!1, !0],
-        ["unisoundInfo.is_xiaoai_exists", !0],
-      ],
+      state: [2, "unisoundInfo.Wakeup_Xiaoai", [!1, !0], ["unisoundInfo.is_xiaoai_exists", !0]],
     },
   ],
   [
@@ -2347,14 +2174,8 @@ var BUTTON_DEFINITIONS = [
       state: ["unisoundInfo.xiaoai_vercode", [902010020]],
     },
   ],
-  [
-    "设置语音报时",
-    { type: -1, itemType: "Voice_time_reporting", min_uver: 1832 },
-  ],
-  [
-    "设置自动重启",
-    { type: -1, itemType: "Auto_restart_device", min_ver: 1848 },
-  ],
+  ["设置语音报时", { type: -1, itemType: "Voice_time_reporting", min_uver: 1832 }],
+  ["设置自动重启", { type: -1, itemType: "Auto_restart_device", min_ver: 1848 }],
   [
     "设置氛围灯亮度",
     {
@@ -2766,13 +2587,10 @@ function updatePlayModeIcon(e, t) {
     e._renderedPlayMode !== i &&
       ((e._renderedPlayMode = i),
       2 == t
-        ? ((e.innerHTML = MUSIC_ICONS.sequential),
-          e.setAttribute("title", "顺序播放"))
+        ? ((e.innerHTML = MUSIC_ICONS.sequential), e.setAttribute("title", "顺序播放"))
         : 3 == t
-          ? ((e.innerHTML = MUSIC_ICONS.repeatOne),
-            e.setAttribute("title", "单曲循环"))
-          : ((e.innerHTML = MUSIC_ICONS.shuffle),
-            e.setAttribute("title", "随机播放")));
+          ? ((e.innerHTML = MUSIC_ICONS.repeatOne), e.setAttribute("title", "单曲循环"))
+          : ((e.innerHTML = MUSIC_ICONS.shuffle), e.setAttribute("title", "随机播放")));
   }
 }
 function onDoubleTap(e, t) {
@@ -2818,8 +2636,7 @@ function buildMusicPanel(e) {
     i.appendChild(n));
   var a = makeEl("div", {
     id: "music_lrc",
-    style:
-      "display:none;width:100%;height:100%;overflow:hidden;position:relative",
+    style: "display:none;width:100%;height:100%;overflow:hidden;position:relative",
   });
   ((ui.musicLyrics = a), i.appendChild(a));
   var o = null,
@@ -2870,9 +2687,7 @@ function buildMusicPanel(e) {
                         "absolute" !== s.position &&
                         "fixed" !== s.position &&
                         (n +=
-                          o.getBoundingClientRect().height +
-                          f(s.marginTop) +
-                          f(s.marginBottom));
+                          o.getBoundingClientRect().height + f(s.marginTop) + f(s.marginBottom));
                     }
                   } else i = !0;
                 }
@@ -2918,17 +2733,14 @@ function buildMusicPanel(e) {
       setTimeout(s, 400),
       setTimeout(s, 900)));
   var r = makeEl("div", {
-    style:
-      "display:flex;align-items:center;justify-content:center;margin:6px 0",
+    style: "display:flex;align-items:center;justify-content:center;margin:6px 0",
   });
   t.appendChild(r);
   var l = makeEl("div", {
     style:
       "flex:0 0 48px;width:48px;text-align:center;color:var(--white);font-variant-numeric:tabular-nums;font-family:Consolas,Monaco,monospace;line-height:1.2",
   });
-  ((ui.musicTimeCurrent = makeText("00:00")),
-    l.appendChild(ui.musicTimeCurrent),
-    r.appendChild(l));
+  ((ui.musicTimeCurrent = makeText("00:00")), l.appendChild(ui.musicTimeCurrent), r.appendChild(l));
   var u = makeEl("div", { style: "flex:1 1 auto;padding:0 8px;min-width:0" }),
     c = makeEl("input", {
       id: "music_time",
@@ -2986,8 +2798,7 @@ function buildMusicPanel(e) {
     ui.qualityPanel.appendChild(makeText("音质：", "")),
     (ui.qualitySelect = makeEl("select", {
       id: "switch_quality",
-      style:
-        "margin:5px 5px 0px 0px;min-width: 60px;height: 25px;backdrop-filter: none;",
+      style: "margin:5px 5px 0px 0px;min-width: 60px;height: 25px;backdrop-filter: none;",
     })),
     (ui.qualitySelect.onchange = function () {
       sendWs({ type: "switch_quality", quality: this.value });
@@ -3004,8 +2815,7 @@ function buildMusicPanel(e) {
     h++
   ) {
     var g = makeEl("option", { value: f[h][1], html: f[h][0] });
-    (f[h][1] == e.ExoPlayer_Quality && (g.selected = !0),
-      ui.qualitySelect.appendChild(g));
+    (f[h][1] == e.ExoPlayer_Quality && (g.selected = !0), ui.qualitySelect.appendChild(g));
   }
   (1 != state.info.Support_Flac &&
     ui.qualitySelect.length > 2 &&
@@ -3016,12 +2826,9 @@ function buildMusicPanel(e) {
     (ui.qualityLabel = makeText("", "")),
     ui.qualityPanel.appendChild(ui.qualityLabel),
     t.appendChild(ui.qualityPanel),
-    2 == e.Current_PlayerType &&
-      isEchoVer(1863) &&
-      (ui.qualityPanel.style.display = "block"));
+    2 == e.Current_PlayerType && isEchoVer(1863) && (ui.qualityPanel.style.display = "block"));
   var v = makeEl("div", {
-    style:
-      "display:flex;justify-content:center;align-items:center;margin:14px 0 10px",
+    style: "display:flex;justify-content:center;align-items:center;margin:14px 0 10px",
   });
   t.appendChild(v);
   var y = makeEl("button", {
@@ -3035,8 +2842,7 @@ function buildMusicPanel(e) {
     onclick: function () {
       var e = parseInt(this.getAttribute("time") || Date.now(), 10);
       Date.now() - e < 0 ||
-        (this.setAttribute("time", Date.now() + 500),
-        executeMusicCommand(this));
+        (this.setAttribute("time", Date.now() + 500), executeMusicCommand(this));
     },
   });
   v.appendChild(y);
@@ -3051,8 +2857,7 @@ function buildMusicPanel(e) {
     onclick: function () {
       var e = parseInt(this.getAttribute("time") || Date.now(), 10);
       Date.now() - e < 0 ||
-        (this.setAttribute("time", Date.now() + 500),
-        executeMusicCommand(this));
+        (this.setAttribute("time", Date.now() + 500), executeMusicCommand(this));
     },
   });
   v.appendChild(_);
@@ -3067,15 +2872,13 @@ function buildMusicPanel(e) {
     onclick: function () {
       var e = parseInt(this.getAttribute("time") || Date.now(), 10);
       Date.now() - e < 0 ||
-        (this.setAttribute("time", Date.now() + 500),
-        executeMusicCommand(this));
+        (this.setAttribute("time", Date.now() + 500), executeMusicCommand(this));
     },
   });
   v.appendChild(b);
   var k = makeEl("div", {
     class: "music_aux_controls",
-    style:
-      "display:flex;justify-content:center;align-items:center;flex-wrap:wrap;margin:6px 0 0px",
+    style: "display:flex;justify-content:center;align-items:center;flex-wrap:wrap;margin:6px 0 0px",
   });
   t.appendChild(k);
   var w =
@@ -3138,9 +2941,7 @@ function buildMusicPanel(e) {
   var S = makeEl("button", {
     id: "music_btn_background",
     type: "button",
-    html: state.coverBackgroundEnabled
-      ? MUSIC_ICONS.background
-      : MUSIC_ICONS.backgroundOff,
+    html: state.coverBackgroundEnabled ? MUSIC_ICONS.background : MUSIC_ICONS.backgroundOff,
     title: state.coverBackgroundEnabled ? "关闭封面背景" : "打开封面背景",
     style: w + ";display:inline-flex",
     onclick: function () {
@@ -3150,20 +2951,12 @@ function buildMusicPanel(e) {
         t = this;
       showAppConfirm(e, function () {
         ((state.coverBackgroundEnabled = !state.coverBackgroundEnabled),
-          localStorage.setItem(
-            "Cover_background_open",
-            state.coverBackgroundEnabled,
-          ),
+          localStorage.setItem("Cover_background_open", state.coverBackgroundEnabled),
           (t.innerHTML = state.coverBackgroundEnabled
             ? MUSIC_ICONS.background
             : MUSIC_ICONS.backgroundOff),
-          t.setAttribute(
-            "title",
-            state.coverBackgroundEnabled ? "关闭封面背景" : "打开封面背景",
-          ),
-          state.coverBackgroundEnabled
-            ? updateCoverBackground()
-            : restoreBackground());
+          t.setAttribute("title", state.coverBackgroundEnabled ? "关闭封面背景" : "打开封面背景"),
+          state.coverBackgroundEnabled ? updateCoverBackground() : restoreBackground());
       });
     },
   });
@@ -3195,8 +2988,7 @@ function buildMusicPanel(e) {
     type: "button",
     html: MUSIC_ICONS.search,
     title: "搜索音乐（需 EchoService 1887+）",
-    style:
-      w + ";display:" + (hasMusicQueueCapability() ? "inline-flex" : "none"),
+    style: w + ";display:" + (hasMusicQueueCapability() ? "inline-flex" : "none"),
     onclick: function () {
       hasMusicQueueCapability() &&
         "function" == typeof createMusicSearchDialog &&
@@ -3249,9 +3041,7 @@ function createFullscreenLrcOverlay() {
           e.appendChild(
             makeEl("div", {
               style:
-                "height:" +
-                i +
-                "px;flex-shrink:0;position:relative;z-index:2;pointer-events:none",
+                "height:" + i + "px;flex-shrink:0;position:relative;z-index:2;pointer-events:none",
             }),
           );
       } catch (e) {}
@@ -3290,10 +3080,7 @@ function createFullscreenLrcOverlay() {
         html: MUSIC_ICONS.play,
         title: "播放",
         onclick: function () {
-          if (
-            !state.musicInfo ||
-            (6 != state.musicInfo.state && 10 != state.musicInfo.state)
-          ) {
+          if (!state.musicInfo || (6 != state.musicInfo.state && 10 != state.musicInfo.state)) {
             var e = parseInt(this.getAttribute("time") || "0", 10);
             if (!(Date.now() - e < 0)) {
               this.setAttribute("time", Date.now() + 600);
@@ -3317,8 +3104,7 @@ function createFullscreenLrcOverlay() {
                   this.classList.add("playing"),
                   this.setAttribute("data", "pause"),
                   0 == state.info.play_type &&
-                  (!state.playlist.playList ||
-                    state.playlist.playList.length < 1) &&
+                  (!state.playlist.playList || state.playlist.playList.length < 1) &&
                   state.info.Recoverable_music
                     ? sendAction(4, 24, 1, !0)
                     : sendAction(4, 3, -1, !0));
@@ -3369,16 +3155,11 @@ function createFullscreenLrcOverlay() {
 function syncFullscreenControls() {
   if (state.lrcFullscreen) {
     ui.fullscreenPlayBtn &&
-      (!state.musicInfo ||
-      (6 != state.musicInfo.state && 10 != state.musicInfo.state)
-        ? state.fullscreenPlayProtectUntil &&
-          Date.now() < state.fullscreenPlayProtectUntil
+      (!state.musicInfo || (6 != state.musicInfo.state && 10 != state.musicInfo.state)
+        ? state.fullscreenPlayProtectUntil && Date.now() < state.fullscreenPlayProtectUntil
           ? (ui.fullscreenPlayBtn.disabled = !1)
           : ((ui.fullscreenPlayBtn.disabled = !1),
-            updatePlayButtonIcon(
-              ui.fullscreenPlayBtn,
-              isPlayingState() ? "pause" : "play",
-            ))
+            updatePlayButtonIcon(ui.fullscreenPlayBtn, isPlayingState() ? "pause" : "play"))
         : ((ui.fullscreenPlayBtn.disabled = !0),
           updatePlayButtonIcon(
             ui.fullscreenPlayBtn,
@@ -3386,8 +3167,7 @@ function syncFullscreenControls() {
           )));
     var e = state.lyricTiming[2] ? parseInt(state.lyricTiming[2], 10) : 0,
       t = state.lyricTiming[1] ? parseInt(state.lyricTiming[1], 10) : 0;
-    ui.fullscreenTimeEl &&
-      (ui.fullscreenTimeEl.innerHTML = msToTime(t) + " / " + msToTime(e));
+    ui.fullscreenTimeEl && (ui.fullscreenTimeEl.innerHTML = msToTime(t) + " / " + msToTime(e));
   }
 }
 function isPlayingState() {
@@ -3400,11 +3180,7 @@ function updateFullscreenBg(e) {
       i = ui.fullscreenOverlay,
       n = ui.musicPic,
       a = n && n._coverRequest,
-      o =
-        !e &&
-        state.coverBackgroundEnabled &&
-        n &&
-        (n._coverPending || n._coverLoading),
+      o = !e && state.coverBackgroundEnabled && n && (n._coverPending || n._coverLoading),
       s = t._backgroundLayers;
     if (o && s && s.hostname === state.hostname && (s.current || s.incoming))
       t.style.display = "block";
@@ -3429,10 +3205,7 @@ function updateFullscreenBg(e) {
                 0,
                 Math.min(
                   60,
-                  parseInt(
-                    localStorage.getItem(state.hostname + "_BackgroundBlur"),
-                    10,
-                  ) || 0,
+                  parseInt(localStorage.getItem(state.hostname + "_BackgroundBlur"), 10) || 0,
                 ),
               );
       if (l)
@@ -3451,9 +3224,7 @@ function updateFullscreenBg(e) {
           p =
             d &&
             d.hostname === state.hostname &&
-            (d.incoming && "1" === d.incoming.style.opacity
-              ? d.incoming
-              : d.current);
+            (d.incoming && "1" === d.incoming.style.opacity ? d.incoming : d.current);
         if (
           !d ||
           d.hostname !== state.hostname ||
@@ -3467,15 +3238,13 @@ function updateFullscreenBg(e) {
               var t = p.style.getPropertyValue(e);
               t && (m[e] = t);
             }),
-              Object.keys(m).length ||
-                (m.background = p.style.getPropertyValue("background")),
+              Object.keys(m).length || (m.background = p.style.getPropertyValue("background")),
               (r = { url: p._backgroundUrl || "", props: m }));
           }
         } else r = d.background;
         r ||
           (r = parseBackgroundCss(
-            localStorage.getItem(state.hostname + "_background") ||
-              DEFAULT_BACKGROUND,
+            localStorage.getItem(state.hostname + "_background") || DEFAULT_BACKGROUND,
           ));
       }
       ((t.style.display = "block"),
@@ -3511,8 +3280,7 @@ function updateFullscreenBg(e) {
 function enterFullscreenLrc() {
   (createFullscreenLrcOverlay(),
     clearTimeout(ui.fullscreenOverlay._closeTimer),
-    (ui.fullscreenOverlay._closeSequence =
-      (ui.fullscreenOverlay._closeSequence || 0) + 1),
+    (ui.fullscreenOverlay._closeSequence = (ui.fullscreenOverlay._closeSequence || 0) + 1),
     (state.lrcFullscreen = !0),
     ui.musicPic && (ui.musicPic.style.display = "none"),
     ui.musicLyrics &&
@@ -3520,8 +3288,7 @@ function enterFullscreenLrc() {
       (ui.musicLyrics.innerHTML = ""),
       (ui.musicLyrics._lyrics = null)),
     localStorage.setItem(state.hostname + "_lrc_mode", 1),
-    ui.fullscreenLrc &&
-      ((ui.fullscreenLrc.innerHTML = ""), (ui.fullscreenLrc._lyrics = null)),
+    ui.fullscreenLrc && ((ui.fullscreenLrc.innerHTML = ""), (ui.fullscreenLrc._lyrics = null)),
     (ui.fullscreenOverlay.style.display = "flex"),
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
@@ -3554,8 +3321,7 @@ function exitFullscreenLrc() {
     (state.lrcFullscreen = !1),
     ui.fullscreenCover &&
       (clearTimeout(ui.fullscreenCover._coverTimer),
-      (ui.fullscreenCover._coverRequest =
-        (ui.fullscreenCover._coverRequest || 0) + 1),
+      (ui.fullscreenCover._coverRequest = (ui.fullscreenCover._coverRequest || 0) + 1),
       (ui.fullscreenCover._requestedCover = ""),
       (ui.fullscreenCover.style.opacity = "1")),
     [ui.fullscreenTitleEl, ui.fullscreenArtistEl].forEach(function (e) {
@@ -3563,8 +3329,7 @@ function exitFullscreenLrc() {
         ((e._marqueeSequence = (e._marqueeSequence || 0) + 1),
         (e._marqueeText = null),
         null != e._marqueeRaf && cancelAnimationFrame(e._marqueeRaf),
-        null != e._marqueeStartFrame &&
-          cancelAnimationFrame(e._marqueeStartFrame),
+        null != e._marqueeStartFrame && cancelAnimationFrame(e._marqueeStartFrame),
         clearTimeout(e._marqueeStartTimer),
         (e._marqueeRaf = e._marqueeStartFrame = e._marqueeStartTimer = null));
     }),
@@ -3582,12 +3347,10 @@ function exitFullscreenLrc() {
           cancelBackgroundLayers(t, !0),
           t && (t.style.backgroundImage = ""),
           ui.fullscreenLrc &&
-            ((ui.fullscreenLrc.innerHTML = ""),
-            (ui.fullscreenLrc._lyrics = null)));
+            ((ui.fullscreenLrc.innerHTML = ""), (ui.fullscreenLrc._lyrics = null)));
         var a = $("#lrc_fullscreen_content");
         (a && (a.style.paddingBottom = ""),
-          ui.musicLyrics &&
-            ((ui.musicLyrics.innerHTML = ""), (ui.musicLyrics._lyrics = null)),
+          ui.musicLyrics && ((ui.musicLyrics.innerHTML = ""), (ui.musicLyrics._lyrics = null)),
           setTimeout(function () {
             ui.fullscreenOverlay !== e ||
               e._closeSequence !== n ||
@@ -3606,18 +3369,15 @@ function setFullscreenMarquee(e, t) {
     e._marqueeText = t;
     var i = (e._marqueeSequence = (e._marqueeSequence || 0) + 1);
     if (
-      (null != e._marqueeStartFrame &&
-        cancelAnimationFrame(e._marqueeStartFrame),
+      (null != e._marqueeStartFrame && cancelAnimationFrame(e._marqueeStartFrame),
       clearTimeout(e._marqueeStartTimer),
       (e._marqueeStartFrame = e._marqueeStartTimer = null),
-      e._marqueeRaf &&
-        (cancelAnimationFrame(e._marqueeRaf), (e._marqueeRaf = null)),
+      e._marqueeRaf && (cancelAnimationFrame(e._marqueeRaf), (e._marqueeRaf = null)),
       (e.innerHTML = ""),
       t)
     ) {
       var n = makeEl("span", { class: "marquee-wrapper" });
-      (n.appendChild(makeEl("span", { class: "marquee-text", html: t })),
-        e.appendChild(n));
+      (n.appendChild(makeEl("span", { class: "marquee-text", html: t })), e.appendChild(n));
       var a = function () {
         if (((e._marqueeStartTimer = null), o() && e.offsetWidth)) {
           var i = e.clientWidth,
@@ -3635,11 +3395,7 @@ function setFullscreenMarquee(e, t) {
               l = a + 60,
               u = function (t) {
                 if (o()) {
-                  if (null === r)
-                    return (
-                      (r = t),
-                      void (e._marqueeRaf = requestAnimationFrame(u))
-                    );
+                  if (null === r) return ((r = t), void (e._marqueeRaf = requestAnimationFrame(u)));
                   var i = Math.min(t - r, 100);
                   ((s -= (40 * i) / 1e3) <= -l && (s += l),
                     (n.style.transform = "translateX(" + s + "px)"),
@@ -3654,8 +3410,7 @@ function setFullscreenMarquee(e, t) {
       e._marqueeStartFrame = requestAnimationFrame(function () {
         o() &&
           (e._marqueeStartFrame = requestAnimationFrame(function () {
-            ((e._marqueeStartFrame = null),
-              o() && (e._marqueeStartTimer = setTimeout(a, 60)));
+            ((e._marqueeStartFrame = null), o() && (e._marqueeStartTimer = setTimeout(a, 60)));
           }));
       });
     }
@@ -3667,10 +3422,7 @@ function setFullscreenMarquee(e, t) {
 function updateFullscreenTitle() {
   if (ui.fullscreenTitleEl && state.lrcFullscreen) {
     var e = (state.musicInfo && state.musicInfo.title) || "",
-      t =
-        (state.musicInfo &&
-          (state.musicInfo.artist || state.musicInfo.arist)) ||
-        "";
+      t = (state.musicInfo && (state.musicInfo.artist || state.musicInfo.arist)) || "";
     if (
       (setFullscreenMarquee(ui.fullscreenTitleEl, e || "歌词"),
       setFullscreenMarquee(ui.fullscreenArtistEl, t),
@@ -3685,15 +3437,10 @@ function updateFullscreenTitle() {
           !ui.musicPic._coverPending &&
           !ui.musicPic._coverLoading
         ) {
-          ((n._requestedCover = i),
-            (n._coverRequest = (n._coverRequest || 0) + 1));
+          ((n._requestedCover = i), (n._coverRequest = (n._coverRequest || 0) + 1));
           var a = n._coverRequest;
           transitionCoverImage(n, i, function () {
-            return (
-              ui.fullscreenCover === n &&
-              n._coverRequest === a &&
-              state.lrcFullscreen
-            );
+            return ui.fullscreenCover === n && n._coverRequest === a && state.lrcFullscreen;
           });
         }
         ui.fullscreenCover.style.visibility = "visible";
@@ -3702,9 +3449,7 @@ function updateFullscreenTitle() {
   }
 }
 function getLrcParent() {
-  return state.lrcFullscreen && ui.fullscreenLrc
-    ? ui.fullscreenLrc
-    : ui.musicLyrics;
+  return state.lrcFullscreen && ui.fullscreenLrc ? ui.fullscreenLrc : ui.musicLyrics;
 }
 function buildPlaylistPanel() {
   var e = createPopupHost({ open: !1 });
@@ -3735,8 +3480,7 @@ function buildPlaylistPanel() {
           var i = ui.playlistTable.getElementsByTagName("tr")[t];
           i &&
             (ui.playlistContainer.scrollTop =
-              i.offsetTop -
-              (ui.playlistContainer.clientHeight - i.offsetHeight) / 2);
+              i.offsetTop - (ui.playlistContainer.clientHeight - i.offsetHeight) / 2);
         }
       }
     }),
@@ -3760,8 +3504,7 @@ function buildPlaylistPanel() {
       border: "0",
       cellspacing: "0",
       cellpadding: "0",
-      style:
-        "width:100%;color:var(--white);text-shadow:var(--white-shadow);margin:0 auto",
+      style: "width:100%;color:var(--white);text-shadow:var(--white-shadow);margin:0 auto",
     })),
     ui.playlistContainer.appendChild(ui.playlistTable),
     e
@@ -3776,8 +3519,7 @@ function startPlaylistPolling() {
     }, 2e3)));
 }
 function stopPlaylistPolling() {
-  playlistPollTimer &&
-    (clearInterval(playlistPollTimer), (playlistPollTimer = null));
+  playlistPollTimer && (clearInterval(playlistPollTimer), (playlistPollTimer = null));
 }
 function showPlaylistOverlay() {
   if (ui.playlistOverlay) {
@@ -3819,8 +3561,7 @@ function cleanupPlaylistOverlay() {
     stopPlaylistPolling(),
     ui.playlistOverlay)
   ) {
-    var e =
-      "function" == typeof attachQueueRowDrag && attachQueueRowDrag.active;
+    var e = "function" == typeof attachQueueRowDrag && attachQueueRowDrag.active;
     e && e.cancel && e.cancel();
   }
 }
@@ -3862,8 +3603,7 @@ function buildVolumePanel(e) {
         (a._pressTimer = setTimeout(function () {
           state.mousePressed = !1;
         }, 600)),
-        ui.volumeLabel &&
-          (ui.volumeLabel.innerHTML = "   " + a.value + "/" + a.max),
+        ui.volumeLabel && (ui.volumeLabel.innerHTML = "   " + a.value + "/" + a.max),
         sendWs({ type: "set_vol", vol: a.value }),
         sendWs({ type: "get_info" }));
     }),
@@ -3943,15 +3683,9 @@ function buildBluetoothPanel() {
     ui.btWrapper.classList.add("mask"),
     ui.btWrapper.appendChild(makeDiv("height:15px")));
   var a = makeEl("div"),
-    o = makeText(
-      "蓝牙列表",
-      "color:var(--white);text-shadow:var(--white-shadow);font-size:15px",
-    );
+    o = makeText("蓝牙列表", "color:var(--white);text-shadow:var(--white-shadow);font-size:15px");
   ((o.id = "bluetooth_list_title"), a.appendChild(o));
-  var s = makeText(
-    "\t▼",
-    "font-size:13px;color:var(--white);text-shadow:var(--white-shadow)",
-  );
+  var s = makeText("\t▼", "font-size:13px;color:var(--white);text-shadow:var(--white-shadow)");
   ((s.id = "bluetooth_list_ico"),
     a.appendChild(s),
     (a.onclick = function () {
@@ -3977,8 +3711,7 @@ function buildBluetoothPanel() {
     ui.btWrapper.appendChild(ui.btListContainer),
     (ui.btTable = makeEl("table", {
       border: "0",
-      style:
-        "width:100%;color:var(--white);text-shadow:var(--white-shadow);margin:0 auto",
+      style: "width:100%;color:var(--white);text-shadow:var(--white-shadow);margin:0 auto",
     })),
     ui.btListContainer.appendChild(ui.btTable),
     ui.btTable.appendChild(makeEl("hr", { size: 1, className: "hr1" })));
@@ -4013,8 +3746,7 @@ function updateScreenStageSize(e, t) {
   if (e > 0 && t > 0 && ui.screenStage) {
     var i = t / e;
     ui.screenStage._ratio !== i &&
-      ((ui.screenStage._ratio = i),
-      (ui.screenStage.style.paddingBottom = 100 * i + "%"));
+      ((ui.screenStage._ratio = i), (ui.screenStage.style.paddingBottom = 100 * i + "%"));
   }
 }
 function buildScreenPanel() {
@@ -4036,18 +3768,13 @@ function buildScreenPanel() {
   (n.setAttribute("_width", 0),
     n.setAttribute("_height", 0),
     (n.onload = function () {
-      if (
-        ui.screen &&
-        "none" !== ui.screen.style.display &&
-        this.getAttribute("src")
-      ) {
+      if (ui.screen && "none" !== ui.screen.style.display && this.getAttribute("src")) {
         var e = this.naturalWidth,
           t = this.naturalHeight;
         e > 0 &&
           t > 0 &&
           (updateScreenStageSize(e, t),
-          (this.getAttribute("_width") == e &&
-            this.getAttribute("_height") == t) ||
+          (this.getAttribute("_width") == e && this.getAttribute("_height") == t) ||
             (this.setAttribute("_width", e),
             this.setAttribute("_height", t),
             runShell("wm size", "wm_size")));
@@ -4076,9 +3803,7 @@ function buildScreenPanel() {
             i = function () {
               ((e.disabled = !1),
                 setTimeout(function () {
-                  ui.screen &&
-                    "none" !== ui.screen.style.display &&
-                    startScreenCapture();
+                  ui.screen && "none" !== ui.screen.style.display && startScreenCapture();
                 }, 500));
             };
           setTimeout(function () {
@@ -4115,9 +3840,7 @@ function buildScreenPanel() {
         (setTimeout(function () {
           ((e.value = "重置系统语言"), (e.disabled = !1));
         }, 1e3),
-          runShell(
-            "setprop persist.sys.language zh && setprop persist.sys.country CN",
-          ));
+          runShell("setprop persist.sys.language zh && setprop persist.sys.country CN"));
       }),
     ),
     ui.container && ui.container.appendChild(e));
@@ -4156,8 +3879,7 @@ function unhideScreen() {
     ui.screen && (ui.screen.style.display = "block"),
     startScreenCapture(),
     ui.screenImage &&
-      (ui.screenImage.setAttribute("_width", 0),
-      ui.screenImage.setAttribute("_height", 0)),
+      (ui.screenImage.setAttribute("_width", 0), ui.screenImage.setAttribute("_height", 0)),
     ui.screen && ui.screen.controller && ui.screen.controller.destroy(),
     ui.screen &&
       (ui.screen.controller = new ScreenController(ui.screenImage, {
@@ -4223,9 +3945,7 @@ function buildSoundEffectsPanel() {
       }),
     ),
     e.appendChild(ui.loudnessBox),
-    isEchoVer(1876) &&
-      (e.appendChild(makeText("扬声器音量：")),
-      e.appendChild(ui.speakerVolBox)));
+    isEchoVer(1876) && (e.appendChild(makeText("扬声器音量：")), e.appendChild(ui.speakerVolBox)));
   var t = makeText("DSP低音增强：");
   ((t.id = "dsp_bass_text"),
     e.appendChild(t),
@@ -4313,27 +4033,21 @@ function renderEqBands(e) {
             ui.eqsBox.appendChild(a),
             ((o = makeText("")).id = "band_text_" + e.Band));
           var r = makeDiv("width:50px;display:inline-block");
-          (r.appendChild(o),
-            ui.eqsBox.appendChild(r),
-            ui.eqsBox.appendChild(makeEl("div")));
+          (r.appendChild(o), ui.eqsBox.appendChild(r), ui.eqsBox.appendChild(makeEl("div")));
         }
-        (!state.mousePressed &&
-          a &&
-          (a.value = parseInt(e.BandLevel / 100, 10)),
+        (!state.mousePressed && a && (a.value = parseInt(e.BandLevel / 100, 10)),
           o && (o.innerHTML = "   " + e.BandLevel / 100 + "dB"));
       })(i.list[a]);
 }
 function renderBassControl(e) {
   if (ui.bassBox) {
     var t, i;
-    if ("" !== ui.bassBox.innerHTML)
-      ((t = $("#bass_value")), (i = $("#bass_text_value")));
+    if ("" !== ui.bassBox.innerHTML) ((t = $("#bass_value")), (i = $("#bass_text_value")));
     else {
       var n = makeDiv("width:80px;display:inline-block");
       (n.appendChild(makeText("低音增强：")),
         ui.bassBox.appendChild(n),
-        ((t = makeEl("input", { type: "range", min: 0, max: 100 })).id =
-          "bass_value"),
+        ((t = makeEl("input", { type: "range", min: 0, max: 100 })).id = "bass_value"),
         t.addEventListener("input", function () {
           var e = $("#bass_text_value");
           (e && (e.innerHTML = "   " + t.value + "%"),
@@ -4358,8 +4072,7 @@ function renderLoudnessControl(e) {
       var n = makeDiv("width:80px;display:inline-block");
       (n.appendChild(makeText("响度控制：")),
         ui.loudnessBox.appendChild(n),
-        ((t = makeEl("input", { type: "range", min: -3e3, max: 3e3 })).id =
-          "loudness_value"),
+        ((t = makeEl("input", { type: "range", min: -3e3, max: 3e3 })).id = "loudness_value"),
         t.addEventListener("input", function () {
           var e = $("#loudness_text_value");
           (e && (e.innerHTML = "   " + t.value / 100 + "dB"),
@@ -4504,8 +4217,7 @@ function renderEqPreset(e) {
               level: t[i].BandLevel,
             });
         else
-          -1 != parseInt(this.value, 10) &&
-            sendWs({ type: "set_eq_preset", preset: this.value });
+          -1 != parseInt(this.value, 10) && sendWs({ type: "set_eq_preset", preset: this.value });
         sendWs({ type: "get_eq_config" });
       };
       var u = makeEl("option", {
@@ -4574,13 +4286,9 @@ function updateCustomPresets() {
       }
     (o
       ? o.getAttribute("bands") !== a.bands && o.setAttribute("bands", a.bands)
-      : ((o = makeEl("option", { value: -2, html: a.name })).setAttribute(
-          "bands",
-          a.bands,
-        ),
+      : ((o = makeEl("option", { value: -2, html: a.name })).setAttribute("bands", a.bands),
         i.appendChild(o)),
-      o.getAttribute("bands") ===
-        JSON.stringify(state.soundEffectsData.eq.Bands.list) &&
+      o.getAttribute("bands") === JSON.stringify(state.soundEffectsData.eq.Bands.list) &&
         ((o.selected = !0), (e = !0)));
   }
   return e;
@@ -4605,8 +4313,7 @@ function unhideSoundEffects() {
     startSoundEffectsRefresh());
 }
 function hideSoundEffects() {
-  (ui.soundEffects && (ui.soundEffects.style.display = "none"),
-    stopSoundEffectsRefresh());
+  (ui.soundEffects && (ui.soundEffects.style.display = "none"), stopSoundEffectsRefresh());
 }
 function getTrackTitle(e) {
   return e
@@ -4621,10 +4328,7 @@ function getTrackTitle(e) {
 }
 function getReportedUnisoundVersion(e) {
   var t = e && e.u_ver,
-    i =
-      "number" == typeof t || ("string" == typeof t && "" !== t.trim())
-        ? Number(t)
-        : NaN;
+    i = "number" == typeof t || ("string" == typeof t && "" !== t.trim()) ? Number(t) : NaN;
   return isFinite(i) && Math.floor(i) === i && i > 1e3 ? i : -1;
 }
 function readUnisoundAvailable() {
@@ -4638,10 +4342,7 @@ function readUnisoundAvailable() {
   )
     return !1;
   var t = e.info.Unisound;
-  return (
-    e.info.u_ver > 1e3 &&
-    (null == t || !0 === t || 1 === t || "true" === t || "1" === t)
-  );
+  return e.info.u_ver > 1e3 && (null == t || !0 === t || 1 === t || "true" === t || "1" === t);
 }
 function updateUnisoundAvailability(e) {
   var t = state.uVer,
@@ -4654,9 +4355,7 @@ function updateUnisoundAvailability(e) {
     }),
     (state.unisoundAvailable = readUnisoundAvailable()),
     (state.isNewUnisound = state.unisoundAvailable),
-    t !== i &&
-      "function" == typeof closeVersionInfoWindow &&
-      closeVersionInfoWindow(),
+    t !== i && "function" == typeof closeVersionInfoWindow && closeVersionInfoWindow(),
     updateMusicCollectionButtons(e));
 }
 function resetUnisoundAvailability() {
@@ -4697,44 +4396,32 @@ function executeMusicCommand(e) {
         : sendAction(4, 3, -1, !0);
     } else
       "collect" === t
-        ? showAppConfirm(
-            "确定要收藏[" + getTrackTitle(state.musicInfo) + "]吗？",
-            function () {
-              readUnisoundAvailable() &&
-                sendToUnisound({
-                  type: "api",
-                  data: { type: "collect", music_info: state.musicInfo },
-                });
-            },
-          )
+        ? showAppConfirm("确定要收藏[" + getTrackTitle(state.musicInfo) + "]吗？", function () {
+            readUnisoundAvailable() &&
+              sendToUnisound({
+                type: "api",
+                data: { type: "collect", music_info: state.musicInfo },
+              });
+          })
         : "cancel_collect" === t &&
-          showAppConfirm(
-            "确定要取消收藏[" + getTrackTitle(state.musicInfo) + "]吗？",
-            function () {
-              readUnisoundAvailable() &&
-                sendToUnisound({
-                  type: "api",
-                  data: { type: "cancel_collect", music_info: state.musicInfo },
-                });
-            },
-          );
+          showAppConfirm("确定要取消收藏[" + getTrackTitle(state.musicInfo) + "]吗？", function () {
+            readUnisoundAvailable() &&
+              sendToUnisound({
+                type: "api",
+                data: { type: "cancel_collect", music_info: state.musicInfo },
+              });
+          });
     sendWs({ type: "get_info" });
   }
 }
 function transitionCoverImage(e, t, i, n) {
   clearTimeout(e._coverTimer);
-  var a =
-    "function" == typeof prefersReducedDialogMotion &&
-    prefersReducedDialogMotion();
+  var a = "function" == typeof prefersReducedDialogMotion && prefersReducedDialogMotion();
   ((e.style.transition = "opacity 0.18s ease"),
     (e.style.opacity = a ? "1" : "0"),
     (e._coverTimer = setTimeout(
       function () {
-        i() &&
-          ((e._coverTimer = null),
-          n && n(),
-          (e.src = t),
-          (e.style.opacity = "1"));
+        i() && ((e._coverTimer = null), n && n(), (e.src = t), (e.style.opacity = "1"));
       },
       a ? 0 : 180,
     )));
@@ -4809,8 +4496,7 @@ function waitMusicCover() {
     (e.style.opacity = "1"),
     ui.fullscreenCover &&
       (clearTimeout(ui.fullscreenCover._coverTimer),
-      (ui.fullscreenCover._coverRequest =
-        (ui.fullscreenCover._coverRequest || 0) + 1),
+      (ui.fullscreenCover._coverRequest = (ui.fullscreenCover._coverRequest || 0) + 1),
       (ui.fullscreenCover._requestedCover = ""),
       (ui.fullscreenCover.style.opacity = "1")),
     [ui.background, ui.fullscreenBg].forEach(function (e) {
@@ -4820,14 +4506,12 @@ function waitMusicCover() {
         (cancelBackgroundLayers(e, !1, !0),
         t.fading ||
           (t.incoming &&
-            (t.incoming.parentNode === e && e.removeChild(t.incoming),
-            (t.incoming = null))));
+            (t.incoming.parentNode === e && e.removeChild(t.incoming), (t.incoming = null))));
     }));
 }
 function restoreCoverBackground() {
   state.coverBackgroundEnabled &&
-    (ui.musicPic && (ui.musicPic._failedBackgroundCover = ui.musicPic.src),
-    restoreBackground());
+    (ui.musicPic && (ui.musicPic._failedBackgroundCover = ui.musicPic.src), restoreBackground());
 }
 function updateCoverBackground() {
   if (
@@ -4906,27 +4590,19 @@ function updateCoverBackground() {
   }
 }
 function hasRealLyrics() {
-  return (
-    !!state.lyrics.length &&
-    (1 !== state.lyrics.length || -1 !== state.lyrics[0][0])
-  );
+  return !!state.lyrics.length && (1 !== state.lyrics.length || -1 !== state.lyrics[0][0]);
 }
 function lyricsWaiting() {
   var e = state.lyricsPending;
   return (
-    !!e &&
-    e.musicId === state.musicId &&
-    e.hostname === state.hostname &&
-    e.socket === state.ws
+    !!e && e.musicId === state.musicId && e.hostname === state.hostname && e.socket === state.ws
   );
 }
 function showLrcPlaceholder(e) {
   var t = getLrcParent();
   if (
     t &&
-    (!ui.musicLyrics ||
-      "block" === ui.musicLyrics.style.display ||
-      state.lrcFullscreen) &&
+    (!ui.musicLyrics || "block" === ui.musicLyrics.style.display || state.lrcFullscreen) &&
     !(
       (hasRealLyrics() && t.querySelector(".music_lrc_div")) ||
       (t._placeholderText === e && t.querySelector(".lrc_placeholder"))
@@ -4946,8 +4622,7 @@ function showLrcPlaceholder(e) {
   }
 }
 function updateLyrics(e, t) {
-  if (lyricsWaiting())
-    return (syncProgressBar(), void showLrcPlaceholder("正在加载歌词…"));
+  if (lyricsWaiting()) return (syncProgressBar(), void showLrcPlaceholder("正在加载歌词…"));
   if (!state.lyricTiming.length)
     return (
       ui.musicTimeRange && (setMusicProgress(0, 0), (state.lastLyricTime = -1)),
@@ -4971,18 +4646,12 @@ function syncProgressBar() {
       -1 !== state.lyricTiming[0] &&
       state.info &&
       state.info.play_state &&
-      ((t += Math.max(0, Date.now() - state.lyricTiming[0])),
-      e > 0 && (t = Math.min(e, t))),
+      ((t += Math.max(0, Date.now() - state.lyricTiming[0])), e > 0 && (t = Math.min(e, t))),
       setMusicProgress(e, t));
   }
 }
 function seekSessionCurrent(e) {
-  return (
-    e &&
-    e.musicId === state.musicId &&
-    e.hostname === state.hostname &&
-    e.socket === state.ws
-  );
+  return e && e.musicId === state.musicId && e.hostname === state.hostname && e.socket === state.ws;
 }
 function clearMusicSeek() {
   var e = state.seekSession;
@@ -5004,15 +4673,10 @@ function beginMusicSeek() {
     (state.timeLocked = !0));
 }
 function previewMusicSeek(e) {
-  (seekSessionCurrent(state.seekSession) && !state.seekSession.committed) ||
-    beginMusicSeek();
+  (seekSessionCurrent(state.seekSession) && !state.seekSession.committed) || beginMusicSeek();
   var t = state.seekSession;
   ((t.position = Math.max(0, parseInt(e, 10) || 0)),
-    (state.lyricTiming = [
-      -1,
-      t.position,
-      state.musicInfo ? state.musicInfo.duration : 0,
-    ]),
+    (state.lyricTiming = [-1, t.position, state.musicInfo ? state.musicInfo.duration : 0]),
     setMusicProgress(state.lyricTiming[2], t.position),
     updateLyrics(!0));
 }
@@ -5025,8 +4689,7 @@ function commitMusicSeek() {
           (e.started = Date.now()),
           (e.until = e.started + 900),
           (state.timeLocked = !1),
-          (state.lyricTiming[0] =
-            state.info && state.info.play_state ? e.started : -1),
+          (state.lyricTiming[0] = state.info && state.info.play_state ? e.started : -1),
           sendWs({ type: "set_position", position: e.position }),
           sendWs({ type: "get_info" }),
           (e.timer = setTimeout(function () {
@@ -5046,16 +4709,14 @@ function acceptMusicSeekPosition(e) {
   if (!t.committed) return !1;
   var i = state.info && state.info.play_state ? Date.now() - t.started : 0;
   return (
-    (Math.abs(Number(e.position) - t.position - i) <= 1500 ||
-      Date.now() >= t.until) &&
+    (Math.abs(Number(e.position) - t.position - i) <= 1500 || Date.now() >= t.until) &&
     (clearMusicSeek(), !0)
   );
 }
 function setMusicProgress(e, t) {
   var i = ui.musicTimeRange;
   if (i) {
-    (i.max !== String(e) && (i.max = e),
-      i.value !== String(t) && (i.value = t));
+    (i.max !== String(e) && (i.max = e), i.value !== String(t) && (i.value = t));
     var n = msToTime(e),
       a = msToTime(t);
     (ui.musicTimeTotal &&
@@ -5099,9 +4760,7 @@ function computePlaybackTime() {
       : parseInt(state.lyricTiming[1], 10);
   return (
     isNaN(e) && (e = 0),
-    e < state.lastLyricTime &&
-      state.lastLyricTime - e < 1e3 &&
-      (e = state.lastLyricTime),
+    e < state.lastLyricTime && state.lastLyricTime - e < 1e3 && (e = state.lastLyricTime),
     (state.lastLyricTime = e),
     e
   );
@@ -5122,19 +4781,11 @@ function renderActiveLyric(e, t) {
     o = i.visible;
   ((window.current_lrc_index = n), null === a && (a = o.length - 1));
   var s = getLrcParent();
-  if (
-    ((ui.musicLyrics && "block" === ui.musicLyrics.style.display) ||
-      state.lrcFullscreen) &&
-    s
-  ) {
-    (s.querySelector(".music_lrc_div") && s._lyrics === state.lyrics) ||
-      buildLyricsDom(o);
+  if (((ui.musicLyrics && "block" === ui.musicLyrics.style.display) || state.lrcFullscreen) && s) {
+    (s.querySelector(".music_lrc_div") && s._lyrics === state.lyrics) || buildLyricsDom(o);
     var r = s.querySelector(".music_lrc_div"),
       l = r ? r.getElementsByTagName("h3") : null;
-    if (
-      (l && l.length > o.length && (o.length < 2 && (a = 1), (a += 1)),
-      l && l[a])
-    ) {
+    if ((l && l.length > o.length && (o.length < 2 && (a = 1), (a += 1)), l && l[a])) {
       var u = state.lyrics[n],
         c = String(u && "" !== u[1]);
       (l[a].getAttribute("current") !== c && l[a].setAttribute("current", c),
@@ -5167,12 +4818,8 @@ function locateActiveLyric(e, t) {
   for (var i = null, n = null, a = [], o = e.length - 1, s = 0; s <= o; s++) {
     var r = e[s],
       l = parseInt(r[0], 10);
-    (l > t
-      ? null === i && (i = s > 0 ? s - 1 : s)
-      : s === o && null === i && (i = s),
-      "" !== r[1] &&
-        (l > t && null === n && (n = a.length > 0 ? a.length - 1 : 0),
-        a.push(r)));
+    (l > t ? null === i && (i = s > 0 ? s - 1 : s) : s === o && null === i && (i = s),
+      "" !== r[1] && (l > t && null === n && (n = a.length > 0 ? a.length - 1 : 0), a.push(r)));
   }
   return { allIndex: i, visibleIndex: n, visible: a };
 }
@@ -5193,23 +4840,18 @@ function buildLyricsDom(e) {
           class: "music_lrc_div",
         })
       : makeEl("div", {
-          style:
-            "width:100%;height:100%;overflow-x:hidden;overflow-y:auto;box-sizing:border-box",
+          style: "width:100%;height:100%;overflow-x:hidden;overflow-y:auto;box-sizing:border-box",
           class: "music_lrc_div",
         });
     var s = t.clientHeight || 224,
       r = e.length < 3 ? 3 - e.length : 1,
       l = function (e, t) {
         var i = makeEl("h3", { class: "lrc" + (t ? " " + t : "") });
-        return (
-          i.appendChild(makeEl("span", { class: "lrc-inner", html: e })),
-          i
-        );
+        return (i.appendChild(makeEl("span", { class: "lrc-inner", html: e })), i);
       };
     if (!state.lrcFullscreen && 50 * (r + e.length + 1) < s) {
       for (
-        var u =
-            null != window.current_lrc_index ? window.current_lrc_index : -1,
+        var u = null != window.current_lrc_index ? window.current_lrc_index : -1,
           c = u >= 0 && state.lyrics[u] ? state.lyrics[u] : null,
           d = 0;
         d < e.length;
@@ -5223,14 +4865,9 @@ function buildLyricsDom(e) {
       i.classList.add("lrc-center");
     } else {
       for (var h = 0; h < r; h++)
-        i.appendChild(
-          makeEl("h3", { class: "lrc", style: "height:20px;margin:0" }),
-        );
+        i.appendChild(makeEl("h3", { class: "lrc", style: "height:20px;margin:0" }));
       for (var g = 0; g < e.length; g++) i.appendChild(l(e[g][1]));
-      if (
-        (i.appendChild(makeEl("h3", { class: "lrc", style: "margin:0" })),
-        state.lrcFullscreen)
-      ) {
+      if ((i.appendChild(makeEl("h3", { class: "lrc", style: "margin:0" })), state.lrcFullscreen)) {
         var v = 0;
         if (window.plus)
           try {
@@ -5247,20 +4884,14 @@ function buildLyricsDom(e) {
       t.appendChild(i),
       (t._lyrics = state.lyrics),
       ui.applyLyricsModeHeight &&
-        (setTimeout(ui.applyLyricsModeHeight, 0),
-        setTimeout(ui.applyLyricsModeHeight, 150)));
+        (setTimeout(ui.applyLyricsModeHeight, 0), setTimeout(ui.applyLyricsModeHeight, 150)));
   }
 }
 function clearOldHighlights(e) {
-  for (
-    var t = document.querySelectorAll(".lrc_shrink"), i = 0;
-    i < t.length;
-    i++
-  )
+  for (var t = document.querySelectorAll(".lrc_shrink"), i = 0; i < t.length; i++)
     t[i].classList.remove("lrc_shrink");
   for (
-    var n = document.querySelectorAll('.current_lrc, h3.lrc[current="true"]'),
-      a = 0;
+    var n = document.querySelectorAll('.current_lrc, h3.lrc[current="true"]'), a = 0;
     a < n.length;
     a++
   )
@@ -5278,9 +4909,7 @@ function scrollToActive(e, t, i) {
       r = a.top - n.top + e.scrollTop + s / 2 - o / 2;
     if (state.lrcFullscreen) r += n.top + o / 2 - window.innerHeight / 2;
     (r < 0 && (r = 0),
-      window.jQuery
-        ? window.jQuery(e).stop().animate({ scrollTop: r }, 400)
-        : (e.scrollTop = r));
+      window.jQuery ? window.jQuery(e).stop().animate({ scrollTop: r }, 400) : (e.scrollTop = r));
   }
 }
 function notifyMediaSession() {
@@ -5301,8 +4930,7 @@ function updatePlaylist(e) {
     var t = attachQueueRowDrag.pending;
     if (t) {
       var i = queueListSignature(e.playList);
-      if (i === t.expected || Date.now() >= t.until)
-        attachQueueRowDrag.pending = null;
+      if (i === t.expected || Date.now() >= t.until) attachQueueRowDrag.pending = null;
       else {
         if (i === t.before) return;
         attachQueueRowDrag.pending = null;
@@ -5310,8 +4938,7 @@ function updatePlaylist(e) {
     }
     if (
       ((state.playlist = e),
-      !ui.playlistOverlay ||
-        (ui.playlistOverlay._popupOpen && !ui.playlistOverlay._appDialogExit))
+      !ui.playlistOverlay || (ui.playlistOverlay._popupOpen && !ui.playlistOverlay._appDialogExit))
     ) {
       var n = $("#list_title");
       (n &&
@@ -5350,8 +4977,7 @@ function renderPlaylistItems(e) {
       (e.playList.forEach(function (i, o) {
         var s = n[i.itemId || ""],
           r = s && s.length ? s.shift() : null;
-        (r && r._queue) ||
-          buildQueueRowContent((r = makeEl("tr", { class: "span" })));
+        (r && r._queue) || buildQueueRowContent((r = makeEl("tr", { class: "span" })));
         var l = t.getElementsByTagName("tr")[o] || null;
         (l !== r && t.insertBefore(r, l),
           (r._song = i),
@@ -5360,23 +4986,17 @@ function renderPlaylistItems(e) {
         var u = i.title || i.album || "",
           c = i.artist || "";
         (r._queue.title.textContent !== u && (r._queue.title.textContent = u),
-          r._queue.artist.textContent !== c &&
-            (r._queue.artist.textContent = c),
+          r._queue.artist.textContent !== c && (r._queue.artist.textContent = c),
           (r.style.borderBottom =
-            o < e.playList.length - 1
-              ? "1px solid rgba(255,255,255,0.1)"
-              : "none"),
-          (r._queue.handle.style.display = hasMusicQueueCapability()
-            ? "inline-flex"
-            : "none"),
+            o < e.playList.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none"),
+          (r._queue.handle.style.display = hasMusicQueueCapability() ? "inline-flex" : "none"),
           setQueueRowPlaying(r, Number(e.playIndex) === o),
           a.add(r));
       }),
         i.forEach(function (e) {
           !a.has(e) && e.parentNode && e.parentNode.removeChild(e);
         }));
-      for (var o = t.getElementsByTagName("hr"); o.length;)
-        o[0].parentNode.removeChild(o[0]);
+      for (var o = t.getElementsByTagName("hr"); o.length;) o[0].parentNode.removeChild(o[0]);
     } else ui.playlistDirty = !0;
 }
 function setQueueRowPlaying(e, t) {
@@ -5392,8 +5012,7 @@ function queueRowAction(e, t) {
     if (
       n &&
       !attachQueueRowDrag.active &&
-      (!ui.playlistOverlay ||
-        (ui.playlistOverlay._popupOpen && !ui.playlistOverlay._appDialogExit))
+      (!ui.playlistOverlay || (ui.playlistOverlay._popupOpen && !ui.playlistOverlay._appDialogExit))
     ) {
       var a = Number(n.getAttribute("index"));
       if (isFinite(a) && !(a < 0)) {
@@ -5410,8 +5029,7 @@ function buildQueueRowContent(e) {
       style: "flex:1;min-width:0;overflow:hidden;text-align:left",
     }),
     i = makeEl("div", {
-      style:
-        "display:flex;align-items:center;min-width:0;gap:3px;text-align:left",
+      style: "display:flex;align-items:center;min-width:0;gap:3px;text-align:left",
     }),
     n = makeEl("span", {
       class: "q_playing_icon",
@@ -5427,14 +5045,9 @@ function buildQueueRowContent(e) {
       style:
         "overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:rgba(255,255,255,0.6);text-shadow:none",
     });
-  (i.appendChild(n),
-    i.appendChild(a),
-    t.appendChild(i),
-    t.appendChild(o),
-    e.appendChild(t));
+  (i.appendChild(n), i.appendChild(a), t.appendChild(i), t.appendChild(o), e.appendChild(t));
   var s = makeEl("span", {
-      style:
-        "display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px",
+      style: "display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px",
     }),
     r =
       "border:none;border-radius:50%;width:30px;height:30px;color:#fff;cursor:pointer;background:rgba(255,255,255,0.15);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:0;margin:0;outline:none;",
@@ -5600,8 +5213,7 @@ function confirmQueueRemove(e, t) {
     (n.wrap.classList.add("app_prompt_wrap"),
       n.body.appendChild(
         makeEl("div", {
-          style:
-            "color:#fff;font-size:13px;padding:4px 0 14px;text-align:left;line-height:1.6",
+          style: "color:#fff;font-size:13px;padding:4px 0 14px;text-align:left;line-height:1.6",
           text: "从队列删除《" + getTrackTitle(t) + "》？",
         }),
       ));
@@ -5625,8 +5237,7 @@ function confirmQueueRemove(e, t) {
     }),
       (s.onclick = function () {
         (n.close(),
-          isMusicQueueContextCurrent(i) &&
-            sendAction(4, 29, -1, JSON.stringify({ index: e })));
+          isMusicQueueContextCurrent(i) && sendAction(4, 29, -1, JSON.stringify({ index: e })));
       }),
       a.appendChild(s),
       a.appendChild(o),
@@ -5641,8 +5252,7 @@ function attachQueueRowDrag(e, t) {
       !attachQueueRowDrag.active &&
       !attachQueueRowDrag.pending &&
       (!ui.playlistOverlay ||
-        (ui.playlistOverlay._popupOpen &&
-          !ui.playlistOverlay._appDialogExit)) &&
+        (ui.playlistOverlay._popupOpen && !ui.playlistOverlay._appDialogExit)) &&
       (null == n.button || 0 === n.button)
     ) {
       (n.cancelable && n.preventDefault(), n.stopPropagation());
@@ -5656,13 +5266,10 @@ function attachQueueRowDrag(e, t) {
         from: Number(e.getAttribute("index")),
         list: state.playlist.playList.slice(),
         playing: Number(state.playlist.playIndex),
-        centers: Array.prototype.map.call(
-          e.parentNode.getElementsByTagName("tr"),
-          function (e) {
-            var t = e.getBoundingClientRect();
-            return t.top + t.height / 2 + ui.playlistContainer.scrollTop;
-          },
-        ),
+        centers: Array.prototype.map.call(e.parentNode.getElementsByTagName("tr"), function (e) {
+          var t = e.getBoundingClientRect();
+          return t.top + t.height / 2 + ui.playlistContainer.scrollTop;
+        }),
         context: musicQueueContext(),
         dragging: !1,
         timer: null,
@@ -5713,21 +5320,17 @@ function attachQueueRowDrag(e, t) {
         ? ((i.y = n),
           i.dragging
             ? (e.cancelable && e.preventDefault(), o())
-            : Math.abs(n - i.startY) > 8 &&
-              ((t._suppressClickUntil = Date.now() + 600), u()))
+            : Math.abs(n - i.startY) > 8 && ((t._suppressClickUntil = Date.now() + 600), u()))
         : u());
   }
   function o() {
     if (i && i.dragging && e.parentNode) {
       for (
         var t = e.parentNode,
-          n = Array.prototype.slice
-            .call(t.getElementsByTagName("tr"))
-            .filter(function (t) {
-              return t !== e;
-            }),
-          a =
-            i.y - i.grabOffset + i.height / 2 + ui.playlistContainer.scrollTop,
+          n = Array.prototype.slice.call(t.getElementsByTagName("tr")).filter(function (t) {
+            return t !== e;
+          }),
+          a = i.y - i.grabOffset + i.height / 2 + ui.playlistContainer.scrollTop,
           o = Number(e.getAttribute("index")),
           s = o;
         s > 0 && a <= i.centers[s - 1];
@@ -5773,11 +5376,7 @@ function attachQueueRowDrag(e, t) {
                 u = r.splice(n.from, 1)[0];
               r.splice(a, 0, u);
               var c = Number(state.playlist.playIndex);
-              c === n.from
-                ? (c = a)
-                : n.from < c && a >= c
-                  ? c--
-                  : n.from > c && a <= c && c++;
+              c === n.from ? (c = a) : n.from < c && a >= c ? c-- : n.from > c && a <= c && c++;
               var d = {
                 before: s,
                 expected: queueListSignature(r),
@@ -5795,8 +5394,7 @@ function attachQueueRowDrag(e, t) {
                 }, 100),
                 setTimeout(function () {
                   attachQueueRowDrag.pending === d &&
-                    ((attachQueueRowDrag.pending = null),
-                    sendWs({ type: "list" }));
+                    ((attachQueueRowDrag.pending = null), sendWs({ type: "list" }));
                 }, 3e3));
             } else renderPlaylistItems(state.playlist);
           else renderPlaylistItems(state.playlist);
@@ -5824,9 +5422,7 @@ function attachQueueRowDrag(e, t) {
   function u() {
     if (i) {
       var e = i.dragging;
-      (l(),
-        e && (t._suppressClickUntil = Date.now() + 600),
-        renderPlaylistItems(state.playlist));
+      (l(), e && (t._suppressClickUntil = Date.now() + 600), renderPlaylistItems(state.playlist));
     }
   }
   function c(e) {
@@ -5864,11 +5460,7 @@ function attachQueueRowDrag(e, t) {
     (t._cancelQueueDrag = u));
 }
 function reindexQueueRows() {
-  for (
-    var e = ui.playlistTable.getElementsByTagName("tr"), t = 0;
-    t < e.length;
-    t++
-  )
+  for (var e = ui.playlistTable.getElementsByTagName("tr"), t = 0; t < e.length; t++)
     e[t].setAttribute("index", t);
 }
 function fetchTrackInfo() {
@@ -5890,24 +5482,16 @@ function fetchTrackInfo() {
                 ((state.titleDisplayUntil = Date.now() + 1e3),
                 setPageTitle(i),
                 (document.title = state.deviceTag + i)),
-              !(
-                state.apiMusicInfo !== t.data ||
-                (ui.musicPic && ui.musicPic._coverPending)
-              ))
+              !(state.apiMusicInfo !== t.data || (ui.musicPic && ui.musicPic._coverPending)))
             )
               return;
             ((state.apiMusicInfo = t.data),
               t.update && t.update > 0
                 ? (localStorage.removeItem("musicinfo"),
                   clearTimeout(timers.trackInfo),
-                  (timers.trackInfo = setTimeout(
-                    fetchTrackInfo,
-                    parseInt(t.update, 10),
-                  )))
+                  (timers.trackInfo = setTimeout(fetchTrackInfo, parseInt(t.update, 10))))
                 : localStorage.setItem("musicinfo", JSON.stringify(t)),
-              updateMusicCover(
-                state.apiMusicInfo.pic || state.musicInfo.albumUrl,
-              ),
+              updateMusicCover(state.apiMusicInfo.pic || state.musicInfo.albumUrl),
               updateFullscreenTitle());
             var n = state.apiMusicInfo.lrc;
             try {
@@ -5922,9 +5506,7 @@ function fetchTrackInfo() {
               if (u)
                 for (
                   var c = u[u.length - 1],
-                    d = l
-                      .substring(l.indexOf(c) + c.length)
-                      .replace(/^\s+|\s+$/g, ""),
+                    d = l.substring(l.indexOf(c) + c.length).replace(/^\s+|\s+$/g, ""),
                     p = 0;
                   p < u.length;
                   p++
@@ -5939,16 +5521,13 @@ function fetchTrackInfo() {
                   return e[0] - t[0];
                 })
               : (state.lyrics = [[-1, "暂无歌词"]]),
-              JSON.stringify(o) === JSON.stringify(state.lyrics) &&
-                (state.lyrics = o));
+              JSON.stringify(o) === JSON.stringify(state.lyrics) && (state.lyrics = o));
           } else
             (ui.musicPic &&
               ui.musicPic._coverPending &&
               updateMusicCover(ui.musicPic.placeholderSrc),
               (state.lyrics = [[-1, "暂无歌词"]]));
-          (state.musicInfo &&
-            !state.lyricTiming.length &&
-            (state.lyricTiming = [-1, 0, 0]),
+          (state.musicInfo && !state.lyricTiming.length && (state.lyricTiming = [-1, 0, 0]),
             updateLyrics(!0));
         }
       },
@@ -6007,8 +5586,7 @@ function updatePlayerState(e) {
   if (
     (confirmEchoVersion(e),
     updateUnisoundAvailability(e),
-    null == state.renderedUnisoundVersion ||
-      state.renderedUnisoundVersion === state.uVer)
+    null == state.renderedUnisoundVersion || state.renderedUnisoundVersion === state.uVer)
   ) {
     for (var t = $$("input[type=range]"), i = 0; i < t.length; i++)
       ((t[i].onmousedown = function () {
@@ -6024,8 +5602,7 @@ function updatePlayerState(e) {
           (clearMusicSeek(),
           (state.lyricTiming = [-1, 0, 0]),
           (state.lastLyricTime = 0),
-          ui.musicTimeRange &&
-            (setMusicProgress(0, 0), (ui.musicTimeRange.disabled = !0))),
+          ui.musicTimeRange && (setMusicProgress(0, 0), (ui.musicTimeRange.disabled = !0))),
         updateVersionFooter(),
         isEchoVer(1835))
       ) {
@@ -6033,18 +5610,13 @@ function updatePlayerState(e) {
         if (n)
           if (e.Unisound) {
             if (
-              ((n.value = "禁用小讯"),
-              (state.unisoundRetryCount[0] = 0),
-              !state.unisoundAvailable)
+              ((n.value = "禁用小讯"), (state.unisoundRetryCount[0] = 0), !state.unisoundAvailable)
             ) {
-              if (state.unisoundRetryCount[1] > 6)
-                return void location.reload();
+              if (state.unisoundRetryCount[1] > 6) return void location.reload();
               state.unisoundRetryCount[0]++;
             }
           } else if (
-            ((n.value = "启用小讯"),
-            (state.unisoundRetryCount[1] = 0),
-            state.unisoundAvailable)
+            ((n.value = "启用小讯"), (state.unisoundRetryCount[1] = 0), state.unisoundAvailable)
           ) {
             if (state.unisoundRetryCount[0] > 6) return void location.reload();
             state.unisoundRetryCount[0]++;
@@ -6054,15 +5626,11 @@ function updatePlayerState(e) {
         var a = $("#switch_player");
         a &&
           (2 == state.info.PlayerType
-            ? (a.setAttribute("PlayerType", 2),
-              (a.value = "切换MediaPlayer播放器"))
-            : (a.setAttribute("PlayerType", 1),
-              (a.value = "切换ExoPlayer播放器")));
+            ? (a.setAttribute("PlayerType", 2), (a.value = "切换MediaPlayer播放器"))
+            : (a.setAttribute("PlayerType", 1), (a.value = "切换ExoPlayer播放器")));
       }
       if (
-        (!state.mousePressed &&
-          ui.volumeRange &&
-          (ui.volumeRange.value = e.vol),
+        (!state.mousePressed && ui.volumeRange && (ui.volumeRange.value = e.vol),
         ui.volumeRange && ui.volumeLabel)
       ) {
         var o = "   " + ui.volumeRange.value + "/" + ui.volumeRange.max;
@@ -6070,8 +5638,7 @@ function updatePlayerState(e) {
       }
       var s = $("#tts_speaker");
       if (s)
-        for (var r = 0; r < s.length; r++)
-          s[r].value === e.ttsModelType && (s[r].selected = !0);
+        for (var r = 0; r < s.length; r++) s[r].value === e.ttsModelType && (s[r].selected = !0);
       if ((updateButtonVisibility(), isEchoVer(1600))) {
         if (isUnisoundVer(1600)) {
           var l = $("#music_source");
@@ -6095,24 +5662,14 @@ function updatePlayerState(e) {
         m && (m.setAttribute("mode", d[1]), updatePlayModeIcon(m, d[1]));
       }
       if (ui.musicPanel && "none" === ui.musicPanel.style.display)
-        state.notificationManager &&
-          state.notificationManager.cancelNotification();
+        state.notificationManager && state.notificationManager.cancelNotification();
       else {
         var f = state.musicInfo;
-        if (
-          e.music_info &&
-          "object" == typeof e.music_info &&
-          !Array.isArray(e.music_info)
-        ) {
+        if (e.music_info && "object" == typeof e.music_info && !Array.isArray(e.music_info)) {
           var h = JSON.parse(JSON.stringify(e.music_info));
           (delete h.Current_MusicData, (state.musicInfo = h));
         } else state.musicInfo = null;
-        if (
-          2 == e.play_type ||
-          3 == e.play_type ||
-          4 == e.play_type ||
-          5 == e.play_type
-        ) {
+        if (2 == e.play_type || 3 == e.play_type || 4 == e.play_type || 5 == e.play_type) {
           var g =
               2 == e.play_type
                 ? "DLNA模式"
@@ -6131,8 +5688,7 @@ function updatePlayerState(e) {
             f &&
             1 != e.play_type &&
             (setPageTitle("R1音箱音乐页面" + state.deviceTag),
-            (document.title =
-              state.deviceTag + "R1音箱音乐页面" + state.deviceTag));
+            (document.title = state.deviceTag + "R1音箱音乐页面" + state.deviceTag));
         (updateMusicControls(e),
           (state.musicInfo && 1 == e.play_type) || (state.lyricsPending = null),
           state.musicInfo && updateMusicTrackInfo(e),
@@ -6141,42 +5697,30 @@ function updatePlayerState(e) {
               state.musicInfo &&
               state.musicInfo.albumUrl &&
               updateMusicCover(state.musicInfo.albumUrl),
-            "function" == typeof updateFullscreenTitle &&
-              updateFullscreenTitle(),
-            (state.musicInfo && state.musicInfo.duration > 0) ||
-              (state.lyricTiming = [-1, 0, 0]),
+            "function" == typeof updateFullscreenTitle && updateFullscreenTitle(),
+            (state.musicInfo && state.musicInfo.duration > 0) || (state.lyricTiming = [-1, 0, 0]),
             (state.lyrics.length && "♪ MiPlay ♪" === state.lyrics[0][1]) ||
               ((state.lyrics = [[-1, "♪ MiPlay ♪"]]), updateLyrics(!0))));
         var y = $("#music_btn_play"),
           _ = document.querySelector(".music_lrc_div");
-        !state.musicInfo ||
-        (6 != state.musicInfo.state && 10 != state.musicInfo.state)
+        !state.musicInfo || (6 != state.musicInfo.state && 10 != state.musicInfo.state)
           ? e.play_state
             ? (_ && (_.style.pointerEvents = "none"),
-              ui.musicPic &&
-                (ui.musicPic.style.webkitAnimationPlayState = "running"),
+              ui.musicPic && (ui.musicPic.style.webkitAnimationPlayState = "running"),
               y && ((y.disabled = !1), updatePlayButtonIcon(y, "pause")))
             : (_ && (_.style.pointerEvents = ""),
-              ui.musicPic &&
-                (ui.musicPic.style.webkitAnimationPlayState = "paused"),
+              ui.musicPic && (ui.musicPic.style.webkitAnimationPlayState = "paused"),
               y && ((y.disabled = !1), updatePlayButtonIcon(y, "play")))
           : y &&
             ((y.disabled = !0),
-            updatePlayButtonIcon(
-              y,
-              6 == state.musicInfo.state ? "buffer" : "loading",
-            ));
-        var b =
-          state.musicInfo &&
-          (6 == state.musicInfo.state || 10 == state.musicInfo.state);
+            updatePlayButtonIcon(y, 6 == state.musicInfo.state ? "buffer" : "loading"));
+        var b = state.musicInfo && (6 == state.musicInfo.state || 10 == state.musicInfo.state);
         if (
           (e.play_state || b
             ? (_ && (_.style.pointerEvents = "none"),
-              ui.musicPic &&
-                (ui.musicPic.style.webkitAnimationPlayState = "running"))
+              ui.musicPic && (ui.musicPic.style.webkitAnimationPlayState = "running"))
             : (_ && (_.style.pointerEvents = ""),
-              ui.musicPic &&
-                (ui.musicPic.style.webkitAnimationPlayState = "paused")),
+              ui.musicPic && (ui.musicPic.style.webkitAnimationPlayState = "paused")),
           0 != state.playType && 0 == e.play_type && null != state.musicId)
         ) {
           (ui.qualityLabel && (ui.qualityLabel.innerHTML = ""),
@@ -6193,8 +5737,7 @@ function updatePlayerState(e) {
             (document.title = "R1音箱音乐页面" + state.deviceTag),
             setPageTitle(document.title),
             ui.musicPic &&
-              ((ui.musicPic._coverTrack = null),
-              updateMusicCover(ui.musicPic.placeholderSrc)),
+              ((ui.musicPic._coverTrack = null), updateMusicCover(ui.musicPic.placeholderSrc)),
             ui.musicLyrics && (ui.musicLyrics.innerHTML = ""),
             updateFullscreenTitle());
         }
@@ -6206,8 +5749,7 @@ function updatePlayerState(e) {
       }
     } else location.reload();
   } else
-    state.unisoundVersionReloading ||
-      ((state.unisoundVersionReloading = !0), location.reload());
+    state.unisoundVersionReloading || ((state.unisoundVersionReloading = !0), location.reload());
 }
 function updateMusicControls(e) {
   updateMusicCollectionButtons(e);
@@ -6220,9 +5762,7 @@ function updateMusicControls(e) {
       (2 == e.play_type || 3 == e.play_type
         ? ((t.disabled = !0), (i.disabled = !0))
         : ((t.disabled = !1), (i.disabled = !1)),
-      a &&
-        (a.style.display =
-          0 == e.play_type || 1 == e.play_type ? "inline-flex" : "none"),
+      a && (a.style.display = 0 == e.play_type || 1 == e.play_type ? "inline-flex" : "none"),
       !state.musicInfo)
     ) {
       a && (a.style.display = "none");
@@ -6268,10 +5808,7 @@ function updateMusicControls(e) {
         ? (n.setAttribute("data", "play"),
           n.classList.remove("playing"),
           (n.disabled = !0),
-          void updatePlayButtonIcon(
-            n,
-            6 == state.musicInfo.state ? "buffer" : "loading",
-          ))
+          void updatePlayButtonIcon(n, 6 == state.musicInfo.state ? "buffer" : "loading"))
         : void (e.play_state
             ? (n.setAttribute("data", "pause"),
               n.classList.add("playing"),
@@ -6323,9 +5860,7 @@ function describeAudioFormat(e, t, i) {
     r = 0;
   if (t > 0) r = parseInt(t / 1e3, 10);
   else if (e.bitrate > 0 && "audio/flac" !== e.sampleMimeType) {
-    (s &&
-      "audio/raw" === e.sampleMimeType &&
-      s * e.sampleRate * e.channelCount === e.bitrate) ||
+    (s && "audio/raw" === e.sampleMimeType && s * e.sampleRate * e.channelCount === e.bitrate) ||
       (r = parseInt(e.bitrate / 1e3, 10));
   }
   return (
@@ -6336,21 +5871,16 @@ function describeAudioFormat(e, t, i) {
   );
 }
 function updateQualityInfo() {
-  if (
-    (ui.applyLyricsModeHeight && ui.applyLyricsModeHeight(), ui.qualitySelect)
-  ) {
+  if ((ui.applyLyricsModeHeight && ui.applyLyricsModeHeight(), ui.qualitySelect)) {
     var e = state.info.ExoPlayer_Quality;
     if (ui.qualitySelect.length > 2) {
       var t = state.info.Support_Flac ? "" : "none";
-      ((ui.qualitySelect[0].style.display = t),
-        (ui.qualitySelect[1].style.display = t));
+      ((ui.qualitySelect[0].style.display = t), (ui.qualitySelect[1].style.display = t));
     }
     e > 1 && !state.info.Support_Flac && (e = 1);
     for (var i = 0; i < ui.qualitySelect.length; i++)
       ui.qualitySelect[i].value == e && (ui.qualitySelect[i].selected = !0);
-    var n = state.info.music_info
-      ? state.info.music_info.Current_MusicData
-      : null;
+    var n = state.info.music_info ? state.info.music_info.Current_MusicData : null;
     if (
       (JSON.stringify(n) !== JSON.stringify(state.currentMusicData) &&
         ((state.currentMusicData = n),
@@ -6370,22 +5900,16 @@ function updateQualityInfo() {
       s = o && "string" == typeof o.quality ? o.quality : null,
       r = o && "number" == typeof o.br ? o.br : 0;
     (s
-      ? ((a = "当前：" + s),
-        n.Format && (a += " " + describeAudioFormat(n.Format, r, !1)))
+      ? ((a = "当前：" + s), n.Format && (a += " " + describeAudioFormat(n.Format, r, !1)))
       : (a = n.Format ? describeAudioFormat(n.Format, r, !0) : ""),
       (ui.qualitySelect.style.display = o ? "" : "none"),
       ui.qualityPanel && (ui.qualityPanel.style.display = "block"),
-      ui.qualityLabel &&
-        a !== ui.qualityLabel.innerHTML &&
-        (ui.qualityLabel.innerHTML = a));
+      ui.qualityLabel && a !== ui.qualityLabel.innerHTML && (ui.qualityLabel.innerHTML = a));
   }
 }
 function updateMusicTrackInfo(e) {
   var t = state.musicInfo,
-    i =
-      2 == e.play_type
-        ? encodeURIComponent(t.title + "-" + t.artist + "-" + t.albumUrl)
-        : t.id;
+    i = 2 == e.play_type ? encodeURIComponent(t.title + "-" + t.artist + "-" + t.albumUrl) : t.id;
   if (
     (state.musicId !== t.id && 2 != e.play_type) ||
     (2 == e.play_type && i !== state.musicId) ||
@@ -6401,12 +5925,8 @@ function updateMusicTrackInfo(e) {
       (state.lyrics = [[-1, "暂无歌词"]]),
       (state.musicId = i),
       (state.lyricsPending =
-        1 == e.play_type
-          ? { musicId: i, hostname: state.hostname, socket: state.ws }
-          : null),
-      ui.musicLyrics &&
-        ((ui.musicLyrics.innerHTML = ""),
-        (ui.musicLyrics._placeholderText = null)),
+        1 == e.play_type ? { musicId: i, hostname: state.hostname, socket: state.ws } : null),
+      ui.musicLyrics && ((ui.musicLyrics.innerHTML = ""), (ui.musicLyrics._placeholderText = null)),
       updateLyrics(!0),
       state.currentMusicData &&
         state.currentMusicData.api_data &&
@@ -6416,8 +5936,7 @@ function updateMusicTrackInfo(e) {
       ui.musicPic)
     ) {
       var a = JSON.stringify([e.play_type, i, t.title, t.artist]);
-      (ui.musicPic._coverTrack !== a &&
-        (waitMusicCover(), (ui.musicPic._coverTrack = a)),
+      (ui.musicPic._coverTrack !== a && (waitMusicCover(), (ui.musicPic._coverTrack = a)),
         (n || t.albumUrl) && updateMusicCover(n || t.albumUrl));
     }
     updateFullscreenTitle();
@@ -6432,14 +5951,11 @@ function updateMusicTrackInfo(e) {
             : 5 == e.play_type
               ? setPageTitle("[MiPlay模式]" + o)
               : setPageTitle(o),
-      (document.title =
-        state.deviceTag + (ui.pageTitle ? ui.pageTitle.innerHTML : "")),
+      (document.title = state.deviceTag + (ui.pageTitle ? ui.pageTitle.innerHTML : "")),
       updateFullscreenTitle()),
       fetchTrackInfo());
   } else
-    ui.playlistTable &&
-      ui.playlistTable.getElementsByTagName("tr").length < 1 &&
-      fetchTrackInfo();
+    ui.playlistTable && ui.playlistTable.getElementsByTagName("tr").length < 1 && fetchTrackInfo();
   var s = acceptMusicSeekPosition(t);
   if (!state.timeLocked && s) {
     var r = 4 == e.play_type ? 0 : Math.max(0, parseInt(t.duration, 10) || 0),
@@ -6447,8 +5963,7 @@ function updateMusicTrackInfo(e) {
     ((state.lyricTiming[0] = e.play_state && r > 0 ? Date.now() : -1),
       (state.lyricTiming[1] = l),
       (state.lyricTiming[2] = r),
-      ui.musicTimeRange &&
-        (setMusicProgress(r, l), (ui.musicTimeRange.disabled = r < 1)));
+      ui.musicTimeRange && (setMusicProgress(r, l), (ui.musicTimeRange.disabled = r < 1)));
   } else
     !state.timeLocked &&
       state.seekSession &&
@@ -6473,8 +5988,7 @@ function updateMusicTrackInfo(e) {
             : 5 == e.play_type
               ? setPageTitle("[MiPlay模式]" + u)
               : setPageTitle(u),
-      (document.title =
-        state.deviceTag + (ui.pageTitle ? ui.pageTitle.innerHTML : "")),
+      (document.title = state.deviceTag + (ui.pageTitle ? ui.pageTitle.innerHTML : "")),
       updateFullscreenTitle());
   }
 }
@@ -6492,50 +6006,30 @@ function buildDeviceInfoPanel() {
       state.isNewUnisound && isUnisoundVer(1800) && isEchoVer(1825))
     ) {
       t.appendChild(
-        makeText(
-          "登录信息：<br>",
-          "color:var(--white);text-shadow:var(--white-shadow)",
-        ),
+        makeText("登录信息：<br>", "color:var(--white);text-shadow:var(--white-shadow)"),
       );
-      var i = makeText(
-        "",
-        "color:var(--white);text-shadow:var(--white-shadow)",
-      );
+      var i = makeText("", "color:var(--white);text-shadow:var(--white-shadow)");
       ((i.id = "user_info_text"),
         t.appendChild(i),
         t.appendChild(makeEl("br")),
         t.appendChild(
-          makeText(
-            "<br>授权信息：<br>",
-            "color:var(--white);text-shadow:var(--white-shadow)",
-          ),
+          makeText("<br>授权信息：<br>", "color:var(--white);text-shadow:var(--white-shadow)"),
         ));
-      var n = makeText(
-        "",
-        "color:var(--white);text-shadow:var(--white-shadow)",
-      );
+      var n = makeText("", "color:var(--white);text-shadow:var(--white-shadow)");
       ((n.id = "sq_info_text"), t.appendChild(n), t.appendChild(makeEl("br")));
     }
     var a =
       state.isNewUnisound && isUnisoundVer(1800) && isEchoVer(1825)
         ? "<br>系统信息：<br>"
         : "系统信息：<br>";
-    t.appendChild(
-      makeText(a, "color:var(--white);text-shadow:var(--white-shadow)"),
-    );
+    t.appendChild(makeText(a, "color:var(--white);text-shadow:var(--white-shadow)"));
     var o = makeText("", "color:var(--white);text-shadow:var(--white-shadow)");
     ((o.id = "state_info_text"),
       t.appendChild(o),
       t.appendChild(makeEl("br")),
       t.appendChild(makeDiv("height:15px")),
-      state.isNewUnisound &&
-        isUnisoundVer(1822) &&
-        isEchoVer(1825) &&
-        buildBenchmarkSection(e),
-      state.isNewUnisound &&
-        isUnisoundVer(1800) &&
-        isEchoVer(1825) &&
-        buildLoginActions(e),
+      state.isNewUnisound && isUnisoundVer(1822) && isEchoVer(1825) && buildBenchmarkSection(e),
+      state.isNewUnisound && isUnisoundVer(1800) && isEchoVer(1825) && buildLoginActions(e),
       buildDeviceActions(e));
   }
 }
@@ -6620,8 +6114,7 @@ function buildBenchmarkSection(e) {
       (p(3e3),
         clearTimeout(timers.asrDuration),
         (timers.asrDuration = setTimeout(function () {
-          (ui.asrMaxDurationLabel &&
-            (ui.asrMaxDurationLabel.innerHTML = d.value + "秒"),
+          (ui.asrMaxDurationLabel && (ui.asrMaxDurationLabel.innerHTML = d.value + "秒"),
             sendToUnisound({
               type: "asrMaxDuration",
               Duration: 1e3 * parseInt(d.value, 10),
@@ -6687,9 +6180,7 @@ function buildDeviceActions(e) {
     makeButton(
       "清理进程",
       function () {
-        ((this.disabled = !0),
-          (this.value = "请稍候。。。"),
-          runShell("ps", "ps"));
+        ((this.disabled = !0), (this.value = "请稍候。。。"), runShell("ps", "ps"));
       },
       { id: "Cleanup_process" },
     ),
@@ -6705,9 +6196,7 @@ function buildDeviceActions(e) {
       n =
         ((e = this),
         function () {
-          1 == t
-            ? sendAction(256, 1, -1, !0)
-            : 0 == t && sendAction(256, 2, -1, !0);
+          1 == t ? sendAction(256, 1, -1, !0) : 0 == t && sendAction(256, 2, -1, !0);
         });
     -1 !== t ? showAppConfirm("确定要" + i + "吗？", n) : n();
   });
@@ -6733,9 +6222,7 @@ function buildDeviceActions(e) {
         };
       -1 !== t
         ? showAppConfirm(
-            "确定要" +
-              (0 == t ? "启用" : "禁用") +
-              "麦克风吗？\r\n提示：此功能为临时开关！",
+            "确定要" + (0 == t ? "启用" : "禁用") + "麦克风吗？\r\n提示：此功能为临时开关！",
             i,
           )
         : i();
@@ -6761,41 +6248,33 @@ function buildDeviceActions(e) {
     e.appendChild(n),
     isEchoVer(1835))
   ) {
-    var a = makeButton(
-      state.unisoundAvailable ? "禁用小讯" : "启用小讯",
-      function () {
-        var e = this;
-        showAppConfirm("确定要" + this.value + "吗？", function () {
-          ((e.disabled = !0),
-            setTimeout(function () {
-              e.disabled = !1;
-            }, 1e3),
-            "禁用小讯" === e.value
-              ? runShell("/system/bin/pm hide com.phicomm.speaker.device")
-              : runShell("/system/bin/pm unhide com.phicomm.speaker.device"));
-        });
-      },
-    );
+    var a = makeButton(state.unisoundAvailable ? "禁用小讯" : "启用小讯", function () {
+      var e = this;
+      showAppConfirm("确定要" + this.value + "吗？", function () {
+        ((e.disabled = !0),
+          setTimeout(function () {
+            e.disabled = !1;
+          }, 1e3),
+          "禁用小讯" === e.value
+            ? runShell("/system/bin/pm hide com.phicomm.speaker.device")
+            : runShell("/system/bin/pm unhide com.phicomm.speaker.device"));
+      });
+    });
     ((a.id = "disable_unisound"), e.appendChild(a));
   }
   if (
     (state.unisoundAvailable &&
       e.appendChild(
         makeButton("清除小讯数据", function () {
-          showAppConfirm(
-            "确定要清除小讯数据吗？\r\n清除后需重新扫码登录才能使用！",
-            function () {
-              showAppConfirm("真的要清除小讯数据吗？", function () {
-                (runShell("/system/bin/pm clear com.phicomm.speaker.device"),
-                  setTimeout(function () {
-                    (runShell(
-                      "/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity",
-                    ),
-                      showAppAlert("清除完毕，稍候请重新扫码登录！"));
-                  }, 3e3));
-              });
-            },
-          );
+          showAppConfirm("确定要清除小讯数据吗？\r\n清除后需重新扫码登录才能使用！", function () {
+            showAppConfirm("真的要清除小讯数据吗？", function () {
+              (runShell("/system/bin/pm clear com.phicomm.speaker.device"),
+                setTimeout(function () {
+                  (runShell("/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity"),
+                    showAppAlert("清除完毕，稍候请重新扫码登录！"));
+                }, 3e3));
+            });
+          });
         }),
       ),
     isUnisoundVer(1825) && isEchoVer(1841))
@@ -6808,8 +6287,7 @@ function buildDeviceActions(e) {
       }, 1e3),
         1 == e.toneState
           ? sendToUnisound({ type: "Set_Bluetooth_prompt_tone", enable: !1 })
-          : 0 == e.toneState &&
-            sendToUnisound({ type: "Set_Bluetooth_prompt_tone", enable: !0 }),
+          : 0 == e.toneState && sendToUnisound({ type: "Set_Bluetooth_prompt_tone", enable: !0 }),
         sendToUnisound({ type: "get_info" }));
     });
     ((o.id = "Bluetooth_prompt_tone_btn"),
@@ -6827,8 +6305,7 @@ function buildDeviceActions(e) {
       }, 1e3),
         1 == e.recordState
           ? sendToUnisound({ type: "Submit_Play_Record", enable: !1 })
-          : 0 == e.recordState &&
-            sendToUnisound({ type: "Submit_Play_Record", enable: !0 }),
+          : 0 == e.recordState && sendToUnisound({ type: "Submit_Play_Record", enable: !0 }),
         sendToUnisound({ type: "get_info" }));
     });
     ((s.id = "Submit_Play_Record_btn"),
@@ -6849,23 +6326,16 @@ function buildDeviceActions(e) {
           e.setAttribute("wait", Date.now() + 3e4));
       });
     });
-    ((r.id = "clear_memo"),
-      (r.disabled = !0),
-      r.setAttribute("wait", 0),
-      e.appendChild(r));
+    ((r.id = "clear_memo"), (r.disabled = !0), r.setAttribute("wait", 0), e.appendChild(r));
   }
   if (isEchoVer(1856)) {
     var l = makeButton(
-      2 == state.info.PlayerType
-        ? "切换MediaPlayer播放器"
-        : "切换ExoPlayer播放器",
+      2 == state.info.PlayerType ? "切换MediaPlayer播放器" : "切换ExoPlayer播放器",
       function () {
         var e = this.getAttribute("PlayerType"),
           t = "2" === e ? 1 : 2;
         showAppConfirm(
-          "确定要切换为" +
-            ("2" === e ? "MediaPlayer播放器" : "ExoPlayer播放器") +
-            "吗？",
+          "确定要切换为" + ("2" === e ? "MediaPlayer播放器" : "ExoPlayer播放器") + "吗？",
           function () {
             sendWs({ type: "switch_player", player: t });
           },
@@ -6881,14 +6351,9 @@ function buildDeviceActions(e) {
       (e.setAttribute("state", "1" === t ? 0 : 1),
         (t = e.getAttribute("state") || 0),
         (e.value = "1" === t ? "关闭smb服务" : "打开smb服务"),
-        runShell(
-          "setprop sys.rksmbd.start " + t + " && getprop sys.rksmbd.start",
-          "rksmbd_state",
-        ),
+        runShell("setprop sys.rksmbd.start " + t + " && getprop sys.rksmbd.start", "rksmbd_state"),
         showAppAlert(
-          "1" === t
-            ? "已打开smbd服务！\r\n用户名: root\r\n密码: 123456"
-            : "已关闭smbd服务！",
+          "1" === t ? "已打开smbd服务！\r\n用户名: root\r\n密码: 123456" : "已关闭smbd服务！",
         ));
     });
   });
@@ -6960,11 +6425,7 @@ function setSystemInfoV2(e, t) {
     updateDeviceInfoWorker());
   var i = $("#state_info_text");
   if (i) {
-    for (
-      var n = e.meminfo.split("\r\n"), a = -1, o = -1, s = -1, r = 0;
-      r < n.length;
-      r++
-    ) {
+    for (var n = e.meminfo.split("\r\n"), a = -1, o = -1, s = -1, r = 0; r < n.length; r++) {
       var l = n[r].split(":");
       if (
         ("MemTotal" === l[0]
@@ -6982,11 +6443,7 @@ function setSystemInfoV2(e, t) {
         break;
       }
     for (var p = 0, m = 0; m < e.availableProcessors; m++)
-      for (
-        var f = (e["cpu" + m] || "").split("\r\n"), h = 0;
-        h < f.length;
-        h++
-      ) {
+      for (var f = (e["cpu" + m] || "").split("\r\n"), h = 0; h < f.length; h++) {
         var g = f[h].split(":");
         if ("scaling_cur_freq" === g[0]) {
           var v = parseInt(g[1], 10);
@@ -7041,18 +6498,12 @@ function setSystemInfoV2(e, t) {
         "%"),
       _ && (T += " " + Math.round(_) + "℃"),
       (T +=
-        "<br>可用/全部：" +
-        parseInt((o + s) / 1024, 10) +
-        "MB/" +
-        parseInt(a / 1024, 10) +
-        "MB"),
+        "<br>可用/全部：" + parseInt((o + s) / 1024, 10) + "MB/" + parseInt(a / 1024, 10) + "MB"),
       (T += "<br>系统已运行：" + formatDuration(e.elapsedRealtime)),
       state.deviceDate &&
         (T +=
-          "<br>音箱当前时间：" +
-          formatUnixTime(parseInt(state.deviceDate.getTime() / 1e3, 10))),
-      (T +=
-        "<br>信息更新时间：" + formatUnixTime(parseInt(Date.now() / 1e3, 10))),
+          "<br>音箱当前时间：" + formatUnixTime(parseInt(state.deviceDate.getTime() / 1e3, 10))),
+      (T += "<br>信息更新时间：" + formatUnixTime(parseInt(Date.now() / 1e3, 10))),
       (i.innerHTML = T));
   }
 }
@@ -7063,11 +6514,7 @@ function setSystemInfoV1(e) {
     updateDeviceInfoWorker());
   var t = $("#state_info_text");
   if (t) {
-    for (
-      var i = e.split("\r\n"), n = -1, a = -1, o = -1, s = 0, r = 0;
-      r < i.length;
-      r++
-    ) {
+    for (var i = e.split("\r\n"), n = -1, a = -1, o = -1, s = 0, r = 0; r < i.length; r++) {
       var l = i[r].split(":");
       if (
         ("MemTotal" === l[0]
@@ -7099,14 +6546,9 @@ function setSystemInfoV1(e) {
     ((g += "<br>固件版本：" + c),
       (g += "<br>设备IP：" + state.localIp),
       (g +=
-        "<br>可用/全部：" +
-        parseInt((a + o) / 1024, 10) +
-        "MB/" +
-        parseInt(n / 1024, 10) +
-        "MB"),
+        "<br>可用/全部：" + parseInt((a + o) / 1024, 10) + "MB/" + parseInt(n / 1024, 10) + "MB"),
       (g += "<br>系统已运行：" + formatDuration(Date.now() - 1e3 * u)),
-      (g +=
-        "<br>信息更新时间：" + formatUnixTime(parseInt(Date.now() / 1e3, 10))),
+      (g += "<br>信息更新时间：" + formatUnixTime(parseInt(Date.now() / 1e3, 10))),
       (t.innerHTML = g));
   }
 }
@@ -7164,22 +6606,17 @@ function loadDeviceInfo() {
       if (e) {
         var s = "用户：" + o.nick + "(" + o.userid + ")";
         ((s +=
-          "<br>QQ音乐：" +
-          (1 == o.qqmusic_login_state ? "已登录(" + o.userid + ")" : "未登录")),
+          "<br>QQ音乐：" + (1 == o.qqmusic_login_state ? "已登录(" + o.userid + ")" : "未登录")),
           isUnisoundVer(1844) &&
             (s +=
               "<br>酷我音乐：" +
-              (1 == o.kuwo_login_state && o.kuwo_uid
-                ? "已登录(" + o.kuwo_uid + ")"
-                : "未登录")),
+              (1 == o.kuwo_login_state && o.kuwo_uid ? "已登录(" + o.kuwo_uid + ")" : "未登录")),
           (s +=
             "<br>网易云音乐：" +
             (1 == o.netease_login_state && o.netease_uid
               ? "已登录(" + o.netease_uid + ")"
               : o.netease_login_info || "未登录")),
-          (s +=
-            "<br>最后登录时间：" +
-            (o.login_time ? formatUnixTime(o.login_time) : "未知")),
+          (s += "<br>最后登录时间：" + (o.login_time ? formatUnixTime(o.login_time) : "未知")),
           (e.innerHTML = s));
       }
       if (t) {
@@ -7191,12 +6628,10 @@ function loadDeviceInfo() {
           (u > a.sq_expire_time && 3 != a.sq_type
             ? (l =
                 2 == a.sq_type
-                  ? "试用已过期<br>过期时间：" +
-                    formatUnixTime(a.sq_expire_time)
+                  ? "试用已过期<br>过期时间：" + formatUnixTime(a.sq_expire_time)
                   : "已过期<br>过期时间：" + formatUnixTime(a.sq_expire_time))
             : 2 == a.sq_type
-              ? (l =
-                  "试用授权<br>到期时间：" + formatUnixTime(a.sq_expire_time))
+              ? (l = "试用授权<br>到期时间：" + formatUnixTime(a.sq_expire_time))
               : ((l = "已授权<br>到期时间："),
                 (l +=
                   3 == a.sq_type
@@ -7248,11 +6683,7 @@ function unhideBluetooth() {
     startBluetoothRefresh());
 }
 function hideBluetooth() {
-  for (
-    var e = [ui.btScanBtn, ui.btDiscoverBtn, ui.btEnableBtn], t = 0;
-    t < e.length;
-    t++
-  )
+  for (var e = [ui.btScanBtn, ui.btDiscoverBtn, ui.btEnableBtn], t = 0; t < e.length; t++)
     e[t] && (e[t].disabled = !0);
   ((ui.btLastHash = ""),
     ui.btEnableBtn && (ui.btEnableBtn.enable = -1),
@@ -7275,10 +6706,8 @@ function refreshBluetoothDevices(e) {
         a && (a.innerHTML = "扫描到的设备[0]"),
         ui.btScanBtn &&
           (e.Scanning
-            ? ((ui.btScanBtn.disabled = !0),
-              (ui.btScanBtn.value = "扫描中。。。"))
-            : ((ui.btScanBtn.disabled = !1),
-              (ui.btScanBtn.value = "扫描蓝牙设备"))),
+            ? ((ui.btScanBtn.disabled = !0), (ui.btScanBtn.value = "扫描中。。。"))
+            : ((ui.btScanBtn.disabled = !1), (ui.btScanBtn.value = "扫描蓝牙设备"))),
         !e.Enabled)
       )
         return (
@@ -7297,13 +6726,11 @@ function refreshBluetoothDevices(e) {
         ((ui.btEnableBtn.enable = 1),
         (ui.btEnableBtn.disabled = !1),
         (ui.btEnableBtn.value = "关闭蓝牙适配器"),
-        state.info.Service_Normally_Open &&
-          sendWs({ type: "BT_setScanMode", mode: 21 })),
+        state.info.Service_Normally_Open && sendWs({ type: "BT_setScanMode", mode: 21 })),
         ui.btDiscoverBtn &&
           ((ui.btDiscoverBtn.disabled = !1),
           (ui.btDiscoverBtn.ScanMode = e.ScanMode),
-          (ui.btDiscoverBtn.value =
-            23 == e.ScanMode ? "关闭蓝牙可发现" : "打开蓝牙可发现")));
+          (ui.btDiscoverBtn.value = 23 == e.ScanMode ? "关闭蓝牙可发现" : "打开蓝牙可发现")));
       for (
         var o = e.Bonded_Devices || [],
           s = e.Scan_Devices || [],
@@ -7348,10 +6775,8 @@ function bluetoothDataHash(e) {
     t.push(r.Address || "", r.Name || "");
   }
   t.push("|");
-  for (var l = e.A2dp_ConnectedDevices || [], u = 0; u < l.length; u++)
-    t.push(l[u]);
-  for (var c = e.A2dpSink_ConnectedDevices || [], d = 0; d < c.length; d++)
-    t.push(c[d]);
+  for (var l = e.A2dp_ConnectedDevices || [], u = 0; u < l.length; u++) t.push(l[u]);
+  for (var c = e.A2dpSink_ConnectedDevices || [], d = 0; d < c.length; d++) t.push(c[d]);
   return t.join(",");
 }
 function classifyBluetoothDevice(e) {
@@ -7375,11 +6800,7 @@ function classifyBluetoothDevice(e) {
     (e.A2dp = !!(524288 & n)));
 }
 function renderBluetoothList(e, t, i, n, a) {
-  for (
-    var o = document.createDocumentFragment(), s = 0, r = 0;
-    r < t.length;
-    r++
-  ) {
+  for (var o = document.createDocumentFragment(), s = 0, r = 0; r < t.length; r++) {
     var l = t[r],
       u = makeEl("tr", { class: "span" });
     (u.setAttribute(
@@ -7388,8 +6809,7 @@ function renderBluetoothList(e, t, i, n, a) {
         l.A2dpConnect ||
         l.A2dpSinkConnect,
     ),
-      "true" == u.getAttribute("Connected") &&
-        u.appendChild(makeEl("span", { html: "[已连接]" })),
+      "true" == u.getAttribute("Connected") && u.appendChild(makeEl("span", { html: "[已连接]" })),
       u.setAttribute("data", JSON.stringify(l)),
       (function (e) {
         e.onclick = function () {
@@ -7425,8 +6845,7 @@ function getBluetoothDeviceTitle(e) {
 }
 var miPlayGroupDialog = null;
 function createMiPlayGroupDialog() {
-  if (miPlayGroupDialog && miPlayGroupDialog.isOpen())
-    miPlayGroupDialog.close();
+  if (miPlayGroupDialog && miPlayGroupDialog.isOpen()) miPlayGroupDialog.close();
   else {
     var e = createDialogPanel("MiPlay 立体声组合", {
       transparent: !0,
@@ -7440,8 +6859,7 @@ function createMiPlayGroupDialog() {
       type: "button",
       class: "btn",
       value: "🔗 一键组队（自动发现副机）",
-      style:
-        "width:100%;margin-bottom:10px;padding:10px;font-size:14px;font-weight:bold",
+      style: "width:100%;margin-bottom:10px;padding:10px;font-size:14px;font-weight:bold",
     });
     e.body.appendChild(n);
     var a = makeEl("div", {
@@ -7494,8 +6912,7 @@ function createMiPlayGroupDialog() {
         style: "flex:1;color:#fff;font-size:12px",
       }),
       f = makeEl("select", {
-        style:
-          "flex:1;color:#fff;background:#333;border:1px solid #555;padding:4px",
+        style: "flex:1;color:#fff;background:#333;border:1px solid #555;padding:4px",
       });
     [
       ["立体声", 0],
@@ -7542,8 +6959,7 @@ function createMiPlayGroupDialog() {
               setTimeout(function () {
                 (e.isOpen() &&
                   document.getElementById("miplay_group_wrap") === e.wrap &&
-                  ((n.value = "🔗 一键组队（自动发现副机）"),
-                  (n.disabled = !1)),
+                  ((n.value = "🔗 一键组队（自动发现副机）"), (n.disabled = !1)),
                   sendWs({ type: "get_info" }),
                   setTimeout(v, 600));
               }, 1500));
@@ -7595,11 +7011,9 @@ function createMiPlayGroupDialog() {
     if (e.isOpen() && document.getElementById("miplay_group_wrap") === e.wrap) {
       var t = parseInt(state.info.miplay_group_role || 0, 10),
         n = state.info.miplay_group_peer || "",
-        a = (state.info.miplay_discovered || "")
-          .split(",")
-          .filter(function (e) {
-            return e.trim();
-          }),
+        a = (state.info.miplay_discovered || "").split(",").filter(function (e) {
+          return e.trim();
+        }),
         s = 2 == state.info.miplay_state;
       "" === d.value && (d.value = n);
       var l = 1 === t ? "主机(左)" : 2 === t ? "副机(右)" : "未启用",
@@ -7694,13 +7108,11 @@ function createBluetoothConfigDialog(e) {
               sendWs({ type: "BT_Device" }));
           }),
         r("取消配对", function () {
-          (sendWs({ type: "BT_removeBond", mac: i.Address }),
-            sendWs({ type: "BT_Device" }));
+          (sendWs({ type: "BT_removeBond", mac: i.Address }), sendWs({ type: "BT_Device" }));
         }))
       : i.A2dpSink || i.A2dp
         ? r("配对", function () {
-            (sendWs({ type: "BT_createBond", mac: i.Address }),
-              sendWs({ type: "BT_Device" }));
+            (sendWs({ type: "BT_createBond", mac: i.Address }), sendWs({ type: "BT_Device" }));
           })
         : r("不支持连接此设备！", function () {}, !0);
   }
@@ -7751,13 +7163,8 @@ function openVoiceTimeReportingPanel(e) {
           type: "checkbox",
           id: "Half_an_hour_switch",
           onclick: function () {
-            for (
-              var e = this.checked, t = 0;
-              t < state.radioReportList.length;
-              t++
-            )
-              state.radioReportList[t] > 0 &&
-                (state.radioReportList[t] = e ? 3 : 1);
+            for (var e = this.checked, t = 0; t < state.radioReportList.length; t++)
+              state.radioReportList[t] > 0 && (state.radioReportList[t] = e ? 3 : 1);
             sendToUnisound({
               type: "set_Time_reporting_list",
               list: state.radioReportList,
@@ -7790,11 +7197,7 @@ function openVoiceTimeReportingPanel(e) {
           });
           ((t.onclick = function () {
             var t = i.querySelector("#Half_an_hour_switch");
-            ((state.radioReportList[e] = this.checked
-              ? t && t.checked
-                ? 3
-                : 1
-              : 0),
+            ((state.radioReportList[e] = this.checked ? (t && t.checked ? 3 : 1) : 0),
               sendToUnisound({
                 type: "set_Time_reporting_list",
                 list: state.radioReportList,
@@ -7818,8 +7221,7 @@ function openVoiceTimeReportingPanel(e) {
           function () {
             if (t.isOpen()) {
               var e = i.querySelector("#Whole_point_prompt").value;
-              if (e && -1 === e.indexOf("[hour]"))
-                return showAppAlert("请添加[hour]字段！");
+              if (e && -1 === e.indexOf("[hour]")) return showAppAlert("请添加[hour]字段！");
               sendToUnisound({ type: "set_Whole_point_prompt", prompt: e });
             }
           },
@@ -7841,8 +7243,7 @@ function openVoiceTimeReportingPanel(e) {
           function () {
             if (t.isOpen()) {
               var e = i.querySelector("#Half_dot_prompt").value;
-              if (e && -1 === e.indexOf("[hour]"))
-                return showAppAlert("请添加[hour]字段！");
+              if (e && -1 === e.indexOf("[hour]")) return showAppAlert("请添加[hour]字段！");
               sendToUnisound({ type: "set_Half_dot_prompt", prompt: e });
             }
           },
@@ -7850,30 +7251,21 @@ function openVoiceTimeReportingPanel(e) {
         ),
       ));
   }
-  if (
-    !voiceReportingSession ||
-    voiceReportingSession.dlg !== ui.voiceReportingDialog
-  ) {
+  if (!voiceReportingSession || voiceReportingSession.dlg !== ui.voiceReportingDialog) {
     var a = {
       dlg: ui.voiceReportingDialog,
       generation: ++voiceReportingGeneration,
     };
     ((voiceReportingSession = a),
       a.dlg.onClose(function () {
-        voiceReportingSession === a &&
-          ((voiceReportingSession = null), voiceReportingGeneration++);
+        voiceReportingSession === a && ((voiceReportingSession = null), voiceReportingGeneration++);
       }));
   }
-  return (
-    createVoiceTimeReportingPanel(e),
-    requestVoiceTimeReporting(),
-    ui.voiceReportingDialog
-  );
+  return (createVoiceTimeReportingPanel(e), requestVoiceTimeReporting(), ui.voiceReportingDialog);
 }
 function createVoiceTimeReportingPanel(e) {
   if (e) {
-    ((state.voiceReportingData = e),
-      (state.radioReportList = e.Time_reporting_list || []));
+    ((state.voiceReportingData = e), (state.radioReportList = e.Time_reporting_list || []));
     var t = voiceReportingSession;
     if (t && t.generation === voiceReportingGeneration && t.dlg.isOpen()) {
       var i = t.dlg.body;
@@ -7910,9 +7302,7 @@ function openAutoRestartPanel(e) {
     ui.autoRestartDialog.isOpen() || reopenPopupHost(ui.autoRestartHost);
   else {
     var t = createDialogPanel("设置自动重启");
-    ((ui.autoRestartPanel = t.wrap),
-      (ui.autoRestartHost = t.host),
-      (ui.autoRestartDialog = t));
+    ((ui.autoRestartPanel = t.wrap), (ui.autoRestartHost = t.host), (ui.autoRestartDialog = t));
     var i = t.body;
     ((i.style.color = "#fff"),
       i.appendChild(
@@ -7951,25 +7341,18 @@ function openAutoRestartPanel(e) {
     var n = { dlg: ui.autoRestartDialog, generation: ++autoRestartGeneration };
     ((autoRestartSession = n),
       n.dlg.onClose(function () {
-        autoRestartSession === n &&
-          ((autoRestartSession = null), autoRestartGeneration++);
+        autoRestartSession === n && ((autoRestartSession = null), autoRestartGeneration++);
       }));
   }
-  return (
-    createAutoRestartPanel(e),
-    requestAutoRestart(),
-    ui.autoRestartDialog
-  );
+  return (createAutoRestartPanel(e), requestAutoRestart(), ui.autoRestartDialog);
 }
 function createAutoRestartPanel(e) {
   if (e) {
-    ((state.autoRestartData = e),
-      (state.autoRestartTimes = e.Auto_restart_device_time));
+    ((state.autoRestartData = e), (state.autoRestartTimes = e.Auto_restart_device_time));
     var t = autoRestartSession;
     if (t && t.generation === autoRestartGeneration && t.dlg.isOpen()) {
       var i = t.dlg.body;
-      i.querySelector("#Auto_restart_device_switch").checked =
-        e.Auto_restart_device_open;
+      i.querySelector("#Auto_restart_device_switch").checked = e.Auto_restart_device_open;
       var n = state.autoRestartTimes || [0, 0];
       i.querySelector("#Auto_restart_device_time").value =
         padZero(n[0], 2) + ":" + padZero(n[1], 2);
@@ -8001,9 +7384,7 @@ function initLogin() {
           ((e.value = "重启中。。。"),
             runShell("/system/bin/am force-stop com.phicomm.speaker.device"),
             setTimeout(function () {
-              (runShell(
-                "/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity",
-              ),
+              (runShell("/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity"),
                 setTimeout(function () {
                   ((e.value = "重启小讯"), showAppAlert("重启完毕！"));
                 }, 1e4));
@@ -8066,9 +7447,7 @@ function showDisconnectedActions(e) {
         i.appendChild(n));
     }
     ((i._retry = e),
-      ui.container &&
-        i.parentNode !== ui.container &&
-        ui.container.appendChild(i),
+      ui.container && i.parentNode !== ui.container && ui.container.appendChild(i),
       (i.style.display = "block"));
   }
 }
@@ -8202,9 +7581,7 @@ function buildPasswordLogin() {
     (ui.qrcodeMessage.innerHTML = "<h3>登录酷我音乐</h3><h3></h3>"),
     t.appendChild(makeText("账号：")));
   var i = makeEl("input", { type: "text", id: "username", className: "input" });
-  (t.appendChild(i),
-    t.appendChild(makeEl("div")),
-    t.appendChild(makeText("密码：")));
+  (t.appendChild(i), t.appendChild(makeEl("div")), t.appendChild(makeText("密码：")));
   var n = makeEl("input", {
     type: "password",
     id: "password",
@@ -8239,10 +7616,7 @@ function loginConnected() {
 }
 function loginSessionCurrent(e) {
   return (
-    !!e &&
-    e === state.loginSession &&
-    e.app === state.loginApp &&
-    e.device === loginDeviceKey()
+    !!e && e === state.loginSession && e.app === state.loginApp && e.device === loginDeviceKey()
   );
 }
 function loginIntentCurrent(e) {
@@ -8255,10 +7629,7 @@ function loginIntentCurrent(e) {
   );
 }
 function loginFlowActive() {
-  return (
-    loginIntentCurrent(state.loginIntent) ||
-    loginSessionCurrent(state.loginSession)
-  );
+  return loginIntentCurrent(state.loginIntent) || loginSessionCurrent(state.loginSession);
 }
 function invalidateLoginIntent() {
   var e = state.loginIntent;
@@ -8273,8 +7644,7 @@ function clearLoginFlowNotices() {
 function clearQrCache() {
   try {
     for (
-      var e = ["qrcode_state", "qrcode_data", "qrcode_app", "qrcode_cache"],
-        t = 0;
+      var e = ["qrcode_state", "qrcode_data", "qrcode_app", "qrcode_cache"], t = 0;
       t < e.length;
       t++
     )
@@ -8301,16 +7671,11 @@ function hideLogin() {
   var e = state.loginSession;
   (e &&
     e.restartPending &&
-    ((state.loginRecoveryDevice = e.device),
-    (e.restartPending = !1),
-    recoverLoginService()),
+    ((state.loginRecoveryDevice = e.device), (e.restartPending = !1), recoverLoginService()),
     clearLoginTimers(),
     (state.loginSession = null),
     (state.qrLoaded = !1),
-    ui.qrcode &&
-      ((ui.qrcode.onload = null),
-      (ui.qrcode.onerror = null),
-      (ui.qrcode.qrsig = "")),
+    ui.qrcode && ((ui.qrcode.onload = null), (ui.qrcode.onerror = null), (ui.qrcode.qrsig = "")),
     ui.loginPanel && (ui.loginPanel.style.display = "none"),
     removeEl($("#login_selection_div")));
   for (var t = $$("#pwd_login_div"), i = 0; i < t.length; i++) removeEl(t[i]);
@@ -8358,8 +7723,7 @@ function beginQrSession() {
 }
 function updateQrcode() {
   if (
-    (!loginSessionCurrent(state.loginSession) ||
-      "done" !== state.loginSession.stage) &&
+    (!loginSessionCurrent(state.loginSession) || "done" !== state.loginSession.stage) &&
     ui.qrcode &&
     ui.loginPanel &&
     "none" !== ui.loginPanel.style.display
@@ -8384,9 +7748,7 @@ function requestQrcode(e) {
             setLoginMessage(
               "二维码加载超时，请点击刷新二维码！音箱时间：" +
                 (state.deviceDate
-                  ? formatUnixTime(
-                      parseInt(state.deviceDate.getTime() / 1e3, 10),
-                    )
+                  ? formatUnixTime(parseInt(state.deviceDate.getTime() / 1e3, 10))
                   : ""),
               0,
             ));
@@ -8407,20 +7769,14 @@ function validQrData(e) {
 function loginReplyMatches(e, t) {
   if (!loginSessionCurrent(t) || !e) return !1;
   if (e.qrcode_app && e.qrcode_app !== t.app) return !1;
-  if (e.login_param && e.login_param.pt_3rd_aid != state.loginParams.pt_3rd_aid)
-    return !1;
+  if (e.login_param && e.login_param.pt_3rd_aid != state.loginParams.pt_3rd_aid) return !1;
   var i = e.qrsig || (e.cookies && e.cookies.qrsig);
   return !i || !ui.qrcode.qrsig || i === ui.qrcode.qrsig;
 }
 function startQrStateRefresh() {
   stopQrStateRefresh();
   var e = state.loginSession;
-  if (
-    loginSessionCurrent(e) &&
-    "polling" === e.stage &&
-    ui.qrcode.qrsig &&
-    loginConnected()
-  ) {
+  if (loginSessionCurrent(e) && "polling" === e.stage && ui.qrcode.qrsig && loginConnected()) {
     setLoginMessage("等待二维码状态返回。。。");
     var t = function () {
       if (loginSessionCurrent(e) && "polling" === e.stage && loginConnected()) {
@@ -8443,11 +7799,7 @@ function stopQrStateRefresh() {
 }
 function updateQrCodeData(e, t) {
   var i = state.loginSession;
-  if (
-    loginSessionCurrent(i) &&
-    "loading" === i.stage &&
-    loginReplyMatches(e, i)
-  )
+  if (loginSessionCurrent(i) && "loading" === i.stage && loginReplyMatches(e, i))
     if (validQrData(e)) {
       (clearTimeout(timers.qrLoad),
         (timers.qrLoad = -1),
@@ -8463,8 +7815,7 @@ function updateQrCodeData(e, t) {
             setLoginMessage("二维码图片加载失败，请点击刷新二维码", 0);
         }),
         setLoginMessage(
-          "请使用手机QQ扫码" +
-            ("speaker" === state.loginMode ? "登录音箱账号！" : "登录！"),
+          "请使用手机QQ扫码" + ("speaker" === state.loginMode ? "登录音箱账号！" : "登录！"),
           0,
         ),
         (ui.qrcode.src = e.image));
@@ -8498,11 +7849,7 @@ function flushLoginRequest(e) {
       var t = e.request;
       ((e.request = null),
         (e.stage = e.nextStage),
-        setLoginMessage(
-          "submit" === e.stage
-            ? "正在提交登录数据。。。"
-            : "正在登录，请稍候。。。",
-        ),
+        setLoginMessage("submit" === e.stage ? "正在提交登录数据。。。" : "正在登录，请稍候。。。"),
         sendToUnisound(t),
         watchLoginResult(e));
     } else setLoginMessage("连接已断开，恢复连接后继续提交登录");
@@ -8513,9 +7860,7 @@ function watchLoginResult(e) {
       !loginSessionCurrent(e) ||
         ("auth" !== e.stage && "submit" !== e.stage) ||
         ("kuwo_pwd" !== e.app
-          ? setLoginMessage(
-              "登录结果暂未返回，请等待；若长时间无响应，请刷新二维码后重试",
-            )
+          ? setLoginMessage("登录结果暂未返回，请等待；若长时间无响应，请刷新二维码后重试")
           : loginFailed(e, "登录结果暂未返回，可手动重试密码登录"));
     }, 3e4)));
 }
@@ -8530,9 +7875,7 @@ function recoverLoginService() {
     state.loginRecoveryDevice === loginDeviceKey() &&
     loginConnected() &&
     ((state.loginRecoveryDevice = null),
-    runShell(
-      "/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity",
-    ));
+    runShell("/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity"));
 }
 function resumeLoginConnection() {
   recoverLoginService();
@@ -8551,9 +7894,7 @@ function resumeLoginConnection() {
               ? restartMusicLogin(e)
               : sendToUnisound({ type: "login_state" })
             : ("auth" !== e.stage && "submit" !== e.stage) ||
-              (setLoginMessage(
-                "连接已恢复，等待登录结果；如无响应请刷新二维码重试",
-              ),
+              (setLoginMessage("连接已恢复，等待登录结果；如无响应请刷新二维码重试"),
               sendToUnisound({ type: "login_state" }),
               watchLoginResult(e)),
     !0)
@@ -8561,11 +7902,7 @@ function resumeLoginConnection() {
 }
 function updateQrState(e) {
   var t = state.loginSession;
-  if (
-    loginSessionCurrent(t) &&
-    "polling" === t.stage &&
-    loginReplyMatches(e, t)
-  ) {
+  if (loginSessionCurrent(t) && "polling" === t.stage && loginReplyMatches(e, t)) {
     var i = e && e.qrcode_state,
       n = i && i[i.call];
     if (i && Array.isArray(n) && null != i.code) {
@@ -8589,10 +7926,7 @@ function updateQrState(e) {
           (ui.qrcode.onerror = null),
           (ui.qrcode.style.cssText =
             "margin:10px auto;position:relative;border-radius:100%;height:120px"),
-          (ui.qrcode.src =
-            "https://q1.qlogo.cn/g?b=qq&nk=" +
-            encodeURIComponent(s) +
-            "&s=100"));
+          (ui.qrcode.src = "https://q1.qlogo.cn/g?b=qq&nk=" + encodeURIComponent(s) + "&s=100"));
         (queueLoginRequest(
           t,
           {
@@ -8639,10 +7973,7 @@ function handleQQLogin(e) {
         clearQrCache(),
         sendToUnisound({ type: "login_state" }),
         showAppAlert("登录成功,欢迎" + e.nick + "[" + e.userid + "]"))
-      : loginFailed(
-          t,
-          e.login_msg || e.msg || "音箱账号登录失败，请刷新二维码后重试",
-        ));
+      : loginFailed(t, e.login_msg || e.msg || "音箱账号登录失败，请刷新二维码后重试"));
 }
 function finishMusicLogin(e, t) {
   loginSessionCurrent(e) &&
@@ -8665,15 +7996,8 @@ function restartMusicLogin(e) {
     loginConnected() &&
     (e.restartPending &&
       ((e.restartPending = !1),
-      runShell(
-        "/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity",
-      ),
-      sendAction(
-        65536,
-        3,
-        0,
-        '{"type":"login_state","code":1,"login_state":"0"}',
-      )),
+      runShell("/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity"),
+      sendAction(65536, 3, 0, '{"type":"login_state","code":1,"login_state":"0"}')),
     (timers.login = setTimeout(function () {
       loginSessionCurrent(e) && location.reload();
     }, 1e3)));
@@ -8704,11 +8028,7 @@ function handleNeteaseLogin(e, t) {
               },
               "submit",
             ));
-        } else
-          loginFailed(
-            i,
-            "网易云音乐登录失败！" + (e.msg || "请刷新二维码后重试"),
-          );
+        } else loginFailed(i, "网易云音乐登录失败！" + (e.msg || "请刷新二维码后重试"));
     } else finishMusicLogin(i, e);
 }
 function handleKuwoLogin(e, t) {
@@ -8723,11 +8043,7 @@ function handleKuwoLogin(e, t) {
           var n = e.data.userInfo;
           (n.pic && (ui.qrcode.src = n.pic),
             setLoginMessage(
-              "酷我音乐登录成功！用户：" +
-                n.nickName +
-                "[" +
-                n.uid +
-                "]，正在提交登录数据。。。",
+              "酷我音乐登录成功！用户：" + n.nickName + "[" + n.uid + "]，正在提交登录数据。。。",
             ),
             queueLoginRequest(
               i,
@@ -8738,13 +8054,7 @@ function handleKuwoLogin(e, t) {
     } else finishMusicLogin(i, e);
 }
 function unisoundNoticeCurrent(e, t) {
-  return (
-    !!e &&
-    e === ui.flowNotice &&
-    !!e.host.parentNode &&
-    t === state.ws &&
-    loginConnected()
-  );
+  return !!e && e === ui.flowNotice && !!e.host.parentNode && t === state.ws && loginConnected();
 }
 function readDeviceInfoResponse(e) {
   if (!e || "get_info" !== e.type || 200 !== e.code) return null;
@@ -8765,12 +8075,10 @@ function checkUnisoundSkip(e, t, i) {
       clearTimeout(timers.unisoundInitBackup),
       (timers.loginState = timers.unisoundInitBackup = -1));
     var n = e.panel.offsetWidth;
-    (n > 0 &&
-      e.panel.parentNode.style.setProperty("width", n + "px", "important"),
+    (n > 0 && e.panel.parentNode.style.setProperty("width", n + "px", "important"),
       (i.disabled = !0),
       (i.value = "跳过等待"),
-      (e.message.textContent =
-        "已发送跳过指令，等待音箱同步状态后检查，请稍候。"),
+      (e.message.textContent = "已发送跳过指令，等待音箱同步状态后检查，请稍候。"),
       (state.unisoundSkipSequence = (state.unisoundSkipSequence || 0) + 1));
     var a = (state.unisoundSkipCheck = {
       notice: e,
@@ -8787,13 +8095,9 @@ function checkUnisoundSkip(e, t, i) {
           sendWs(
             { type: "get_info", type_id: a.id },
             function (n) {
-              if (
-                state.unisoundSkipCheck === a &&
-                unisoundNoticeCurrent(e, t)
-              ) {
+              if (state.unisoundSkipCheck === a && unisoundNoticeCurrent(e, t)) {
                 if (
-                  ((a.pending = !1),
-                  !(n && n.type_id === a.id ? readDeviceInfoResponse(n) : null))
+                  ((a.pending = !1), !(n && n.type_id === a.id ? readDeviceInfoResponse(n) : null))
                 )
                   return (
                     (i.disabled = !1),
@@ -8816,9 +8120,7 @@ function checkUnisoundSkip(e, t, i) {
   }
 }
 function handleLoginState(e) {
-  if (
-    (clearTimeout(timers.loginState), (timers.loginState = -1), 1 == e.code)
-  ) {
+  if ((clearTimeout(timers.loginState), (timers.loginState = -1), 1 == e.code)) {
     var t = state.unisoundSkipCheck;
     if (
       !t ||
@@ -8836,9 +8138,7 @@ function handleLoginState(e) {
         if (0 == e.login_state) {
           (clearTimeout(timers.unisoundInit),
             (timers.unisoundInit = -1),
-            runShell(
-              "/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity",
-            ));
+            runShell("/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity"));
           var n = showFlowNotice(
               "unisound",
               "小讯初始化",
@@ -8846,19 +8146,12 @@ function handleLoginState(e) {
             ),
             a = state.ws;
           if (
-            ((n.phase = "initializing"),
-            (n.socket = a),
-            !n.actions.querySelector("#Skip_Waiting"))
+            ((n.phase = "initializing"), (n.socket = a), !n.actions.querySelector("#Skip_Waiting"))
           ) {
             var o = makeFlowButton("跳过等待", function () {
               unisoundNoticeCurrent(n, a) &&
                 !this.disabled &&
-                (sendAction(
-                  65536,
-                  3,
-                  0,
-                  '{"type":"login_state","code":1,"login_state":"1"}',
-                ),
+                (sendAction(65536, 3, 0, '{"type":"login_state","code":1,"login_state":"1"}'),
                 checkUnisoundSkip(n, a, this));
             });
             ((o.id = "Skip_Waiting"),
@@ -8870,8 +8163,7 @@ function handleLoginState(e) {
           }, 1e3)),
             -1 === timers.unisoundInitBackup &&
               (timers.unisoundInitBackup = setTimeout(function () {
-                unisoundNoticeCurrent(n, a) &&
-                  ((state.reload = !0), addRecoveryButtons(n.actions));
+                unisoundNoticeCurrent(n, a) && ((state.reload = !0), addRecoveryButtons(n.actions));
               }, 6e3)));
         } else if (1 == e.login_state) {
           var s = !state.initState;
@@ -8886,8 +8178,7 @@ function handleLoginState(e) {
           var r = updatePingStatus(e),
             l = state.ws;
           ((timers.loginState = setTimeout(function () {
-            unisoundNoticeCurrent(r, l) &&
-              sendToUnisound({ type: "login_state" });
+            unisoundNoticeCurrent(r, l) && sendToUnisound({ type: "login_state" });
           }, 1e3)),
             addRtimeButton(r.actions));
         } else {
@@ -8919,22 +8210,13 @@ function updatePingStatus(e) {
         : 0 == state.pingResult
           ? "失败(" + t + ")"
           : "等待(" + t + ")",
-    n = state.deviceDate
-      ? formatUnixTime(parseInt(state.deviceDate.getTime() / 1e3, 10))
-      : "",
+    n = state.deviceDate ? formatUnixTime(parseInt(state.deviceDate.getTime() / 1e3, 10)) : "",
     a = showFlowNotice(
       "unisound",
       "音箱时间校准",
-      (e.login_msg || "请校准音箱时间") +
-        "\n音箱时间：" +
-        n +
-        "\n测试PING授权服务器：" +
-        i,
+      (e.login_msg || "请校准音箱时间") + "\n音箱时间：" + n + "\n测试PING授权服务器：" + i,
     );
-  return (
-    runShell("date & ping -w 1 r1service.wxfsq.com", "ping_r1service"),
-    a
-  );
+  return (runShell("date & ping -w 1 r1service.wxfsq.com", "ping_r1service"), a);
 }
 function addRtimeButton(e) {
   var t = ui.flowNotice,
@@ -8950,9 +8232,7 @@ function addRtimeButton(e) {
             var n = this;
             ((n.value = "正在校准。。。"),
               setTimeout(function () {
-                unisoundNoticeCurrent(t, i) &&
-                  n.parentNode === e &&
-                  (n.value = "校准音箱时间");
+                unisoundNoticeCurrent(t, i) && n.parentNode === e && (n.value = "校准音箱时间");
               }, 2e3),
               runShell(
                 "settings put global auto_time 0 & sleep 1 & settings put global ntp_server ntp1.aliyun.com & settings put global auto_time 1",
@@ -8982,9 +8262,7 @@ function addRecoveryButtons(e, t) {
                 setTimeout(function () {
                   n === state.ws &&
                     loginConnected() &&
-                    (runShell(
-                      "/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity",
-                    ),
+                    (runShell("/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity"),
                     unisoundNoticeCurrent(e, n) &&
                       (i.recoveryLoginState &&
                         sendAction(
@@ -9019,8 +8297,7 @@ function addRecoveryButtons(e, t) {
               var e = showFlowNotice("unisound", "重启音箱", "重启中。。。");
               (runShell("stop adbd&&start adbd&&adb reboot"),
                 setTimeout(function () {
-                  unisoundNoticeCurrent(e, n) &&
-                    (showAppAlert("重启完毕！"), location.reload());
+                  unisoundNoticeCurrent(e, n) && (showAppAlert("重启完毕！"), location.reload());
                 }, 1e4));
             }
           },
@@ -9047,12 +8324,7 @@ function handleUnisoundMessage(e) {
                 if ("login_kuwo" === i) {
                   var n = state.loginSession,
                     a = $("#pwd_login_btn");
-                  if (
-                    !a ||
-                    !loginSessionCurrent(n) ||
-                    "kuwo_pwd" !== n.app ||
-                    "auth" !== n.stage
-                  )
+                  if (!a || !loginSessionCurrent(n) || "kuwo_pwd" !== n.app || "auth" !== n.stage)
                     return;
                   return 1 == t.code && t.data && "succ" === t.data.result
                     ? void handleKuwoLogin(t, 0)
@@ -9061,9 +8333,7 @@ function handleUnisoundMessage(e) {
                       (a.disabled = !1),
                       (a.value = "登录"),
                       void setLoginMessage(
-                        t.msg ||
-                          (t.data && t.data.msg) ||
-                          "酷我音乐登录失败，请重试",
+                        t.msg || (t.data && t.data.msg) || "酷我音乐登录失败，请重试",
                       ));
                 }
                 if (1 == t.code || 2 == t.code)
@@ -9082,10 +8352,7 @@ function handleUnisoundMessage(e) {
                       "del_memo" !== i &&
                       "delall_memo" !== i
                     )
-                      if (
-                        "Main_Wakeup_Benchmark" !== i &&
-                        "User_Wakeup_Benchmark" !== i
-                      )
+                      if ("Main_Wakeup_Benchmark" !== i && "User_Wakeup_Benchmark" !== i)
                         if ("get_info" !== i)
                           if ("asrMaxDuration" !== i) {
                             if ("Voice_time_reporting" !== i)
@@ -9126,10 +8393,7 @@ function handleUnisoundMessage(e) {
         ? updateQrCodeData(t.data)
         : loginSessionCurrent(state.loginSession) &&
           "loading" === state.loginSession.stage &&
-          loginFailed(
-            state.loginSession,
-            t.msg || "二维码获取失败，请刷新二维码",
-          );
+          loginFailed(state.loginSession, t.msg || "二维码获取失败，请刷新二维码");
   }
 }
 function detectXiaoaiInstalled() {
@@ -9162,8 +8426,7 @@ function updateUnisoundInfo(e) {
               (ui.dormancyBtn.dormancyState = 1),
               (ui.dormancyBtn.style.backgroundColor = "rgba(238,0,0,1)"),
               ui.wakeupBtn &&
-                ((ui.wakeupBtn.disabled = !0),
-                (ui.wakeupBtn.style.backgroundColor = "")))
+                ((ui.wakeupBtn.disabled = !0), (ui.wakeupBtn.style.backgroundColor = "")))
             : ((ui.dormancyBtn.value = "开始休眠"),
               (ui.dormancyBtn.dormancyState = 0),
               (ui.dormancyBtn.style.backgroundColor = ""),
@@ -9196,8 +8459,7 @@ function updateUnisoundInfo(e) {
     }
     if (state.unisoundInfo.asrMaxDuration) {
       var s = {};
-      for (var r in state.unisoundInfo.asrMaxDuration)
-        s[r] = state.unisoundInfo.asrMaxDuration[r];
+      for (var r in state.unisoundInfo.asrMaxDuration) s[r] = state.unisoundInfo.asrMaxDuration[r];
       ((s.code = 1), updateAsrMaxDuration(s));
     }
     updateButtonVisibility();
@@ -9257,10 +8519,7 @@ function handleApiResponse(e, t) {
       var a = state.loginSession;
       loginSessionCurrent(a) &&
         "submit" === a.stage &&
-        loginFailed(
-          a,
-          "数据提交失败！" + (e.login_msg || e.msg || "音箱账号未登录"),
-        );
+        loginFailed(a, "数据提交失败！" + (e.login_msg || e.msg || "音箱账号未登录"));
       var o = $("#user_info_text");
       o && (o.innerHTML = e.login_msg + "(" + e.login_state + ")");
     }
@@ -9297,8 +8556,7 @@ function requestSongList(e) {
             ((songListRequest = null),
               (songListAmbiguousSocket = t.socket),
               songListSessionCurrent(t.session) &&
-                (t.session.dlg.title.innerHTML =
-                  "获取歌单超时，请重新打开重试"));
+                (t.session.dlg.title.innerHTML = "获取歌单超时，请重新打开重试"));
             var e = songListSession;
             songListSessionCurrent(e) && e.waiting && requestSongList(e);
           }
@@ -9314,16 +8572,11 @@ function handleSongListResponse(e) {
   (t && (clearTimeout(t.timer), (songListRequest = null)),
     (t && t.socket !== state.ws) ||
       (state.tempSongList || (state.tempSongList = {}),
-      (state.tempSongList.music_source = t
-        ? t.source
-        : state.info.music_source),
+      (state.tempSongList.music_source = t ? t.source : state.info.music_source),
       200 == e.code
-        ? ((state.tempSongList.time = Date.now()),
-          (state.tempSongList.data = e))
+        ? ((state.tempSongList.time = Date.now()), (state.tempSongList.data = e))
         : (state.tempSongList.time = -1)),
-    t &&
-      songListAmbiguousSocket !== t.socket &&
-      renderSongListWindow(e, t.session));
+    t && songListAmbiguousSocket !== t.socket && renderSongListWindow(e, t.session));
   var i = songListSession;
   songListSessionCurrent(i) && i.waiting && requestSongList(i);
 }
@@ -9342,8 +8595,7 @@ function openSongListWindow(e) {
   ((songListSession = i),
     t.onClose(function () {
       (clearTimeout(i.timer),
-        songListSession === i &&
-          ((songListSession = null), songListGeneration++));
+        songListSession === i && ((songListSession = null), songListGeneration++));
     }));
   var n = makeEl("div", {
     id: "song_list_div",
@@ -9353,10 +8605,7 @@ function openSongListWindow(e) {
   ((n.onclick = function (e) {
     if (t.isOpen()) {
       clearTimeout(timers.listClick);
-      for (
-        var i = e.target;
-        i && (!i.classList || !i.classList.contains("click"));
-      )
+      for (var i = e.target; i && (!i.classList || !i.classList.contains("click"));)
         i = i.parentElement;
       if (i) {
         var n = i.getAttribute("data-id") || "",
@@ -9414,8 +8663,7 @@ function renderSongListWindow(e, t) {
             c.appendChild(
               makeEl("img", {
                 src: u.pic,
-                style:
-                  "border-radius:10%;margin:0 10px 0 5px;height:66px;width:66px",
+                style: "border-radius:10%;margin:0 10px 0 5px;height:66px;width:66px",
               }),
             );
             var d = makeEl("div", {
@@ -9424,14 +8672,9 @@ function renderSongListWindow(e, t) {
             });
             (c.appendChild(d),
               i.appendChild(c),
+              d.appendChild(makeText(u.title, "font-size:16px;color:#fff;text-align:left")),
               d.appendChild(
-                makeText(u.title, "font-size:16px;color:#fff;text-align:left"),
-              ),
-              d.appendChild(
-                makeText(
-                  u.content,
-                  "font-size:12px;color:rgba(255,255,255,0.6);text-align:left",
-                ),
+                makeText(u.content, "font-size:12px;color:rgba(255,255,255,0.6);text-align:left"),
               ));
           }
         }
@@ -9443,9 +8686,7 @@ function createMusicInfoWindow(e, t) {
     n = {},
     a = createDialogPanel("", { noPadding: !0, stack: !(!t || !t.stack) }),
     o = a.header;
-  ((o.style.justifyContent = "center"),
-    o.removeChild(a.title),
-    o.removeChild(a.closeBtn));
+  ((o.style.justifyContent = "center"), o.removeChild(a.title), o.removeChild(a.closeBtn));
   var s = makeEl("img", {
     style: "border-radius:10%;height:66px;margin:0 12px 0 5px",
   });
@@ -9471,9 +8712,7 @@ function createMusicInfoWindow(e, t) {
     style:
       "color:#fff;background-color:transparent;text-shadow:none;border-top:1px solid rgba(255,255,255,0.1)",
   });
-  (d.appendChild(
-    makeEl("span", { style: "color:#fff;text-shadow:none", html: "关闭" }),
-  ),
+  (d.appendChild(makeEl("span", { style: "color:#fff;text-shadow:none", html: "关闭" })),
     (d.onclick = function () {
       a.isOpen() && a.close();
     }),
@@ -9502,34 +8741,28 @@ function createMusicInfoWindow(e, t) {
       title: "收藏歌曲",
       onclick: function () {
         readUnisoundAvailable() &&
-          showAppConfirm(
-            "确定要收藏[" + getTrackTitle(i) + "]吗？",
-            function () {
-              readUnisoundAvailable() &&
-                (sendToUnisound({
-                  type: "api",
-                  data: { type: "collect", music_info: i },
-                }),
-                a.close());
-            },
-          );
+          showAppConfirm("确定要收藏[" + getTrackTitle(i) + "]吗？", function () {
+            readUnisoundAvailable() &&
+              (sendToUnisound({
+                type: "api",
+                data: { type: "collect", music_info: i },
+              }),
+              a.close());
+          });
       },
     }),
     f.push({
       title: "取消收藏",
       onclick: function () {
         readUnisoundAvailable() &&
-          showAppConfirm(
-            "确定要取消收藏[" + getTrackTitle(i) + "]吗？",
-            function () {
-              readUnisoundAvailable() &&
-                (sendToUnisound({
-                  type: "api",
-                  data: { type: "cancel_collect", music_info: i },
-                }),
-                a.close());
-            },
-          );
+          showAppConfirm("确定要取消收藏[" + getTrackTitle(i) + "]吗？", function () {
+            readUnisoundAvailable() &&
+              (sendToUnisound({
+                type: "api",
+                data: { type: "cancel_collect", music_info: i },
+              }),
+              a.close());
+          });
       },
     })),
     f.push({
@@ -9558,8 +8791,7 @@ function createMusicInfoWindow(e, t) {
           "string" == typeof n.lrc)
         )
           for (
-            var a = n.lrc.match(/(\[\d{1,3}:\d{1,2}.\d{1,3}\])(.*)/g) || [],
-              o = 0;
+            var a = n.lrc.match(/(\[\d{1,3}:\d{1,2}.\d{1,3}\])(.*)/g) || [], o = 0;
             o < a.length;
             o++
           )
@@ -9580,8 +8812,7 @@ function createMusicInfoWindow(e, t) {
             if (e) {
               var i = makeEl("tr", {
                 class: "span1",
-                style:
-                  "color:#fff;background-color:transparent;text-shadow:none",
+                style: "color:#fff;background-color:transparent;text-shadow:none",
               });
               ((i.onclick = function () {
                 a.isOpen() && e.onclick();
@@ -9593,8 +8824,7 @@ function createMusicInfoWindow(e, t) {
                   }),
                 ),
                 c.insertBefore(i, d),
-                t < f.length - 1 &&
-                  c.insertBefore(makeEl("hr", { class: "hr" }), d));
+                t < f.length - 1 && c.insertBefore(makeEl("hr", { class: "hr" }), d));
             }
           })(f[t], t);
       } else
@@ -9682,23 +8912,16 @@ function handleMessage(e) {
                                     : void showAppAlert("已重启EchoService！");
                                 if ("switch_player" !== C) {
                                   if (
-                                    (("set_dev_name" !== C &&
-                                      "rec_dev_name" !== C) ||
-                                      runShell(
-                                        "getprop net.hostname && netcfg",
-                                        "get_hostname",
-                                      ),
+                                    (("set_dev_name" !== C && "rec_dev_name" !== C) ||
+                                      runShell("getprop net.hostname && netcfg", "get_hostname"),
                                     "shell" === C)
                                   ) {
                                     var a = e.type_id;
                                     if ("reboot_adbd" === a)
                                       return void showAppAlert("已重启adbd！");
-                                    if ("query" === a)
-                                      return void setSystemInfoV1(e.data);
+                                    if ("query" === a) return void setSystemInfoV1(e.data);
                                     if ("useless_services_detection" === a)
-                                      return void detectUnusableServices(
-                                        e.data,
-                                      );
+                                      return void detectUnusableServices(e.data);
                                     if ("hide_useless_services" === a) {
                                       var o = $("#hide_useless_services");
                                       return void (
@@ -9713,14 +8936,10 @@ function handleMessage(e) {
                                         }, 2e3))
                                       );
                                     }
-                                    if ("get_hostname" === a)
-                                      return void handleHostnameUpdate(e);
+                                    if ("get_hostname" === a) return void handleHostnameUpdate(e);
                                     if ("ps" === a)
-                                      return void handleProcessList(
-                                        200 == e.code ? e.data : null,
-                                      );
-                                    if ("ping_r1service" === a)
-                                      return void handlePingResponse(e);
+                                      return void handleProcessList(200 == e.code ? e.data : null);
+                                    if ("ping_r1service" === a) return void handlePingResponse(e);
                                     if ("set_date" === a)
                                       return (
                                         showAppAlert("已校准音箱时间！"),
@@ -9740,16 +8959,12 @@ function handleMessage(e) {
                                     if ("detect_xiaoai" === a) {
                                       var s = String(e.data || "");
                                       return (
-                                        (s.indexOf("com.xiaomi.xiaoailite") >
-                                          -1 ||
+                                        (s.indexOf("com.xiaomi.xiaoailite") > -1 ||
                                           s.indexOf("com.duoqin.ai") > -1) &&
-                                          (state.unisoundInfo
-                                            .is_xiaoai_exists ||
-                                            ((state.unisoundInfo.is_xiaoai_exists =
-                                              !0),
+                                          (state.unisoundInfo.is_xiaoai_exists ||
+                                            ((state.unisoundInfo.is_xiaoai_exists = !0),
                                             state.unisoundInfo &&
-                                              (state.unisoundInfo.is_xiaoai_exists =
-                                                !0))),
+                                              (state.unisoundInfo.is_xiaoai_exists = !0))),
                                         void updateButtonVisibility()
                                       );
                                     }
@@ -9762,17 +8977,13 @@ function handleMessage(e) {
                                         "Get_MiPlay_Remote_Diag" !== e.type &&
                                         "Get_Lan_Devices" !== e.type &&
                                         "Set_MiPlay_Sync_Delay" !== e.type &&
-                                        "Set_MiPlay_Remote_Sync_Delay" !==
-                                          e.type &&
+                                        "Set_MiPlay_Remote_Sync_Delay" !== e.type &&
                                         "Set_MiPlay_Tuning" !== e.type &&
                                         "Set_MiPlay_Remote_Tuning" !== e.type &&
-                                        "Set_MiPlay_Remote_Capture" !==
-                                          e.type &&
-                                        "Set_MiPlay_Capture_Latency" !==
-                                          e.type &&
+                                        "Set_MiPlay_Remote_Capture" !== e.type &&
+                                        "Set_MiPlay_Capture_Latency" !== e.type &&
                                         "Set_MiPlay_Channel" !== e.type &&
-                                        "Set_MiPlay_Remote_Channel" !==
-                                          e.type &&
+                                        "Set_MiPlay_Remote_Channel" !== e.type &&
                                         "Set_MiPlay_Open" !== e.type &&
                                         "Set_MiPlay_Group" !== e.type &&
                                         "Set_MiPlay_Group_Auto" !== e.type &&
@@ -9793,20 +9004,15 @@ function handleMessage(e) {
                                           200 == e.code
                                             ? null != u
                                               ? u
-                                              : "object" == typeof e.data &&
-                                                  null !== e.data
+                                              : "object" == typeof e.data && null !== e.data
                                                 ? JSON.stringify(e.data)
                                                 : e.data
-                                            : "object" == typeof e.msg &&
-                                                null !== e.msg
+                                            : "object" == typeof e.msg && null !== e.msg
                                               ? JSON.stringify(e.msg)
                                               : e.msg;
                                         var c = "[" + e.type_id + "]:" + r;
                                         (l && (l.value = c),
-                                          createTextWindow(
-                                            e.type_id,
-                                            String(r),
-                                          ));
+                                          createTextWindow(e.type_id, String(r)));
                                       }
                                     } else setSystemInfoV2(e.data);
                                   else showAppAlert("已保存！");
@@ -9816,8 +9022,7 @@ function handleMessage(e) {
                                 if (200 != e.code) {
                                   var p = "[播放本地音乐]:" + e.msg;
                                   (d && (d.value = p), showAppAlert(p));
-                                } else
-                                  d && (d.value = "[播放本地音乐]:" + e.data);
+                                } else d && (d.value = "[播放本地音乐]:" + e.data);
                               }
                             else requestAutoRestart();
                           else 200 == e.code && createAutoRestartPanel(e.data);
@@ -9827,10 +9032,7 @@ function handleMessage(e) {
                             ui.volumeLabel &&
                             ((ui.volumeRange.max = e.data),
                             (ui.volumeLabel.innerHTML =
-                              " " +
-                              ui.volumeRange.value +
-                              "/" +
-                              ui.volumeRange.max));
+                              " " + ui.volumeRange.value + "/" + ui.volumeRange.max));
                       else ui.btEnableBtn && (ui.btEnableBtn.wait = !1);
                     else refreshBluetoothDevices(e.data);
                   else handleUnisoundMessage(e);
@@ -9862,9 +9064,7 @@ function handleMessage(e) {
             var C;
             (C = $("#dsp_bass_text")) &&
               (C.innerHTML =
-                "DSP低音增强(" +
-                (k.indexOf(">data3") > -1 ? "生效中" : "未生效") +
-                ")：");
+                "DSP低音增强(" + (k.indexOf(">data3") > -1 ? "生效中" : "未生效") + ")：");
           }
         }
     } else {
@@ -9884,10 +9084,8 @@ function handleSwitchPlayer(e) {
     "reboot_echo" !== e.type
       ? t &&
         (2 == e.data.player
-          ? (t.setAttribute("PlayerType", 2),
-            (t.value = "切换MediaPlayer播放器"))
-          : (t.setAttribute("PlayerType", 1),
-            (t.value = "切换ExoPlayer播放器")),
+          ? (t.setAttribute("PlayerType", 2), (t.value = "切换MediaPlayer播放器"))
+          : (t.setAttribute("PlayerType", 1), (t.value = "切换ExoPlayer播放器")),
         sendWs({ type: "reboot_echo", type_id: "switch_player" }))
       : t &&
         showAppAlert(
@@ -9900,8 +9098,7 @@ function handleSwitchPlayer(e) {
 function handleHostnameUpdate(e) {
   if (
     !loginFlowActive() &&
-    (state.initState && ((state.initState = !1), sendWs({ type: "get_info" })),
-    e.data)
+    (state.initState && ((state.initState = !1), sendWs({ type: "get_info" })), e.data)
   ) {
     var t = e.data.split("\r\n");
     if (!(t.length < 2)) {
@@ -9910,9 +9107,7 @@ function handleHostnameUpdate(e) {
         if (t[i].indexOf("wlan0") > -1)
           for (var n = t[i].split(" "), a = 0; a < n.length; a++) {
             var o = n[a].split("/")[0];
-            n[a] &&
-              IP_PATTERN.test(o) &&
-              (state.localIp = o);
+            n[a] && IP_PATTERN.test(o) && (state.localIp = o);
           }
       (state.hostname &&
         (updateDeviceList({
@@ -9932,8 +9127,7 @@ function handleHostnameUpdate(e) {
           -1 === document.title.indexOf("正在获取") &&
           ("]" === document.title.substr(-1)
             ? (document.title =
-                document.title.substr(0, document.title.length - 6) +
-                state.deviceTag)
+                document.title.substr(0, document.title.length - 6) + state.deviceTag)
             : (document.title += state.deviceTag),
           setPageTitle(document.title)));
     }
@@ -9948,9 +9142,7 @@ function handlePingResponse(e) {
         isNaN(a.getTime()) || (state.deviceDate = a);
         break;
       }
-    var o = state.deviceDate
-        ? formatUnixTime(parseInt(state.deviceDate.getTime() / 1e3, 10))
-        : "",
+    var o = state.deviceDate ? formatUnixTime(parseInt(state.deviceDate.getTime() / 1e3, 10)) : "",
       s = $("#device_time");
     (s && (s.innerHTML = "音箱时间：" + o),
       (state.pingResult = t.indexOf("icmp_seq=1") > -1 ? 1 : 0));
@@ -9993,8 +9185,7 @@ function handleProcessList(e) {
         }
       c ||
         u.indexOf(":") > -1 ||
-        (r.push("am force-stop " + u),
-        isEchoVer(1855) || runShell("am force-stop " + u));
+        (r.push("am force-stop " + u), isEchoVer(1855) || runShell("am force-stop " + u));
     }
     (r.length && isEchoVer(1855) && sendWs({ type: "shell1", shells: r }),
       t &&
@@ -10061,13 +9252,9 @@ function isMiPlayTimelineValid(e) {
 }
 function getMiPlayPendingText(e) {
   var t = e && null != e.raw_pending_ms ? parseInt(e.raw_pending_ms, 10) : NaN,
-    i =
-      e && null != e.output_latency_ms
-        ? parseInt(e.output_latency_ms, 10)
-        : NaN;
+    i = e && null != e.output_latency_ms ? parseInt(e.output_latency_ms, 10) : NaN;
   return !e ||
-    ("fusion_opensl_refill" !== e.latency_model &&
-      "fusion_normalized_head" !== e.latency_model)
+    ("fusion_opensl_refill" !== e.latency_model && "fusion_normalized_head" !== e.latency_model)
     ? isNaN(t)
       ? isNaN(i)
         ? "-"
@@ -10103,14 +9290,7 @@ function miPlayBlockPhaseMicros(e) {
       i = Number(e.block_at_ms),
       n = Number(e.diag_elapsed_ms),
       a = n - i + parseInt(e.diag_age_ms, 10);
-    return !isFinite(t) ||
-      !isFinite(i) ||
-      !isFinite(n) ||
-      i <= 0 ||
-      n < i ||
-      a > 5e3
-      ? null
-      : t;
+    return !isFinite(t) || !isFinite(i) || !isFinite(n) || i <= 0 || n < i || a > 5e3 ? null : t;
   }
   var o = parseInt(e.block_error_us, 10),
     s = parseInt(e.block_pending_us, 10);
@@ -10165,8 +9345,7 @@ function createMiPlayAdvDialog() {
     var a = makeEl("input", {
       type: "text",
       placeholder: "或手动输入IP",
-      style:
-        "flex:1;color:#fff;background:#333;border:1px solid #555;padding:5px;font-size:12px",
+      style: "flex:1;color:#fff;background:#333;border:1px solid #555;padding:5px;font-size:12px",
     });
     (i.appendChild(n),
       i.appendChild(a),
@@ -10244,20 +9423,14 @@ function createMiPlayAdvDialog() {
                             (f = H(t)),
                             W(),
                             f === e[1]
-                              ? showAppAlert(
-                                  (i ? "远程" : "") + "已切换为" + e[0] + "！",
-                                )
-                              : showAppAlert(
-                                  "声道回读未确认，请检查目标音箱或稍后重试。",
-                                ),
+                              ? showAppAlert((i ? "远程" : "") + "已切换为" + e[0] + "！")
+                              : showAppAlert("声道回读未确认，请检查目标音箱或稍后重试。"),
                             z());
                         })
                       : ((g = !1),
                         W(),
                         void showAppAlert(
-                          (i ? "远程" : "") +
-                            "设置失败：" +
-                            (t && t.msg ? t.msg : "音箱无响应"),
+                          (i ? "远程" : "") + "设置失败：" + (t && t.msg ? t.msg : "音箱无响应"),
                         ));
                 },
               ));
@@ -10268,8 +9441,7 @@ function createMiPlayAdvDialog() {
     }),
       e.body.appendChild(p));
     var b = makeEl("div", {
-      style:
-        t + ";text-align:center;color:#90caf9;cursor:pointer;margin:8px 0 4px",
+      style: t + ";text-align:center;color:#90caf9;cursor:pointer;margin:8px 0 4px",
       html: "▶ 延迟参数（高级，运行中生效并持久化）",
     });
     e.body.appendChild(b);
@@ -10318,8 +9490,7 @@ function createMiPlayAdvDialog() {
       });
     (C.appendChild(S), k.appendChild(C));
     var E = makeEl("div", {
-      style:
-        "display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:6px",
+      style: "display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:6px",
     });
     ([-5, -1, 1, 5].forEach(function (e) {
       E.appendChild(
@@ -10369,35 +9540,22 @@ function createMiPlayAdvDialog() {
         else {
           var t = D();
           t
-            ? sendWs(
-                { type: "Set_MiPlay_Remote_Tuning", ip: t, queue_target_ms: e },
-                function (e) {
-                  B() &&
-                    (showAppAlert(
-                      e && 200 == e.code
-                        ? "远程参数已应用！"
-                        : "远程应用失败（检查音箱在线）！",
-                    ),
-                    z());
-                },
-              )
-            : sendWs(
-                { type: "Set_MiPlay_Tuning", queue_target_ms: e },
-                function (e) {
-                  B() &&
-                    (showAppAlert(
-                      e && 200 == e.code ? "参数已应用！" : "应用失败！",
-                    ),
-                    z());
-                },
-              );
+            ? sendWs({ type: "Set_MiPlay_Remote_Tuning", ip: t, queue_target_ms: e }, function (e) {
+                B() &&
+                  (showAppAlert(
+                    e && 200 == e.code ? "远程参数已应用！" : "远程应用失败（检查音箱在线）！",
+                  ),
+                  z());
+              })
+            : sendWs({ type: "Set_MiPlay_Tuning", queue_target_ms: e }, function (e) {
+                B() && (showAppAlert(e && 200 == e.code ? "参数已应用！" : "应用失败！"), z());
+              });
         }
       },
     });
     (I.appendChild(A), k.appendChild(I));
     var L = makeEl("div", {
-        style:
-          "display:flex;justify-content:center;gap:6px;margin-bottom:10px;align-items:center",
+        style: "display:flex;justify-content:center;gap:6px;margin-bottom:10px;align-items:center",
       }),
       M = makeEl("input", {
         type: "button",
@@ -10416,35 +9574,21 @@ function createMiPlayAdvDialog() {
                   },
                   function (e) {
                     B() &&
-                      (showAppAlert(
-                        e && 200 == e.code
-                          ? "远程队列水位已重置！"
-                          : "远程重置失败！",
-                      ),
+                      (showAppAlert(e && 200 == e.code ? "远程队列水位已重置！" : "远程重置失败！"),
                       z());
                   },
                 )
-              : sendWs(
-                  { type: "Set_MiPlay_Tuning", queue_target_ms: 800 },
-                  function (e) {
-                    B() &&
-                      (showAppAlert(
-                        e && 200 == e.code ? "队列水位已重置！" : "重置失败！",
-                      ),
-                      z());
-                  },
-                );
+              : sendWs({ type: "Set_MiPlay_Tuning", queue_target_ms: 800 }, function (e) {
+                  B() &&
+                    (showAppAlert(e && 200 == e.code ? "队列水位已重置！" : "重置失败！"), z());
+                });
           });
         },
       });
     (L.appendChild(M),
       k.appendChild(L),
       e.onClose(function () {
-        (clearTimeout(u),
-          l++,
-          _++,
-          y++,
-          miPlayAdvDialog === e && (miPlayAdvDialog = null));
+        (clearTimeout(u), l++, _++, y++, miPlayAdvDialog === e && (miPlayAdvDialog = null));
       }),
       z(),
       F());
@@ -10457,11 +9601,7 @@ function createMiPlayAdvDialog() {
     return e || ("local" === n.value ? null : n.value);
   }
   function R(e) {
-    ((r =
-      !!e &&
-      ("boolean" == typeof e.debug_enabled
-        ? e.debug_enabled
-        : !0 !== e.release_build)),
+    ((r = !!e && ("boolean" == typeof e.debug_enabled ? e.debug_enabled : !0 !== e.release_build)),
       (o.style.display = r ? "" : "none"),
       (s.style.display = r ? "" : "none"),
       clearTimeout(u),
@@ -10518,18 +9658,13 @@ function createMiPlayAdvDialog() {
                       : "空闲"
                     : "快照过期/无实时数据"),
             "时间线误差: " +
-              (null == l
-                ? "--（等待运行中的实时 sender_clock）"
-                : (l / 1e3).toFixed(1) + " ms"),
+              (null == l ? "--（等待运行中的实时 sender_clock）" : (l / 1e3).toFixed(1) + " ms"),
             "参考相位残差: " +
               ("fusion_normalized_head" !== e.latency_model || null == m
                 ? "--（无同基准计量）"
-                : (m / 1e3).toFixed(1) +
-                  " ms（已扣除回调参考，不是双箱声学差）"),
+                : (m / 1e3).toFixed(1) + " ms（已扣除回调参考，不是双箱声学差）"),
             "渲染速率修正: " + (c && d && isFinite(y) ? y + " ppm" : "--"),
-            "PCM 队列: " +
-              (c && d && null != e.buffered_ms ? e.buffered_ms : "--") +
-              " ms",
+            "PCM 队列: " + (c && d && null != e.buffered_ms ? e.buffered_ms : "--") + " ms",
             "输出端 pending: " + p,
             "队列水位目标: " + (e.queue_target_ms || 800) + " ms",
             "同步延迟补偿: " +
@@ -10537,12 +9672,7 @@ function createMiPlayAdvDialog() {
                 ? e.sync_delay_ms + " ms（正值晚播，负值早播）"
                 : "旧固件不支持"),
             "声道: " + ["立体声", "仅左", "仅右"][e.channel || 0],
-            "快照: " +
-              (c
-                ? u + " ms 前"
-                : u >= 0
-                  ? "已过期 " + u + " ms"
-                  : "暂无实时快照"),
+            "快照: " + (c ? u + " ms 前" : u >= 0 ? "已过期 " + u + " ms" : "暂无实时快照"),
           ];
         ("fusion_opensl_refill" !== e.latency_model &&
           "fusion_normalized_head" !== e.latency_model) ||
@@ -10554,11 +9684,7 @@ function createMiPlayAdvDialog() {
               " 帧",
           ),
           null != e.resume_reserve_ms &&
-            _.push(
-              "同步起播/恢复余量: " +
-                e.resume_reserve_ms +
-                " ms（对齐后仍保留的 PCM）",
-            ),
+            _.push("同步起播/恢复余量: " + e.resume_reserve_ms + " ms（对齐后仍保留的 PCM）"),
           _.push(
             "原生缓冲容量: " +
               e.native_buffer_frames +
@@ -10568,21 +9694,14 @@ function createMiPlayAdvDialog() {
         var b = getMiPlayPairDelta(e, t);
         (null != b
           ? _.push(
-              (isMiPlayPhaseSchema(e)
-                ? "台间传输相位估算: "
-                : "台间误差（旧固件估算）: ") +
+              (isMiPlayPhaseSchema(e) ? "台间传输相位估算: " : "台间误差（旧固件估算）: ") +
                 (b / 1e3).toFixed(1) +
                 " ms（本轮实时，本箱相对" +
                 (n ? "本机" : "目标") +
                 "）",
             )
-          : a &&
-            _.push(
-              "台间传输相位估算: --（等待本轮双箱运行中、有效且新鲜的同模型数据）",
-            ),
-          _.push(
-            "说明: 传输相位为写入时的预计呈现估算，不是声学测量，不能证明实际出声同步。",
-          ),
+          : a && _.push("台间传输相位估算: --（等待本轮双箱运行中、有效且新鲜的同模型数据）"),
+          _.push("说明: 传输相位为写入时的预计呈现估算，不是声学测量，不能证明实际出声同步。"),
           (s.textContent = _.join("\n")));
       }
     } else s.textContent = "目标音箱不可达（检查 IP / 是否同网段）";
@@ -10601,9 +9720,7 @@ function createMiPlayAdvDialog() {
               var s = String(t[o] || o),
                 r = s.indexOf("@");
               (r > -1 && (s = s.slice(r + 1)),
-                n.appendChild(
-                  makeEl("option", { value: o, html: s + " (" + o + ")" }),
-                ));
+                n.appendChild(makeEl("option", { value: o, html: s + " (" + o + ")" })));
             }
         }
       }),
@@ -10677,8 +9794,7 @@ function createMiPlayAdvDialog() {
                   })
                 : ((S.disabled = !1),
                   void showAppAlert(
-                    "同步补偿设置失败：" +
-                      (i && i.msg ? i.msg : "音箱无响应/旧固件不支持"),
+                    "同步补偿设置失败：" + (i && i.msg ? i.msg : "音箱无响应/旧固件不支持"),
                   ));
           },
           1e4,
@@ -10705,8 +9821,7 @@ function createMiPlayAdvDialog() {
               ? ((x.value = i.sync_delay_ms), (S.disabled = !1))
               : ((x.value = 0),
                 (S.disabled = !0),
-                (T.textContent =
-                  "目标固件不支持同步补偿，请先更新 EchoService。"))));
+                (T.textContent = "目标固件不支持同步补偿，请先更新 EchoService。"))));
       };
       e
         ? sendWs({ type: "Get_MiPlay_Remote_Diag", ip: e }, function (e) {
@@ -10745,11 +9860,8 @@ var MUSIC_SEARCH_SOURCES = [
   },
   musicSearchDialog = null;
 function createMusicSearchDialog() {
-  if (musicSearchDialog && musicSearchDialog.isOpen())
-    musicSearchDialog.close();
-  else if (
-    (MUSIC_SEARCH_CANCEL && MUSIC_SEARCH_CANCEL(), hasMusicQueueCapability())
-  ) {
+  if (musicSearchDialog && musicSearchDialog.isOpen()) musicSearchDialog.close();
+  else if ((MUSIC_SEARCH_CANCEL && MUSIC_SEARCH_CANCEL(), hasMusicQueueCapability())) {
     var e = musicQueueContext(),
       t = MUSIC_SEARCH_STATE,
       i = t.source,
@@ -10766,17 +9878,14 @@ function createMusicSearchDialog() {
       (MUSIC_SEARCH_CANCEL = x),
       "undefined" != typeof MutationObserver &&
         (c = new MutationObserver(function () {
-          (u.isOpen() &&
-            document.getElementById("music_search_wrap") === u.wrap) ||
-            x();
+          (u.isOpen() && document.getElementById("music_search_wrap") === u.wrap) || x();
         })).observe(u.host, { childList: !0, subtree: !0 }));
     var d =
         "border:none;border-radius:14px;padding:6px 10px;font-size:12px;color:#fff;cursor:pointer;flex-shrink:0",
       p =
         "border:none;border-radius:50%;width:30px;height:30px;color:#fff;cursor:pointer;background:rgba(255,255,255,0.15);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:0;outline:none",
       m = makeEl("div", {
-        style:
-          "display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap",
+        style: "display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap",
       }),
       f = [];
     MUSIC_SEARCH_SOURCES.forEach(function (e) {
@@ -10809,15 +9918,11 @@ function createMusicSearchDialog() {
         title: "搜索",
         style: p + ";background:var(--primary-blue)",
       });
-    (h.appendChild(g),
-      h.appendChild(v),
-      m.appendChild(h),
-      u.body.appendChild(m));
+    (h.appendChild(g), h.appendChild(v), m.appendChild(h), u.body.appendChild(m));
     var y = makeEl("div", {
       role: "status",
       "aria-live": "polite",
-      style:
-        "font-size:12px;color:rgba(255,255,255,0.65);margin:2px 0 6px;min-height:16px",
+      style: "font-size:12px;color:rgba(255,255,255,0.65);margin:2px 0 6px;min-height:16px",
     });
     u.body.appendChild(y);
     var _ = makeEl("div", {
@@ -10859,9 +9964,7 @@ function createMusicSearchDialog() {
       (k.onclick = function () {
         T(n) &&
           (t.list.length
-            ? (sendAction(4, 15, -1, A(t.list, 0)),
-              M("全部播放（" + t.list.length + " 首）"),
-              L())
+            ? (sendAction(4, 15, -1, A(t.list, 0)), M("全部播放（" + t.list.length + " 首）"), L())
             : M("先搜索"));
       }),
       (g.value = t.kw),
@@ -10892,22 +9995,13 @@ function createMusicSearchDialog() {
   }
   function S() {
     f.forEach(function (e) {
-      e.el.style.background =
-        e.key === i ? "var(--primary-blue)" : "rgba(255,255,255,0.12)";
+      e.el.style.background = e.key === i ? "var(--primary-blue)" : "rgba(255,255,255,0.12)";
     });
   }
   function E() {
     ((w.disabled =
-      a ||
-      !1 === t.hasMore ||
-      t.page < 1 ||
-      g.value.trim() !== t.kw ||
-      i !== t.source),
-      (w.textContent = r
-        ? "加载中…"
-        : !1 === t.hasMore
-          ? "没有更多结果"
-          : "加载更多"),
+      a || !1 === t.hasMore || t.page < 1 || g.value.trim() !== t.kw || i !== t.source),
+      (w.textContent = r ? "加载中…" : !1 === t.hasMore ? "没有更多结果" : "加载更多"),
       _.setAttribute("aria-busy", a ? "true" : "false"));
   }
   function I() {
@@ -10924,8 +10018,7 @@ function createMusicSearchDialog() {
     };
     return (
       readUnisoundAvailable() ||
-        (t.url =
-          R1Config.musicApiUrl + "?url=" + encodeURIComponent(e.id || "")),
+        (t.url = R1Config.musicApiUrl + "?url=" + encodeURIComponent(e.id || "")),
       t
     );
   }
@@ -10981,10 +10074,7 @@ function createMusicSearchDialog() {
                   title: "播放",
                   style: p,
                   onclick: function () {
-                    T(n) &&
-                      (sendAction(4, 15, -1, A([e], 0)),
-                      M("已播放：" + (e.name || "")),
-                      L());
+                    T(n) && (sendAction(4, 15, -1, A([e], 0)), M("已播放：" + (e.name || "")), L());
                   },
                 }),
               ),
@@ -11037,8 +10127,7 @@ function createMusicSearchDialog() {
           })
         : _.appendChild(
             makeEl("div", {
-              style:
-                "font-size:12px;color:rgba(255,255,255,0.5);padding:10px 0",
+              style: "font-size:12px;color:rgba(255,255,255,0.5);padding:10px 0",
               text: "无结果",
             }),
           ));
@@ -11048,19 +10137,13 @@ function createMusicSearchDialog() {
       var s = g.value.trim(),
         u = i;
       if (!s) return (C(), M("输入关键词"), void E());
-      if (!(
-        e > 1 &&
-        (a || t.page < 1 || s !== t.kw || u !== t.source || e !== t.page + 1)
-      )) {
+      if (!(e > 1 && (a || t.page < 1 || s !== t.kw || u !== t.source || e !== t.page + 1))) {
         C();
         var c = n;
         ((l = t.status), (a = !0), (r = e > 1));
         var d = t.list.length,
           p = _.scrollTop,
-          m =
-            "undefined" != typeof AbortController
-              ? new AbortController()
-              : null;
+          m = "undefined" != typeof AbortController ? new AbortController() : null;
         ((o = m),
           M(e > 1 ? "正在加载第 " + e + " 页…" : "搜索中..."),
           E(),
@@ -11103,16 +10186,11 @@ function createMusicSearchDialog() {
                   if (l) {
                     var m = l.getBoundingClientRect(),
                       f = _.getBoundingClientRect();
-                    ((_.scrollTop += m.top - f.top),
-                      l.classList.add("search_result_new"));
+                    ((_.scrollTop += m.top - f.top), l.classList.add("search_result_new"));
                   } else _.scrollTop = p;
                   M(
                     n.length
-                      ? "已新增 " +
-                          n.length +
-                          " 首，共 " +
-                          t.list.length +
-                          " 首"
+                      ? "已新增 " + n.length + " 首，共 " + t.list.length + " 首"
                       : "没有更多结果，共 " + t.list.length + " 首",
                   );
                 } else
@@ -11154,11 +10232,7 @@ function renderHomePage(e) {
       return (
         (document.title = "正在获取设备信息。。。"),
         setPageTitle(document.title),
-        showFlowNotice(
-          "connection",
-          "正在初始化",
-          "连接音箱成功，正在获取设备信息，请稍候。",
-        ),
+        showFlowNotice("connection", "正在初始化", "连接音箱成功，正在获取设备信息，请稍候。"),
         void runShell("getprop net.hostname && netcfg", "get_hostname")
       );
     ((state.initState1 = !1),
@@ -11215,8 +10289,7 @@ function renderHomePage(e) {
         (window.plus && state.version.app > plus.runtime.versionCode) ||
         state.version.echo > state.ver ||
         (state.isNewUnisound && state.version.unisound > state.uVer)) &&
-        (setTimeout(openVersionInfo, 2e3),
-        localStorage.setItem("web_ver1", state.version.web)),
+        (setTimeout(openVersionInfo, 2e3), localStorage.setItem("web_ver1", state.version.web)),
       isEchoVer(1855))
     ) {
       var o = [{ type: "send_to_unisound", data: { type: "get_info" } }];
@@ -11342,9 +10415,7 @@ function handleButtonClick(e) {
         var n = function () {
           sendConfiguredAction(t);
         };
-        "小讯收藏" === e.value ||
-        "喜欢的歌" === e.value ||
-        "个性电台" === e.value
+        "小讯收藏" === e.value || "喜欢的歌" === e.value || "个性电台" === e.value
           ? showAppConfirm("点播" + e.value + "？", n)
           : showAppConfirm(e.value + "？", n);
       } else onItemClick(e, t, i);
@@ -11374,16 +10445,11 @@ function onInputClick(e, t, i) {
   if (s.length > 1) {
     for (var r = [], l = 0; l < s.length; l++)
       0 === l
-        ? ((r[l] = t.param[s[l]]),
-          "object" != typeof r[l] && (r[l] = JSON.parse(r[l])))
+        ? ((r[l] = t.param[s[l]]), "object" != typeof r[l] && (r[l] = JSON.parse(r[l])))
         : (r[l] = r[l - 1][s[l]]);
     var u = s.length - 1;
-    (r[u] ? (r[u - 1][s[u]] += i.value) : (r[u - 1][s[u]] = i.value),
-      (t.param[s[0]] = r[0]));
-  } else
-    t.param[t.input]
-      ? (t.param[t.input] += i.value)
-      : (t.param[t.input] = i.value);
+    (r[u] ? (r[u - 1][s[u]] += i.value) : (r[u - 1][s[u]] = i.value), (t.param[s[0]] = r[0]));
+  } else t.param[t.input] ? (t.param[t.input] += i.value) : (t.param[t.input] = i.value);
   var c = function () {
     var n = JSON.parse(JSON.stringify(t.param));
     "执行shell" !== e.value && (i.value = "");
@@ -11393,27 +10459,17 @@ function onInputClick(e, t, i) {
       (n.type = t.ws_type),
       sendWs(n));
   };
-  "执行指令" !== e.value
-    ? c()
-    : showAppConfirm("确定要执行以下指令吗？\r\n" + i.value, c);
+  "执行指令" !== e.value ? c() : showAppConfirm("确定要执行以下指令吗？\r\n" + i.value, c);
 }
 function getCurrentValueTip(e) {
   var t = state.info;
   if ("修改小讯唤醒词" === e)
-    return (
-      "当前小讯唤醒词为：\r\n" +
-      (t.main_wakeup_word || []).concat("小讯小讯").join("\r\n")
-    );
-  if ("修改设备名" === e)
-    return null != t.device_name ? "当前设备名为：" + t.device_name : null;
+    return "当前小讯唤醒词为：\r\n" + (t.main_wakeup_word || []).concat("小讯小讯").join("\r\n");
+  if ("修改设备名" === e) return null != t.device_name ? "当前设备名为：" + t.device_name : null;
   if ("设置氛围灯亮度" === e)
-    return null != t.music_light_luma
-      ? "当前亮度为：" + t.music_light_luma
-      : null;
+    return null != t.music_light_luma ? "当前亮度为：" + t.music_light_luma : null;
   if ("设置颜色渐变速度" === e)
-    return null != t.music_light_chroma
-      ? "当前渐变速度为：" + t.music_light_chroma
-      : null;
+    return null != t.music_light_chroma ? "当前渐变速度为：" + t.music_light_chroma : null;
   if ("设置氛围灯光颜色" === e) {
     if (null != t.music_light_color) {
       for (var i = t.music_light_color.toString(16); i.length < 6;) i = "0" + i;
@@ -11434,8 +10490,7 @@ function onToggleClick(e, t, i) {
       o = function () {
         var e = {};
         for (var i in t.param[n])
-          Object.prototype.hasOwnProperty.call(t.param[n], i) &&
-            (e[i] = t.param[n][i]);
+          Object.prototype.hasOwnProperty.call(t.param[n], i) && (e[i] = t.param[n][i]);
         ((e.type = t.ws_type),
           t.tips &&
             ((e.type_id = t.tips[n]),
@@ -11443,19 +10498,13 @@ function onToggleClick(e, t, i) {
             (state.tips_data[e.type_id] = t.succ ? t.succ[n] : null)),
           sendWs(e));
       };
-    0 != t.state[0] || "info.music_light_mode" !== t.state[1]
-      ? showAppConfirm(a + "？", o)
-      : o();
+    0 != t.state[0] || "info.music_light_mode" !== t.state[1] ? showAppConfirm(a + "？", o) : o();
   } else if (1 == t.state[0]) {
     if ("" === i.value && t.err) {
       var s = $("#text");
       return void (s && (s.value = "[" + e.value + "]:" + t.err[n]));
     }
-    sendWs(
-      JSON.parse(
-        JSON.stringify(t.param[n]).replace("${" + t.input[n] + "}", i.value[n]),
-      ),
-    );
+    sendWs(JSON.parse(JSON.stringify(t.param[n]).replace("${" + t.input[n] + "}", i.value[n])));
   }
   sendWs({ type: "get_info" });
 }
@@ -11467,28 +10516,19 @@ function onItemClick(e, t, i) {
         if (
           ("reboot_unisound" === n &&
             showAppConfirm("确定要重启小讯吗？", function () {
-              var e = showFlowNotice(
-                  "unisound",
-                  "重启小讯",
-                  "正在重启小讯，请稍候。",
-                ),
+              var e = showFlowNotice("unisound", "重启小讯", "正在重启小讯，请稍候。"),
                 t = state.ws;
               ((state.unisoundSkipCheck = null),
-                runShell(
-                  "/system/bin/am force-stop com.phicomm.speaker.device",
-                ),
+                runShell("/system/bin/am force-stop com.phicomm.speaker.device"),
                 setTimeout(function () {
                   t === state.ws &&
                     t &&
                     t.readyState === WebSocket.OPEN &&
-                    (runShell(
-                      "/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity",
-                    ),
+                    (runShell("/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity"),
                     setTimeout(function () {
                       ui.flowNotice === e &&
                         t === state.ws &&
-                        (clearFlowNotice("unisound"),
-                        showAppAlert("重启完毕！"));
+                        (clearFlowNotice("unisound"), showAppAlert("重启完毕！"));
                     }, 1e4));
                 }, 3e3));
             }),
@@ -11496,27 +10536,18 @@ function onItemClick(e, t, i) {
         )
           if ("open_net_config" !== n) {
             if ("upload_page" === n) {
-              var a = new URL(
-                  R1Config.deviceHttpUrl(state.ip, "upload"),
-                  location.href,
-                ),
+              var a = new URL(R1Config.deviceHttpUrl(state.ip, "upload"), location.href),
                 o = "",
                 s = null,
                 r = "",
                 l = 0;
               try {
                 ((r = getBackgroundData()),
-                  (l = Number(
-                    localStorage.getItem(state.hostname + "_BackgroundBlur") ||
-                      "0",
-                  )));
+                  (l = Number(localStorage.getItem(state.hostname + "_BackgroundBlur") || "0")));
               } catch (y) {}
               if (
                 (("string" != typeof r || r.length > 2097152) && (r = ""),
-                r &&
-                  !/^data:image\/(?:jpeg|png|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/.test(
-                    r,
-                  ))
+                r && !/^data:image\/(?:jpeg|png|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/.test(r))
               )
                 try {
                   var u = new URL(r);
@@ -11533,13 +10564,10 @@ function onItemClick(e, t, i) {
               try {
                 var c = new Uint8Array(16);
                 window.crypto.getRandomValues(c);
-                for (var d = 0; d < c.length; d++)
-                  o += ("0" + c[d].toString(16)).slice(-2);
+                for (var d = 0; d < c.length; d++) o += ("0" + c[d].toString(16)).slice(-2);
                 a.hash =
                   "echo-upload-background=" +
-                  encodeURIComponent(
-                    JSON.stringify({ nonce: o, origin: location.origin }),
-                  );
+                  encodeURIComponent(JSON.stringify({ nonce: o, origin: location.origin }));
               } catch (b) {}
               var p = Date.now() + 15e3,
                 m = null;
@@ -11573,16 +10601,13 @@ function onItemClick(e, t, i) {
                   } catch (e) {}
                 }
               }
-              (window.addEventListener("message", h),
-                window.addEventListener("pagehide", f));
+              (window.addEventListener("message", h), window.addEventListener("pagehide", f));
               try {
                 32 === o.length && (s = window.open(a.href, "_blank"));
               } catch (k) {}
               return s
                 ? void (m = setTimeout(function e() {
-                    s.closed || Date.now() >= p
-                      ? f()
-                      : (m = setTimeout(e, 500));
+                    s.closed || Date.now() >= p ? f() : (m = setTimeout(e, 500));
                   }, 500))
                 : (f(),
                   (a.hash = ""),
@@ -11593,8 +10618,7 @@ function onItemClick(e, t, i) {
             }
             if ("connect_page" === n)
               return -1 === location.href.indexOf(state.controlHost)
-                ? void (location.href =
-                    R1Config.assetUrl("?no_auto_connect"))
+                ? void (location.href = R1Config.assetUrl("?no_auto_connect"))
                 : (history.replaceState(null, "", location.pathname + "?no_auto_connect"),
                   void history.go(0));
             if ("Voice_time_reporting" !== n)
@@ -11623,12 +10647,9 @@ function onItemClick(e, t, i) {
                         "reboot_adbd" !== n
                           ? "reboot_echo" !== n
                             ? "get_song_list" !== n || openSongListWindow()
-                            : showAppConfirm(
-                                "确定要重启EchoService吗？",
-                                function () {
-                                  sendWs({ type: "reboot_echo" });
-                                },
-                              )
+                            : showAppConfirm("确定要重启EchoService吗？", function () {
+                                sendWs({ type: "reboot_echo" });
+                              })
                           : showAppConfirm("确定要重启adbd吗？", function () {
                               runShell(
                                 "stop adbd && start adbd && echo 1 || echo 0",
@@ -11666,19 +10687,15 @@ function onItemClick(e, t, i) {
               else openAutoRestartPanel();
             else openVoiceTimeReportingPanel();
           } else
-            showAppConfirm(
-              "确定要打开配网模式吗？\r\n打开后网页控制将断开！",
-              function () {
-                (sendAction(262144, 1),
-                  sendToUnisound({
-                    type: "NetworkConfigOutputEvent",
-                    status: 1,
-                  }),
-                  showAppAlert("已打开！\r\n请使用配网工具进行配网！"),
-                  (location.href =
-                    R1Config.assetUrl("pages/wifi/")));
-              },
-            );
+            showAppConfirm("确定要打开配网模式吗？\r\n打开后网页控制将断开！", function () {
+              (sendAction(262144, 1),
+                sendToUnisound({
+                  type: "NetworkConfigOutputEvent",
+                  status: 1,
+                }),
+                showAppAlert("已打开！\r\n请使用配网工具进行配网！"),
+                (location.href = R1Config.assetUrl("pages/wifi/")));
+            });
         else
           showAppConfirm("确定要重启音箱吗？", function () {
             (isEchoVer(1847)
@@ -11692,8 +10709,7 @@ function onItemClick(e, t, i) {
 }
 function sendConfiguredAction(e) {
   var t = {};
-  for (var i in e.param)
-    Object.prototype.hasOwnProperty.call(e.param, i) && (t[i] = e.param[i]);
+  for (var i in e.param) Object.prototype.hasOwnProperty.call(e.param, i) && (t[i] = e.param[i]);
   ((t.type = e.ws_type),
     65536 == t.what &&
       1 == t.arg2 &&
@@ -11711,17 +10727,12 @@ function updateButtonVisibility() {
         var i = JSON.parse(t.getAttribute("data"));
         if (2 != i.type || (0 != i.state[0] && 2 != i.state[0]))
           (3 == i.type || i.state) &&
-            (t.style.display = arrIncludes(
-              i.state[1] || [],
-              getNestedValue(i.state[0]),
-            )
+            (t.style.display = arrIncludes(i.state[1] || [], getNestedValue(i.state[0]))
               ? ""
               : "none");
         else {
           for (var n = [], a = -1, o = 0; o < i.state[2].length; o++) {
-            Array.isArray(i.state[2][o])
-              ? (n = n.concat(i.state[2][o]))
-              : n.push(i.state[2][o]);
+            Array.isArray(i.state[2][o]) ? (n = n.concat(i.state[2][o])) : n.push(i.state[2][o]);
             for (var s = 0; s < n.length; s++)
               if (n[s] == getNestedValue(i.state[1])) {
                 a = o;
@@ -11734,8 +10745,7 @@ function updateButtonVisibility() {
             continue;
           }
           (2 == i.state[0]
-            ? (t.style.display =
-                getNestedValue(i.state[3][0]) == i.state[3][1] ? "" : "none")
+            ? (t.style.display = getNestedValue(i.state[3][0]) == i.state[3][1] ? "" : "none")
             : (t.style.display = ""),
             (t.value = i.title[a]));
         }
@@ -11757,9 +10767,7 @@ function navigateToPage(e) {
     "btn_page" === i[n].id.substr(0, 8) &&
       i[n].id !== e.id &&
       (i[n].value = i[n].getAttribute("data"));
-  e.value !== t
-    ? (e.value = t)
-    : (e.value = t.length > 2 ? "返回首页" : "首页");
+  e.value !== t ? (e.value = t) : (e.value = t.length > 2 ? "返回首页" : "首页");
 }
 function hideAllPages(e) {
   for (
@@ -11787,8 +10795,7 @@ function hideAllPages(e) {
   }
 }
 function showPage(e) {
-  ((state.loginIntent || state.loginSession) &&
-    (hideLogin(), clearQrCache(), startInfoRefresh()),
+  ((state.loginIntent || state.loginSession) && (hideLogin(), clearQrCache(), startInfoRefresh()),
     hideAllPages(e));
   for (
     var t = ["index"].concat(
@@ -11842,20 +10849,17 @@ function unhideMusic() {
               ? state.musicInfo.title + "-" + state.musicInfo.artist
               : (state.musicInfo ? state.musicInfo.title : "") || "",
           ),
-          (document.title =
-            state.deviceTag + (ui.pageTitle ? ui.pageTitle.innerHTML : "")));
+          (document.title = state.deviceTag + (ui.pageTitle ? ui.pageTitle.innerHTML : "")));
       }),
     ui.musicPanel && (ui.musicPanel.style.display = "block"),
     hidePlaylistOverlay(),
-    null != ui.musicBackgroundFrame &&
-      cancelAnimationFrame(ui.musicBackgroundFrame),
+    null != ui.musicBackgroundFrame && cancelAnimationFrame(ui.musicBackgroundFrame),
     (ui.musicBackgroundFrame = requestAnimationFrame(function () {
       ((ui.musicBackgroundFrame = null), updateCoverBackground());
     })));
 }
 function hideMusic() {
-  (null != ui.musicBackgroundFrame &&
-    cancelAnimationFrame(ui.musicBackgroundFrame),
+  (null != ui.musicBackgroundFrame && cancelAnimationFrame(ui.musicBackgroundFrame),
     (ui.musicBackgroundFrame = null),
     state.lrcFullscreen && exitFullscreenLrc(),
     stopLyrics(),
@@ -11925,8 +10929,7 @@ function clearScreenFrameUrl() {
   ((screenFrameLoad = null),
     e && (releaseScreenFrameLoad(e), (e.image.src = "")),
     screenFrameImage &&
-      ((screenFrameImage.style.visibility = "hidden"),
-      (screenFrameImage.src = "")),
+      ((screenFrameImage.style.visibility = "hidden"), (screenFrameImage.src = "")),
     screenFrameUrl && URL.revokeObjectURL(screenFrameUrl),
     (screenFrameUrl = null),
     (screenFrameImage = null));
@@ -12017,9 +11020,7 @@ function cleanupSpeakerConnection(e) {
       (state.unisoundSkipCheck = null),
       showRebootEchoButton(!1),
       stopLyrics(),
-      ui.screen &&
-        ui.screen.controller &&
-        ui.screen.controller.cancelGestures(),
+      ui.screen && ui.screen.controller && ui.screen.controller.cancelGestures(),
       resetEchoVersionConfirmation(),
       resetUnisoundAvailability(),
       clearTimeout(speakerRestoreTimer),
@@ -12078,8 +11079,7 @@ function showConnectionNotice(e, t, i, n) {
       (a.retryButton.style.display = o ? "none" : "")),
     n &&
       (a.host.onclick = function (e) {
-        (e.target !== a.host && e.target !== a.host.content) ||
-          a.cancelButton.onclick();
+        (e.target !== a.host && e.target !== a.host.content) || a.cancelButton.onclick();
       }),
     a
   );
@@ -12091,20 +11091,24 @@ function connectSpeaker() {
       resetEchoVersionConfirmation(),
       resetUnisoundAvailability(),
       state.ver < 1 && (state.ver = 1e3),
-      ui.pageTitle &&
-        "" === ui.pageTitle.innerHTML &&
-        setPageTitle("请稍后。。。"),
+      ui.pageTitle && "" === ui.pageTitle.innerHTML && setPageTitle("请稍后。。。"),
       ui.main && (ui.main.onclick = function () {}),
       clearTimeout(timers.connect),
       (timers.connect = -1),
       urlParams.del(["no_auto_connect", "connect_ip", "connect_id"]),
       !state.ip)
     ) {
-      var e = localStorage.getItem("r1_endpoint") ||
-        localStorage.getItem("ip") || localStorage.getItem("hostname") || "";
+      var e =
+        localStorage.getItem("r1_endpoint") ||
+        localStorage.getItem("ip") ||
+        localStorage.getItem("hostname") ||
+        "";
       if (e) {
-        try { state.ip = R1Config.parseDeviceAddress(e).address; }
-        catch (error) { /* 忽略旧的无效地址，保留连接页供用户修正。 */ }
+        try {
+          state.ip = R1Config.parseDeviceAddress(e).address;
+        } catch (error) {
+          /* 忽略旧的无效地址，保留连接页供用户修正。 */
+        }
       }
     }
     if (!state.ip) {
@@ -12116,8 +11120,7 @@ function connectSpeaker() {
     }
     if (location.host.indexOf(state.controlHost) > -1) {
       var n = { connect_ip: state.ip };
-      (null != state.connectId && (n.connect_id = state.connectId),
-        urlParams.put(n));
+      (null != state.connectId && (n.connect_id = state.connectId), urlParams.put(n));
     }
     (state.ws && state.ws.readyState !== WebSocket.CLOSED) ||
       ((state.ws = createWebSocket(R1Config.parseDeviceAddress(state.ip).url)),
@@ -12136,17 +11139,14 @@ function connectSpeaker() {
             localStorage.setItem("r1_endpoint", state.ip);
             var e = R1Config.parseDeviceAddress(state.ip).host;
             IP_PATTERN.test(e)
-              ? (localStorage.setItem("ip", e),
-                localStorage.removeItem("hostname"))
+              ? (localStorage.setItem("ip", e), localStorage.removeItem("hostname"))
               : HOSTNAME_PATTERN.test(e.toLowerCase()) &&
-                (localStorage.setItem("hostname", e),
-                localStorage.removeItem("ip"));
+                (localStorage.setItem("hostname", e), localStorage.removeItem("ip"));
           }
           if (loginFlowActive())
             return (
               !ui.flowNotice ||
-                ("connection" !== ui.flowNotice.kind &&
-                  "unisound" !== ui.flowNotice.kind) ||
+                ("connection" !== ui.flowNotice.kind && "unisound" !== ui.flowNotice.kind) ||
                 clearFlowNotice(),
               showRebootEchoButton(!1),
               (state.reload = !1),
@@ -12163,10 +11163,7 @@ function connectSpeaker() {
               setTimeout(function () {
                 a === state.ws &&
                   a.readyState === WebSocket.OPEN &&
-                  runShell(
-                    "date & ping -w 1 r1service.wxfsq.com",
-                    "ping_r1service",
-                  );
+                  runShell("date & ping -w 1 r1service.wxfsq.com", "ping_r1service");
               }, 600),
               -1 === timers.unisoundInit &&
                 isEchoVer(1825) &&
@@ -12176,17 +11173,13 @@ function connectSpeaker() {
                     loginFlowActive() ||
                     ((state.reload = !0), addRecoveryButtons(t.actions));
                 }, 6e3)),
-              runShell(
-                "/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity",
-              ),
+              runShell("/system/bin/am start com.phicomm.speaker.device/.ui.MainActivity"),
               resumeLoginConnection() || sendWs({ type: "get_info" }));
           } else
             (clearFlowNotice("connection"),
               setPageTitle("已恢复连接！"),
               resumeLoginConnection() ||
-                (ui.musicPanel &&
-                  "block" === ui.musicPanel.style.display &&
-                  startLyrics(),
+                (ui.musicPanel && "block" === ui.musicPanel.style.display && startLyrics(),
                 clearTimeout(speakerRestoreTimer),
                 (speakerRestoreTimer = setTimeout(function () {
                   if (
@@ -12194,15 +11187,13 @@ function connectSpeaker() {
                     a === state.ws &&
                       a.readyState === WebSocket.OPEN &&
                       !loginFlowActive() &&
-                      (state.currentPage ||
-                        (state.currentPage = $("#btn_page_music")),
+                      (state.currentPage || (state.currentPage = $("#btn_page_music")),
                       state.currentPage))
                   ) {
                     var e = state.currentPage.getAttribute("data");
                     e === state.currentPage.value
                       ? setPageTitle("R1音箱控制页面" + state.deviceTag)
-                      : ((state.currentPage.value = e),
-                        navigateToPage(state.currentPage));
+                      : ((state.currentPage.value = e), navigateToPage(state.currentPage));
                   }
                 }, 1e3)),
                 startInfoRefresh()));
@@ -12252,9 +11243,7 @@ function showRebootEchoButton(e) {
       (timers.rebootEcho = setTimeout(function () {
         if (!loginFlowActive()) {
           var e = makeFlowButton("重启echo", function () {
-            ((this.value = "重启中。。。"),
-              (this.disabled = !0),
-              sendWs({ type: "reboot_echo" }));
+            ((this.value = "重启中。。。"), (this.disabled = !0), sendWs({ type: "reboot_echo" }));
           });
           e.id = "RebootEcho_btn";
           var t = ui.flowNotice;
@@ -12263,8 +11252,7 @@ function showRebootEchoButton(e) {
       }, 3e3)));
 }
 function openVersionInfo() {
-  (createTextWindow(null, getVersionInfo()),
-    ui.popup && (ui.popup._versionInfo = !0));
+  (createTextWindow(null, getVersionInfo()), ui.popup && (ui.popup._versionInfo = !0));
 }
 function closeVersionInfoWindow() {
   for (var e = popupRenderHosts.length - 1; e >= 0; e--) {
@@ -12291,10 +11279,7 @@ function getVersionInfo() {
   (state.version.echo > state.ver &&
     (o += " <a href=\"javascript:app_down('echo');\">下载新版本</a>"),
     a.push(o),
-    a.push(
-      "new_EchoService编译时间：" +
-        formatBuildTimestamp(getConfirmedBuildTimestamp()),
-    ));
+    a.push("new_EchoService编译时间：" + formatBuildTimestamp(getConfirmedBuildTimestamp())));
   var s,
     r = "new_Unisound版本：" + n;
   (state.isNewUnisound &&
@@ -12343,8 +11328,7 @@ function app_down(e) {
         (n.onreadystatechange = function () {
           4 === n.readyState &&
             200 === n.status &&
-            (i.loadData(n.responseText, { baseURL: state.downurl + t }),
-            i.show());
+            (i.loadData(n.responseText, { baseURL: state.downurl + t }), i.show());
         }),
         n.send());
     } else location.href = "https://r1.wxfsq.com/lanzou.php?id=" + t;
@@ -12352,9 +11336,7 @@ function app_down(e) {
 }
 function updateDeviceList(e) {
   for (
-    var t = JSON.parse(localStorage.getItem("device_list") || "[]"),
-      i = -1,
-      n = 0;
+    var t = JSON.parse(localStorage.getItem("device_list") || "[]"), i = -1, n = 0;
     n < t.length;
     n++
   )
@@ -12384,20 +11366,15 @@ function handleIpInput(e) {
         ((i[a].selected = !0),
           (state.hostname = o),
           setBackgroundCss(
-            localStorage.getItem(state.hostname + "_background") ||
-              DEFAULT_BACKGROUND,
+            localStorage.getItem(state.hostname + "_background") || DEFAULT_BACKGROUND,
           ),
           updateStatusBar());
         var l = i[a].getAttribute("device_sid");
         n &&
           n.style &&
-          (n.setAttribute("device_sid", l || ""),
-          (n.style.display = l ? "inline-block" : "none"));
+          (n.setAttribute("device_sid", l || ""), (n.style.display = l ? "inline-block" : "none"));
         var u = i[a].getAttribute("connect_id");
-        return void e.setAttribute(
-          "connect_id",
-          "undefined" === u ? "" : u || "",
-        );
+        return void e.setAttribute("connect_id", "undefined" === u ? "" : u || "");
       }
     }
     (n && n.style && (n.style.display = "none"),
@@ -12414,8 +11391,11 @@ function renderConnectPage() {
         ((this.ondblclick = function () {}), loadConsole());
       }));
   var e = makeEl("div", { id: "custom_ip_page" }),
-    t = localStorage.getItem("r1_endpoint") ||
-      localStorage.getItem("ip") || localStorage.getItem("hostname") || "";
+    t =
+      localStorage.getItem("r1_endpoint") ||
+      localStorage.getItem("ip") ||
+      localStorage.getItem("hostname") ||
+      "";
   -1 != state.connectIp && (t = state.connectIp);
   var i = null;
   state.controlHost.indexOf("r1.wxfsq.com") > -1 &&
@@ -12449,9 +11429,7 @@ function renderConnectPage() {
           n.appendChild(a));
         var o = t ? String(t).toLowerCase() : "",
           s = e.hostname ? String(e.hostname).toLowerCase() : "";
-        (e.ip === t ||
-          s === o ||
-          (null != state.connectId && state.connectId === e.device_msid)) &&
+        (e.ip === t || s === o || (null != state.connectId && state.connectId === e.device_msid)) &&
           (t = e.ip || e.hostname);
       })(i[a], a);
     ((n.value = ""),
@@ -12460,9 +11438,7 @@ function renderConnectPage() {
         if (e) {
           var t = this[parseInt(this.value, 10)];
           t &&
-            ((e.value = t.getAttribute("ip")
-              ? t.getAttribute("ip")
-              : t.getAttribute("hostname")),
+            ((e.value = t.getAttribute("ip") ? t.getAttribute("ip") : t.getAttribute("hostname")),
             e.setAttribute("connect_id", t.getAttribute("connect_id") || ""),
             handleIpInput(e));
         }
@@ -12525,7 +11501,9 @@ function renderConnectPage() {
     e.appendChild(makeDiv("height:10px")),
     ui.container && ui.container.appendChild(e));
   var validAddress = false;
-  try { validAddress = !!R1Config.parseDeviceAddress(t); } catch (error) {}
+  try {
+    validAddress = !!R1Config.parseDeviceAddress(t);
+  } catch (error) {}
   if (validAddress) {
     if (((o.value = t), -1 === location.href.indexOf("no_auto_connect"))) {
       var u,
@@ -12533,9 +11511,7 @@ function renderConnectPage() {
           if (ui.flowNotice === u) {
             ui.main && (ui.main.onclick = function () {});
             var e = $("#get_ip_btn");
-            e && "none" !== e.style.display
-              ? fetchAndConnectIp()
-              : testSpeakerConnection();
+            e && "none" !== e.style.display ? fetchAndConnectIp() : testSpeakerConnection();
           }
         };
       ((u = showConnectionNotice(
@@ -12547,8 +11523,7 @@ function renderConnectPage() {
         (timers.connect = setTimeout(c, 2e3)));
     }
   } else i && n && "" === n.value && ((n.value = 0), fireEvent(n, "change"));
-  (o.value ? handleIpInput(o) : setBackgroundCss(DEFAULT_BACKGROUND),
-    updateStatusBar());
+  (o.value ? handleIpInput(o) : setBackgroundCss(DEFAULT_BACKGROUND), updateStatusBar());
 }
 function fetchAndConnectIp() {
   testSpeakerConnection();
@@ -12610,10 +11585,8 @@ function attemptSpeakerConnection(e) {
                 setPageTitle("连接音箱成功，正在初始化。。。")),
               localStorage.setItem("r1_endpoint", endpoint.address),
               n
-                ? (localStorage.removeItem("hostname"),
-                  localStorage.setItem("ip", i))
-                : (localStorage.removeItem("ip"),
-                  localStorage.setItem("hostname", i)),
+                ? (localStorage.removeItem("hostname"), localStorage.setItem("ip", i))
+                : (localStorage.removeItem("ip"), localStorage.setItem("hostname", i)),
               initLogin(),
               connectSpeaker(),
               sendWs({ type: "get_info" }),
@@ -12678,11 +11651,7 @@ function initLocalNetworkPermission() {
   if (isLocalHostAccess()) currentPermission = "granted";
   else {
     var e = urlParams.get("noCheckPermission");
-    if (
-      (!e || 1 != e.noCheckPermission) &&
-      navigator.permissions &&
-      navigator.permissions.query
-    )
+    if ((!e || 1 != e.noCheckPermission) && navigator.permissions && navigator.permissions.query)
       try {
         var t = navigator.permissions.query({ name: "local-network-access" });
         t &&
@@ -12715,7 +11684,9 @@ function requestAndConnect(e) {
       e();
       return;
     }
-  } catch (error) { /* 地址校验由连接入口显示。 */ }
+  } catch (error) {
+    /* 地址校验由连接入口显示。 */
+  }
   "granted" !== currentPermission
     ? "prompt" !== currentPermission
       ? "denied" !== currentPermission
@@ -12792,16 +11763,10 @@ function OkHttpImageFetcher() {
   ((this.connectTimeout = 1e4),
     (this.readTimeout = 1e4),
     (this.writeTimeout = 1e4),
-    (this.ClientBuilder = plus.android.importClass(
-      "dc.squareup.okhttp3.OkHttpClient$Builder",
-    )),
-    (this.RequestBuilder = plus.android.importClass(
-      "dc.squareup.okhttp3.Request$Builder",
-    )),
+    (this.ClientBuilder = plus.android.importClass("dc.squareup.okhttp3.OkHttpClient$Builder")),
+    (this.RequestBuilder = plus.android.importClass("dc.squareup.okhttp3.Request$Builder")),
     (this.TimeUnit = plus.android.importClass("java.util.concurrent.TimeUnit")),
-    (this.BitmapFactory = plus.android.importClass(
-      "android.graphics.BitmapFactory",
-    )),
+    (this.BitmapFactory = plus.android.importClass("android.graphics.BitmapFactory")),
     (this.Handler = plus.android.importClass("android.os.Handler")),
     (this.Looper = plus.android.importClass("android.os.Looper")));
   try {
@@ -12828,9 +11793,7 @@ function compressImageToDataUrl(e, t, i, n, a) {
         r.drawImage(s, 0, 0, l, u));
       var c = o.toDataURL("image/jpeg", t),
         d = Math.round(0.75 * c.length);
-      d > i && n > 1 && t > 0.1
-        ? compressImageToDataUrl(e, t - 0.1, i, n - 1, a)
-        : a(c, d);
+      d > i && n > 1 && t > 0.1 ? compressImageToDataUrl(e, t - 0.1, i, n - 1, a) : a(c, d);
     }),
       (s.onerror = function () {
         a(null, 0);
@@ -12853,9 +11816,7 @@ function createSetBackgroundPage() {
     accept: "image/*",
     style: "height:30px;width:180px",
   });
-  (t.appendChild(i),
-    t.appendChild(makeDiv("height:5px")),
-    t.appendChild(makeText("图片地址：")));
+  (t.appendChild(i), t.appendChild(makeDiv("height:5px")), t.appendChild(makeText("图片地址：")));
   var n = makeEl("input", { type: "text", style: "height:30px;width:180px" });
   (t.appendChild(n), t.appendChild(makeDiv("height:5px")));
   var a = makeEl("div");
@@ -12898,8 +11859,7 @@ function createSetBackgroundPage() {
                 (e.isOpen() && ((t.disabled = !1), (t.value = "设置背景图片")),
                   i
                     ? (applyBackground(i), e.close())
-                    : e.isOpen() &&
-                      showAppAlert("抱歉，图片过大，请手动压缩后再上传！"));
+                    : e.isOpen() && showAppAlert("抱歉，图片过大，请手动压缩后再上传！"));
               }));
           })
         : n.value
@@ -12931,8 +11891,7 @@ function createSetBackgroundPage() {
           var e = getBackgroundData();
           e
             ? showAppAlert(
-                "当前背景：自定义\n" +
-                  (e.length > 120 ? e.substring(0, 120) + "..." : e),
+                "当前背景：自定义\n" + (e.length > 120 ? e.substring(0, 120) + "..." : e),
               )
             : showAppAlert("当前背景：默认");
         },
@@ -12947,19 +11906,16 @@ function initPlusFeatures() {
       updateVersionFooter(),
       plus.webview
         .currentWebview()
-        .overrideUrlLoading(
-          { mode: "allow", match: ".*wxfsq.*|.*:8080.*" },
-          function (e) {
-            if (/(jq|qm)\.qq\.com/.test(e.url)) {
-              var t = plus.webview.create(e.url);
-              t.onloaded = function () {
-                setTimeout(function () {
-                  t.close();
-                }, 2e3);
-              };
-            } else plus.runtime.openURL(e.url);
-          },
-        ));
+        .overrideUrlLoading({ mode: "allow", match: ".*wxfsq.*|.*:8080.*" }, function (e) {
+          if (/(jq|qm)\.qq\.com/.test(e.url)) {
+            var t = plus.webview.create(e.url);
+            t.onloaded = function () {
+              setTimeout(function () {
+                t.close();
+              }, 2e3);
+            };
+          } else plus.runtime.openURL(e.url);
+        }));
     try {
       var e = plus.android.importClass("android.content.Context"),
         t = plus.android.importClass("android.content.Intent"),
@@ -12974,8 +11930,7 @@ function initPlusFeatures() {
           function (e) {
             if (0 === e.index) {
               var o = new t(i.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-              (o.setData(n.parse("package:" + a.getPackageName())),
-                a.startActivity(o));
+              (o.setData(n.parse("package:" + a.getPackageName())), a.startActivity(o));
             } else 1 === e.index && localStorage.setItem("power", "2");
           },
           {
@@ -13085,11 +12040,7 @@ function load() {
             e.source.postMessage({ type: "save_config_success" }, e.origin));
           break;
         case "get_config":
-          for (
-            var i = {}, n = Object.keys(localStorage), a = 0;
-            a < n.length;
-            a++
-          )
+          for (var i = {}, n = Object.keys(localStorage), a = 0; a < n.length; a++)
             i[n[a]] = localStorage.getItem(n[a]);
           e.source.postMessage({ type: "save_config", config: i }, e.origin);
           break;
@@ -13116,8 +12067,7 @@ function load() {
         (ui.popup = createPopupHost({ open: !1 })),
         (ui.background = makeEl("div", {
           id: "background_div",
-          style:
-            "z-index:-1;position:fixed;left:0;top:0;width:100%;height:100%",
+          style: "z-index:-1;position:fixed;left:0;top:0;width:100%;height:100%",
         })),
         document.body.appendChild(ui.main));
       var i = makeEl("div", { id: "StatusBar", style: "display:none" });
@@ -13127,9 +12077,7 @@ function load() {
         location.href.indexOf("debug") > -1 && loadConsole(),
         ui.main.appendChild(ui.container),
         (ui.container.innerHTML = ""),
-        ui.container.appendChild(
-          makeEl("div", { class: "scroll-container" }, ui.pageTitle),
-        ),
+        ui.container.appendChild(makeEl("div", { class: "scroll-container" }, ui.pageTitle)),
         initLogin(),
         ui.container.appendChild(ui.loginPanel),
         loadJQuery());
@@ -13180,9 +12128,7 @@ function load() {
     var t = this.eventInputSource(e);
     (t && (this._lastInputSource = t),
       (this._rightMouseIntent =
-        "mouse" === t &&
-        2 === e.button &&
-        0 === Object.keys(this.touches).length));
+        "mouse" === t && 2 === e.button && 0 === Object.keys(this.touches).length));
   }),
   (ScreenController.prototype.isTouchMouseEvent = function (e) {
     return (
@@ -13309,8 +12255,7 @@ function load() {
       (this._rightMouseIntent = !1));
     for (var t = 0; t < e.changedTouches.length; t++) {
       var i = e.changedTouches[t].identifier;
-      (this.touches[i] && clearTimeout(this.touches[i].longPressTimer),
-        delete this.touches[i]);
+      (this.touches[i] && clearTimeout(this.touches[i].longPressTimer), delete this.touches[i]);
     }
   }),
   (ScreenController.prototype.onMouseDown = function (e) {
@@ -13344,9 +12289,7 @@ function load() {
       this._rightMouseIntent =
         0 === Object.keys(this.touches).length &&
         ("mouse" === t ||
-          (!t &&
-            "touch" !== this._lastInputSource &&
-            "pen" !== this._lastInputSource));
+          (!t && "touch" !== this._lastInputSource && "pen" !== this._lastInputSource));
   }),
   (ScreenController.prototype.onMouseMove = function (e) {
     if (this.mouseActive && this.mouseState) {
@@ -13446,9 +12389,7 @@ function load() {
       var s = new a(this.channelId, this.channelName, n.IMPORTANCE_LOW);
       (s.setShowBadge(!1),
         s.setLockscreenVisibility(1),
-        e
-          .getSystemService(i.NOTIFICATION_SERVICE)
-          .createNotificationChannel(s));
+        e.getSystemService(i.NOTIFICATION_SERVICE).createNotificationChannel(s));
     } catch (e) {
       window.console && console.error;
     }
@@ -13471,11 +12412,7 @@ function load() {
         plus.android.importClass(t.getResources()),
         l
           .setContentTitle(e || "R1音箱控制器")
-          .setSmallIcon(
-            t
-              .getResources()
-              .getIdentifier("icon", "drawable", t.getPackageName()),
-          )
+          .setSmallIcon(t.getResources().getIdentifier("icon", "drawable", t.getPackageName()))
           .setContentIntent(r)
           .setOngoing(!0)
           .setStyle(
@@ -13513,10 +12450,7 @@ function load() {
         if (
           (d && 2 === d.length && e.title
             ? (l.putString(r.METADATA_KEY_TITLE, d[1] || "-"),
-              l.putString(
-                r.METADATA_KEY_ARTIST,
-                (e.title || "") + "-" + (e.artist || ""),
-              ))
+              l.putString(r.METADATA_KEY_ARTIST, (e.title || "") + "-" + (e.artist || "")))
             : (l.putString(r.METADATA_KEY_TITLE, e.title || "R1音箱控制器"),
               l.putString(r.METADATA_KEY_ARTIST, e.artist || "")),
           l.putString(r.METADATA_KEY_ALBUM, e.album || ""),
@@ -13575,26 +12509,12 @@ function load() {
     var i = this;
     try {
       var n = new this.ClientBuilder();
-      (plus.android.invoke(
-        n,
-        "connectTimeout",
-        this.connectTimeout,
-        this.TimeUnit.MILLISECONDS,
-      ),
-        plus.android.invoke(
-          n,
-          "readTimeout",
-          this.readTimeout,
-          this.TimeUnit.MILLISECONDS,
-        ));
+      (plus.android.invoke(n, "connectTimeout", this.connectTimeout, this.TimeUnit.MILLISECONDS),
+        plus.android.invoke(n, "readTimeout", this.readTimeout, this.TimeUnit.MILLISECONDS));
       var a = plus.android.invoke(n, "build"),
         o = new this.RequestBuilder();
       (plus.android.invoke(o, "url", e), plus.android.invoke(o, "get"));
-      var s = plus.android.invoke(
-          a,
-          "newCall",
-          plus.android.invoke(o, "build"),
-        ),
+      var s = plus.android.invoke(a, "newCall", plus.android.invoke(o, "build")),
         r = plus.android.implements("dc.squareup.okhttp3.Callback", {
           onFailure: function (e, n) {
             i.handler().post(
@@ -13701,14 +12621,12 @@ function load() {
                       var a = t.querySelector(".scroll-wrapper");
                       (a
                         ? (a.innerHTML = "")
-                        : (((a = document.createElement("div")).className =
-                            "scroll-wrapper"),
+                        : (((a = document.createElement("div")).className = "scroll-wrapper"),
                           t.appendChild(a)),
                         a.appendChild(i));
                       var o = a.querySelector(".scroll-gap");
                       (o ||
-                        (((o = document.createElement("span")).className =
-                          "scroll-gap"),
+                        (((o = document.createElement("span")).className = "scroll-gap"),
                         (o.innerHTML = "&nbsp;&nbsp;&nbsp;")),
                         a.appendChild(o));
                       var s = a.querySelector("h3.clone");
@@ -13727,11 +12645,7 @@ function load() {
                           f = !1,
                           h = function (e) {
                             if (!f && !p) {
-                              if (null === m)
-                                return (
-                                  (m = e),
-                                  void (c = requestAnimationFrame(h))
-                                );
+                              if (null === m) return ((m = e), void (c = requestAnimationFrame(h)));
                               var t = Math.min(e - m, 100);
                               for (d -= (80 * t) / 1e3; d <= -u;) d += u;
                               ((a.style.transform = "translateX(" + d + "px)"),
@@ -13742,16 +12656,10 @@ function load() {
                           g = function () {
                             p ||
                               f ||
-                              ((p = !0),
-                              c && (cancelAnimationFrame(c), (c = null)),
-                              (m = null));
+                              ((p = !0), c && (cancelAnimationFrame(c), (c = null)), (m = null));
                           },
                           v = function () {
-                            p &&
-                              !f &&
-                              ((p = !1),
-                              (m = null),
-                              (c = requestAnimationFrame(h)));
+                            p && !f && ((p = !1), (m = null), (c = requestAnimationFrame(h)));
                           };
                         (t.addEventListener("mouseenter", g),
                           t.addEventListener("mouseleave", v),
@@ -13775,11 +12683,7 @@ function load() {
       }
     }
     function a() {
-      for (
-        var e = document.querySelectorAll(".scroll-container"), t = 0;
-        t < e.length;
-        t++
-      ) {
+      for (var e = document.querySelectorAll(".scroll-container"), t = 0; t < e.length; t++) {
         e[t].id || (e[t].id = "scroll_" + t);
         var a = e[t].querySelector("h3:not(.clone)"),
           o = e[t]._marqueeChecked;
@@ -13800,19 +12704,13 @@ function load() {
       window.addEventListener("pageshow", function (e) {
         e.persisted && resumeLoginConnection();
       }),
-      "loading" === document.readyState
-        ? document.addEventListener("DOMContentLoaded", a)
-        : a(),
+      "loading" === document.readyState ? document.addEventListener("DOMContentLoaded", a) : a(),
       window.addEventListener("load", function () {
         setTimeout(a, 300);
       }),
       (window.startScroll = a),
       (window.stopScroll = function () {
-        for (
-          var e = document.querySelectorAll(".scroll-container"), t = 0;
-          t < e.length;
-          t++
-        )
+        for (var e = document.querySelectorAll(".scroll-container"), t = 0; t < e.length; t++)
           i(e[t]);
       }));
   })(),
@@ -13848,23 +12746,18 @@ function load() {
           var i = ui.pageTitle.clientHeight;
           ui.pageTitle.style.minHeight = (i < 60 ? i : 27) + "px";
         }
-        var n = urlParams.get([
-          "connect_ip",
-          "connect_id",
-          "no_auto_connect",
-          "ver",
-          "u_ver",
-        ]);
-        (n &&
-          Object.prototype.hasOwnProperty.call(n, "u_ver") &&
-          urlParams.del("u_ver"),
+        var n = urlParams.get(["connect_ip", "connect_id", "no_auto_connect", "ver", "u_ver"]);
+        (n && Object.prototype.hasOwnProperty.call(n, "u_ver") && urlParams.del("u_ver"),
           n &&
             !n.no_auto_connect &&
             (n.connect_id && (state.connectId = n.connect_id),
             n.connect_ip &&
               (function () {
-                try { state.connectIp = R1Config.parseDeviceAddress(n.connect_ip).address; }
-                catch (error) { state.connectIp = -1; }
+                try {
+                  state.connectIp = R1Config.parseDeviceAddress(n.connect_ip).address;
+                } catch (error) {
+                  state.connectIp = -1;
+                }
               })(),
             n.ver && ((state.ver = n.ver), urlParams.del("ver"))),
           window.custom_ip ? renderConnectPage() : connectSpeaker(),

@@ -29,17 +29,17 @@ python3 serve.py
 
 ## 目录
 
-| 路径 | 用途 |
-| --- | --- |
-| `index.html` | 原控制界面入口 |
-| `pages/` | `modern`、`wifi`、`adb`、`dlna`、`mdns`、`device-scan` 页面 |
-| `assets/js/` | `classic`、`modern`、`shared`、`tools` 脚本 |
-| `assets/css/` | 页面样式 |
-| `assets/images/` | 应用图标、唱片和唱针图片 |
-| `assets/vendor/` | 第三方浏览器库及其许可 |
-| `scripts/` | 开发检查工具 |
-| `tests/` | 浏览器与接口回归 |
-| `docs/` | 上游快照分析与协议记录 |
+| 路径             | 用途                                                        |
+| ---------------- | ----------------------------------------------------------- |
+| `index.html`     | 原控制界面入口                                              |
+| `pages/`         | `modern`、`wifi`、`adb`、`dlna`、`mdns`、`device-scan` 页面 |
+| `assets/js/`     | `classic`、`modern`、`shared`、`tools` 脚本                 |
+| `assets/css/`    | 页面样式                                                    |
+| `assets/images/` | 应用图标、唱片和唱针图片                                    |
+| `assets/vendor/` | 第三方浏览器库及其许可                                      |
+| `scripts/`       | 开发检查工具                                                |
+| `tests/`         | 浏览器与接口回归                                            |
+| `docs/`          | 上游快照分析与协议记录                                      |
 
 页面入口由 `newui/`、`config_wifi/`、`adb/` 等旧路径迁移至 `pages/`，
 部署时应整体上传当前目录并更新书签。历史分析报告中的路径仍指当时的上游快照。
@@ -78,6 +78,21 @@ WSS 需要自己的反向代理转发 WebSocket；`serve.py` 不提供设备代�
 [协议摘要](docs/upstream-protocol-2026-11-10.md)。
 
 ## 验证
+
+开发时使用 Node.js 20+ 安装固定版本的格式化工具：
+
+```sh
+npm ci
+npm run check
+npm run format
+```
+
+`check` 检查格式、浏览器脚本语法和本地资源引用；`format` 统一项目代码格式。
+HTML、CSS、JavaScript 使用两空格缩进，JavaScript 使用 camelCase 变量和函数名、
+PascalCase 组件和类名，常量使用 UPPER_SNAKE_CASE，目录和文件使用 kebab-case。
+设备协议字段、存储键、DOM ID 和固件兼容接口保留原名。
+第三方压缩分发文件和历史分析原始数据不参与格式化。
+npm 仅用于开发检查，页面部署和 `serve.py` 不依赖 Node.js。
 
 服务器回归仅需 Python 标准库：
 

@@ -6,10 +6,10 @@ function init() {
   head.appendChild(style);
   document.body.classList.add("body");
 
-
   var temp_div = document.createElement("div");
   temp_div.id = "temp_div";
-  temp_div.style = "position: fixed; text-align: center; left: 0px; top: 0px; width: 100%; height: 100%;";
+  temp_div.style =
+    "position: fixed; text-align: center; left: 0px; top: 0px; width: 100%; height: 100%;";
   document.body.appendChild(temp_div);
 
   var h3 = document.createElement("h3");
@@ -27,7 +27,6 @@ function init() {
   };
   temp_div.appendChild(btn);
 
-
   var script = document.getElementById("refresh") || document.createElement("script");
   if (script.id !== "refresh") {
     script.type = "text/javascript";
@@ -35,21 +34,21 @@ function init() {
     document.body.appendChild(script);
   }
   script.onerror = function () {
-    h3.textContent = '页面资源加载失败，请检查本站资源或刷新重试。';
+    h3.textContent = "页面资源加载失败，请检查本站资源或刷新重试。";
   };
   script.src = R1Config.assetUrl("assets/js/classic/bootstrap.js?t=" + Date.now());
 }
 
 function setCookie(cname, cvalue, exdays) {
   var d = new Date();
-  d.setTime(d.getTime() + (exdays * 1000));
+  d.setTime(d.getTime() + exdays * 1000);
   var expires = "expires=" + d.toGMTString();
   document.cookie = cname + "=" + cvalue + "; " + expires;
 }
 
 function getCookie(cname) {
   var name = cname + "=";
-  var ca = document.cookie.split(';');
+  var ca = document.cookie.split(";");
   for (var i = 0; i < ca.length; i++) {
     var c = ca[i].trim();
     if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
@@ -60,8 +59,8 @@ function getCookie(cname) {
 if (window.R1Config) {
   init();
 } else {
-  var configScript = document.createElement('script');
-  configScript.src = new URL('../shared/config.js', document.currentScript.src).href;
+  var configScript = document.createElement("script");
+  configScript.src = new URL("../shared/config.js", document.currentScript.src).href;
   configScript.onload = init;
   document.head.appendChild(configScript);
 }

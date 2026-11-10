@@ -1,0 +1,6 @@
+# Third-party distributions and original upstream evidence.
+assets/vendor/
+docs/
+AGENTS.md
+LICENSE
+package-lock.json

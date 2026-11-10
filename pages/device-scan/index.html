@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
@@ -11,8 +11,8 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="../../assets/css/tools/device-scan.css" />
-  <script src="../../assets/js/shared/config.js"></script>
-</head>
+    <script src="../../assets/js/shared/config.js"></script>
+  </head>
   <body>
     <div class="container">
       <header>
@@ -21,9 +21,7 @@
 
       <div class="dashboard">
         <div class="card">
-          <div class="card-title">
-            <i class="fas fa-network-wired"></i> 网络控制面板
-          </div>
+          <div class="card-title"><i class="fas fa-network-wired"></i> 网络控制面板</div>
           <div class="controls">
             <div class="mode-tabs">
               <div class="mode-tab active" data-mode="dlna">DLNA设备扫描</div>
@@ -35,9 +33,7 @@
             </p>
 
             <div class="btn-group">
-              <button id="scanBtn" class="btn-scan">
-                <i class="fas fa-search"></i> 开始扫描
-              </button>
+              <button id="scanBtn" class="btn-scan"><i class="fas fa-search"></i> 开始扫描</button>
               <button id="stopBtn" class="btn-stop" disabled>
                 <i class="fas fa-stop"></i> 停止扫描
               </button>
@@ -54,9 +50,7 @@
         </div>
 
         <div class="card" style="grid-column: 1 / -1">
-          <div class="card-title">
-            <i class="fas fa-laptop"></i> 发现的设备列表
-          </div>
+          <div class="card-title"><i class="fas fa-laptop"></i> 发现的设备列表</div>
           <div class="devices-list" id="devicesList"></div>
         </div>
       </div>

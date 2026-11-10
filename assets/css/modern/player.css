@@ -7,27 +7,30 @@
 
 /* ---------- 1. 音乐页容器 ---------- */
 .page.page-music {
-    overflow: hidden;
-    overscroll-behavior: none;
-    padding: 0 !important;
+  overflow: hidden;
+  overscroll-behavior: none;
+  padding: 0 !important;
 }
-.page.page-music .page-inner { max-width: none; height: 100%; }
+.page.page-music .page-inner {
+  max-width: none;
+  height: 100%;
+}
 
 /* 原版 wrapper 的高度写死 calc(100vh - 80px)，这里按新外壳重算：
  * 桌面：视口 - 顶栏；移动：再减去底部标签栏与安全区 */
 .netease-player-wrapper {
-    height: calc(100vh - 56px);
-    height: calc(100dvh - 56px);
-    min-height: 520px;
-    margin-bottom: 0;
-    overflow: hidden;
+  height: calc(100vh - 56px);
+  height: calc(100dvh - 56px);
+  min-height: 520px;
+  margin-bottom: 0;
+  overflow: hidden;
 }
 @media (max-width: 899px) {
-    .netease-player-wrapper {
-        height: calc(100vh - 56px - 60px - env(safe-area-inset-bottom));
-        height: calc(100dvh - 56px - 60px - env(safe-area-inset-bottom));
-        min-height: 400px;
-    }
+  .netease-player-wrapper {
+    height: calc(100vh - 56px - 60px - env(safe-area-inset-bottom));
+    height: calc(100dvh - 56px - 60px - env(safe-area-inset-bottom));
+    min-height: 400px;
+  }
 }
 
 /* ---------- 1.1 桌面双栏布局不做放大 ----------
@@ -35,172 +38,320 @@
  * 横屏 ≤1024px 时原版 CSS 显示的是桌面双栏（转盘+歌词），再套这个放大
  * 会把歌词列推出屏幕右缘（歌词被裁掉一半）。横屏下一律不放大。 */
 @media (orientation: landscape) and (max-width: 1024px) {
-    .player-content-desktop { transform: none; }
+  .player-content-desktop {
+    transform: none;
+  }
 }
 
 /* ---------- 1.2 全站滚动条 ----------
  * app.css 的深色滚动条只挂在旧版 .app-content 类名上，新版结构覆盖不到，
  * 系统默认白条（带箭头）在深色弹层里非常突兀。这里全站统一为深色圆角细条。 */
 * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(127, 127, 127, 0.45) transparent;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(127, 127, 127, 0.45) transparent;
 }
-::-webkit-scrollbar { width: 9px; height: 9px; }
-::-webkit-scrollbar-track, ::-webkit-scrollbar-track-piece, ::-webkit-scrollbar-corner { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(127, 127, 127, 0.45); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(127, 127, 127, 0.7); }
-::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(127, 127, 127, 0.45);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(127, 127, 127, 0.7);
+}
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
 
 /* ---------- 2. 进度条（网易云红细条，hover 变粗、滑块浮现） ---------- */
-.page.page-music .progress-slider .track-wrap { height: 18px; }
-.page.page-music .progress-slider input[type="range"] {
-    height: 3px;
-    background: linear-gradient(90deg,
-        #c20c0c 0%, #e72d2d calc(var(--p, 0) * 1%),
-        rgba(255, 255, 255, 0.24) calc(var(--p, 0) * 1%),
-        rgba(255, 255, 255, 0.24) 100%);
-    border-radius: 99px;
-    cursor: pointer;
+.page.page-music .progress-slider .track-wrap {
+  height: 18px;
 }
-.page.page-music .progress-slider:hover input[type="range"] { height: 5px; }
+.page.page-music .progress-slider input[type="range"] {
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    #c20c0c 0%,
+    #e72d2d calc(var(--p, 0) * 1%),
+    rgba(255, 255, 255, 0.24) calc(var(--p, 0) * 1%),
+    rgba(255, 255, 255, 0.24) 100%
+  );
+  border-radius: 99px;
+  cursor: pointer;
+}
+.page.page-music .progress-slider:hover input[type="range"] {
+  height: 5px;
+}
 .page.page-music .progress-slider input[type="range"]::-webkit-slider-thumb {
-    width: 12px; height: 12px;
-    background: #fff; border: 0;
-    border-radius: 50%;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-    opacity: 0;
-    transition: opacity 0.18s var(--mui-transition), transform 0.18s var(--mui-transition);
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition:
+    opacity 0.18s var(--mui-transition),
+    transform 0.18s var(--mui-transition);
 }
 .page.page-music .progress-slider:hover input[type="range"]::-webkit-slider-thumb,
-.page.page-music .progress-slider input[type="range"]:active::-webkit-slider-thumb { opacity: 1; }
-.page.page-music .progress-slider input[type="range"]::-moz-range-thumb {
-    width: 12px; height: 12px; background: #fff; border: 0; border-radius: 50%;
+.page.page-music .progress-slider input[type="range"]:active::-webkit-slider-thumb {
+  opacity: 1;
 }
-.page.page-music .progress-slider input[type="range"]::-moz-range-track { background: transparent; }
+.page.page-music .progress-slider input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 0;
+  border-radius: 50%;
+}
+.page.page-music .progress-slider input[type="range"]::-moz-range-track {
+  background: transparent;
+}
 
 /* ---------- 3. 音量浮层（按钮上方弹出） ---------- */
-.vol-control { position: relative; }
+.vol-control {
+  position: relative;
+}
 .vol-slider-wrap {
-    position: absolute; bottom: 44px; left: 50%; transform: translateX(-50%);
-    z-index: 30;
-    width: 168px;
-    display: flex; flex-direction: column; gap: 8px; align-items: center;
-    padding: 12px;
-    background: var(--mui-modal-bg);
-    border: 1px solid var(--mui-divider);
-    border-radius: 12px;
-    box-shadow: var(--mui-shadow-3);
-    animation: r1RiseIn var(--mui-duration) var(--mui-transition) both;
+  position: absolute;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: 168px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  background: var(--mui-modal-bg);
+  border: 1px solid var(--mui-divider);
+  border-radius: 12px;
+  box-shadow: var(--mui-shadow-3);
+  animation: r1RiseIn var(--mui-duration) var(--mui-transition) both;
 }
-.vol-slider-wrap .slider { width: 100%; }
+.vol-slider-wrap .slider {
+  width: 100%;
+}
 .vol-value {
-    font-size: 12.5px; font-weight: 650;
-    color: rgba(255, 255, 255, 0.85);
-    font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.85);
+  font-variant-numeric: tabular-nums;
 }
-.vol-slider-wrap .btn.sm { width: 30px; }
+.vol-slider-wrap .btn.sm {
+  width: 30px;
+}
 
 /* ---------- 4. 播放器里的按钮与原版对齐 ---------- */
 /* 原版 .ctrl-btn / .play-btn 定义在 app.css（后于 theme.css 加载即已生效），
  * 这里只补新组件基线可能带来的差异：按钮内图标间距、文字不换行 */
-.netease-player-wrapper .btn { white-space: nowrap; }
-.netease-player-wrapper .btn .ico { flex: none; }
+.netease-player-wrapper .btn {
+  white-space: nowrap;
+}
+.netease-player-wrapper .btn .ico {
+  flex: none;
+}
 
 /* ---------- 5. 歌单队列弹层内的滚动区 ---------- */
-.playlist-scroll { max-height: min(60vh, 480px); overflow-y: auto; }
+.playlist-scroll {
+  max-height: min(60vh, 480px);
+  overflow-y: auto;
+}
 .playlist-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background var(--mui-duration) var(--mui-transition);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--mui-duration) var(--mui-transition);
 }
-.playlist-item:hover { background: var(--mui-list-hover); }
-.playlist-item.playing { background: var(--mui-primary-bg); }
+.playlist-item:hover {
+  background: var(--mui-list-hover);
+}
+.playlist-item.playing {
+  background: var(--mui-primary-bg);
+}
 .playlist-item .pl-idx {
-    width: 26px; text-align: center; flex: none;
-    font-size: 13px; color: var(--mui-text-disabled);
-    font-variant-numeric: tabular-nums;
+  width: 26px;
+  text-align: center;
+  flex: none;
+  font-size: 13px;
+  color: var(--mui-text-disabled);
+  font-variant-numeric: tabular-nums;
 }
-.playlist-item.playing .pl-idx { color: var(--mui-primary); font-weight: 700; }
-.playlist-item .pl-main { flex: 1; min-width: 0; }
+.playlist-item.playing .pl-idx {
+  color: var(--mui-primary);
+  font-weight: 700;
+}
+.playlist-item .pl-main {
+  flex: 1;
+  min-width: 0;
+}
 .playlist-item .pl-name {
-    font-size: 14px; font-weight: 600; color: var(--mui-text-primary);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mui-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.playlist-item.playing .pl-name { color: var(--mui-primary); }
+.playlist-item.playing .pl-name {
+  color: var(--mui-primary);
+}
 .playlist-item .pl-artist {
-    font-size: 12px; color: var(--mui-text-disabled);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 12px;
+  color: var(--mui-text-disabled);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.playlist-item .pl-act { flex: none; display: flex; gap: 6px; }
+.playlist-item .pl-act {
+  flex: none;
+  display: flex;
+  gap: 6px;
+}
 
 /* 更多功能网格（原版 .netease-more-grid 在 app.css 中已有，这里只补新按钮基线） */
-.netease-more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.netease-more-item {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    padding: 14px 6px; border-radius: 12px;
-    cursor: pointer;
-    transition: background var(--mui-duration) var(--mui-transition), transform 120ms var(--mui-transition);
+.netease-more-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
-.netease-more-item:hover { background: var(--mui-list-hover); }
-.netease-more-item:active { transform: scale(0.96); }
-.netease-more-item .more-icon { font-size: 24px; color: var(--mui-primary); display: flex; }
-.netease-more-item .more-label { font-size: 12.5px; color: var(--mui-text-secondary); }
-@media (max-width: 420px) { .netease-more-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
-
+.netease-more-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 6px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background var(--mui-duration) var(--mui-transition),
+    transform 120ms var(--mui-transition);
+}
+.netease-more-item:hover {
+  background: var(--mui-list-hover);
+}
+.netease-more-item:active {
+  transform: scale(0.96);
+}
+.netease-more-item .more-icon {
+  font-size: 24px;
+  color: var(--mui-primary);
+  display: flex;
+}
+.netease-more-item .more-label {
+  font-size: 12.5px;
+  color: var(--mui-text-secondary);
+}
+@media (max-width: 420px) {
+  .netease-more-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+}
 
 /* ---------- 4. 亮色模式歌词颜色保底 ----------
  * 播放器底色为深色，但亮色主题 + 自定义浅色背景下歌词要能看清：
  * 未播放深灰、播放中红；去掉白色光晕。!important 压过基础规则。 */
 :root:not([data-theme="dark"]) .netease-lrc-line {
-    color: rgba(0, 0, 0, 0.45) !important;
-    text-shadow: none !important;
+  color: rgba(0, 0, 0, 0.45) !important;
+  text-shadow: none !important;
 }
 :root:not([data-theme="dark"]) .netease-lrc-line.active {
-    color: #e72d2d !important;
-    text-shadow: none !important;
+  color: #e72d2d !important;
+  text-shadow: none !important;
 }
 :root:not([data-theme="dark"]) .netease-lrc-line-mobile {
-    color: rgba(0, 0, 0, 0.45) !important;
-    text-shadow: none !important;
+  color: rgba(0, 0, 0, 0.45) !important;
+  text-shadow: none !important;
 }
 :root:not([data-theme="dark"]) .netease-lrc-line-mobile.active {
-    color: #e72d2d !important;
-    text-shadow: none !important;
+  color: #e72d2d !important;
+  text-shadow: none !important;
 }
 
 /* ---------- 5. 榜单/列表封面缩略图 ---------- */
 .playlist-item .pl-pic {
-    width: 48px; height: 48px; border-radius: 10px; flex: none;
-    background: var(--mui-list-hover) center/cover no-repeat;
-    display: grid; place-items: center;
-    color: var(--mui-text-disabled); overflow: hidden;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  flex: none;
+  background: var(--mui-list-hover) center/cover no-repeat;
+  display: grid;
+  place-items: center;
+  color: var(--mui-text-disabled);
+  overflow: hidden;
 }
-.playlist-item .pl-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
+.playlist-item .pl-pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
 /* ---------- 6. 底部标签栏激活态：药丸背景 ----------
  * 原顶部悬浮指示条与图标脱节（视觉错位），改为 iOS 风格：
  * 激活项整体加浅蓝圆角背景，纯背景方案无绝对定位、不会错位。 */
-.tabbar { padding: 4px 6px calc(4px + env(safe-area-inset-bottom)); }
-.tabbar-item { border-radius: 14px; }
-.tabbar-item.on { background: var(--mui-primary-bg); }
-.tabbar-item.on::before { display: none; }
+.tabbar {
+  padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
+}
+.tabbar-item {
+  border-radius: 14px;
+}
+.tabbar-item.on {
+  background: var(--mui-primary-bg);
+}
+.tabbar-item.on::before {
+  display: none;
+}
 
 /* 桌面端无歌词占位：明确提示 + 重新获取按钮 */
-.pure-music-center .no-lrc-hint { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 10px; }
-.pure-music-center .no-lrc-btn {
-    margin-top: 12px; display: inline-flex; align-items: center; gap: 6px;
-    height: 32px; padding: 0 14px; border-radius: 999px;
-    background: rgba(255,255,255,0.12); color: #fff;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.2);
-    transition: background 0.2s;
+.pure-music-center .no-lrc-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 10px;
 }
-.pure-music-center .no-lrc-btn:hover { background: rgba(255,255,255,0.2); }
-.pure-music-center .no-lrc-btn svg { width: 15px; height: 15px; }
+.pure-music-center .no-lrc-btn {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background 0.2s;
+}
+.pure-music-center .no-lrc-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.pure-music-center .no-lrc-btn svg {
+  width: 15px;
+  height: 15px;
+}
 
 /* 当前播放队列行的封面块：正在播放的歌有描边高亮 */
-.playlist-item .pl-pic.has-img { box-shadow: 0 0 0 2px var(--mui-primary); }
-.playlist-item .pl-pic.no-pic { background-size: 60%; }
+.playlist-item .pl-pic.has-img {
+  box-shadow: 0 0 0 2px var(--mui-primary);
+}
+.playlist-item .pl-pic.no-pic {
+  background-size: 60%;
+}

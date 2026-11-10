@@ -4,15 +4,11 @@ class AsyncLock {
   }
   acquire() {
     return new Promise((e) => {
-      this.locked
-        ? this.queue.push(e)
-        : ((this.locked = !0), e(this.release.bind(this)));
+      this.locked ? this.queue.push(e) : ((this.locked = !0), e(this.release.bind(this)));
     });
   }
   release() {
-    this.queue.length > 0
-      ? this.queue.shift()(this.release.bind(this))
-      : (this.locked = !1);
+    this.queue.length > 0 ? this.queue.shift()(this.release.bind(this)) : (this.locked = !1);
   }
 }
 const adbUrls = [
@@ -40,27 +36,24 @@ const adbUrls = [
     init: function () {
       (this.updateStatus("等待ADB初始化", "disconnected"),
         document.addEventListener("plusready", this.onPlusReady.bind(this)),
-        document
-          .getElementById("deviceSelect")
-          .addEventListener("change", (e) => {
-            if (!e.target.value) return;
-            this.isConnected = !1;
-            const t = e.target.value;
-            t &&
-              (this.printConsole(`已选择设备: ${t}`, "info"),
-              isNetworkDevice(t) &&
-                (document.getElementById("ipAddress").value.length ||
-                  (document.getElementById("ipAddress").value = t)),
-              this.connectionCheck(t, (e, t) => {
-                e
-                  ? this.printConsole("切换设备成功", "info")
-                  : this.printConsole(`切换设备失败: ${t}`, "error");
-              }));
-          }),
+        document.getElementById("deviceSelect").addEventListener("change", (e) => {
+          if (!e.target.value) return;
+          this.isConnected = !1;
+          const t = e.target.value;
+          t &&
+            (this.printConsole(`已选择设备: ${t}`, "info"),
+            isNetworkDevice(t) &&
+              (document.getElementById("ipAddress").value.length ||
+                (document.getElementById("ipAddress").value = t)),
+            this.connectionCheck(t, (e, t) => {
+              e
+                ? this.printConsole("切换设备成功", "info")
+                : this.printConsole(`切换设备失败: ${t}`, "error");
+            }));
+        }),
         document.querySelectorAll(".tab").forEach((e) => {
           "connectionTabContainer" === e.parentNode.id
-            ? ("usb" === e.getAttribute("data-tab") &&
-                (e.style.display = "none"),
+            ? ("usb" === e.getAttribute("data-tab") && (e.style.display = "none"),
               e.addEventListener("click", (e) => {
                 (e.target.parentNode
                   .querySelectorAll(".active")
@@ -72,10 +65,7 @@ const adbUrls = [
               }),
               e.getAttribute("data-tab") == this.connectionType && e.click())
             : e.addEventListener("click", (t) => {
-                if (
-                  !this.isConnected &&
-                  "console" != t.target.getAttribute("data-tab")
-                )
+                if (!this.isConnected && "console" != t.target.getAttribute("data-tab"))
                   return this.printConsole("请先连接设备", "error");
                 (t.target.parentNode
                   .querySelectorAll(".tab")
@@ -97,48 +87,34 @@ const adbUrls = [
           const s = e.value.trim();
           if (s)
             return (
-              this.isInShellMode
-                ? this.executeShellCommand(s)
-                : this.executeCommand(s),
+              this.isInShellMode ? this.executeShellCommand(s) : this.executeCommand(s),
               (e.value = ""),
               !1
             );
         } else {
-          if ("ArrowUp" === t.key)
-            return (t.preventDefault(), this.navigateHistory(-1), !1);
-          if ("ArrowDown" === t.key)
-            return (t.preventDefault(), this.navigateHistory(1), !1);
+          if ("ArrowUp" === t.key) return (t.preventDefault(), this.navigateHistory(-1), !1);
+          if ("ArrowDown" === t.key) return (t.preventDefault(), this.navigateHistory(1), !1);
         }
       }),
-        document
-          .getElementById("clearConsoleBtn")
-          .addEventListener("click", () => {
-            ((document.getElementById("consoleOutput").innerHTML = ""),
-              this.printConsole("控制台已清空", "info"));
-          }),
+        document.getElementById("clearConsoleBtn").addEventListener("click", () => {
+          ((document.getElementById("consoleOutput").innerHTML = ""),
+            this.printConsole("控制台已清空", "info"));
+        }),
         document.getElementById("connectBtn").addEventListener("click", () => {
           this.connect();
         }),
-        document
-          .getElementById("disconnectBtn")
-          .addEventListener("click", () => {
-            this.disconnect();
-          }),
-        document
-          .getElementById("refreshDevicesBtn")
-          .addEventListener("click", (e) => {
-            this.discoverDevices();
-          }),
-        document
-          .getElementById("rebootDeviceBtn")
-          .addEventListener("click", () => {
-            this.rebootDevice();
-          }),
-        document
-          .getElementById("refreshDeviceInfoBtn")
-          .addEventListener("click", () => {
-            this.getDeviceInfo();
-          }),
+        document.getElementById("disconnectBtn").addEventListener("click", () => {
+          this.disconnect();
+        }),
+        document.getElementById("refreshDevicesBtn").addEventListener("click", (e) => {
+          this.discoverDevices();
+        }),
+        document.getElementById("rebootDeviceBtn").addEventListener("click", () => {
+          this.rebootDevice();
+        }),
+        document.getElementById("refreshDeviceInfoBtn").addEventListener("click", () => {
+          this.getDeviceInfo();
+        }),
         document.getElementById("shellBtn").addEventListener("click", () => {
           this.isConnected
             ? this.isInShellMode
@@ -148,133 +124,82 @@ const adbUrls = [
         }),
         document
           .getElementById("refreshFilesBtn")
-          .addEventListener("click", () =>
-            this.listFiles(this.currentDirectory),
-          ),
+          .addEventListener("click", () => this.listFiles(this.currentDirectory)),
         document
           .getElementById("createFolderBtn")
           .addEventListener("click", () => this.createFolder()),
-        document
-          .getElementById("homeBtn")
-          .addEventListener("click", () => this.goHomeDirectory()),
-        document
-          .getElementById("installFileAppBtn")
-          .addEventListener("click", () => {
-            if (this.selectedFile) {
-              const e = this.selectedFile.getAttribute("data-path");
-              (this.printConsole("正在检查应用安装权限...", "info"),
-                this.showProgress("file", "正在检查应用安装权限...", -1),
-                this.executeAdbCommand(
-                  "shell settings get secure install_non_market_apps",
-                  (t, s) => {
-                    "1" != t
-                      ? this.executeAdbCommand(
-                          "shell settings put secure install_non_market_apps 1",
-                          (t, s) => {
-                            this.installAppWithProgress(e, 1);
-                          },
-                        )
-                      : this.installAppWithProgress(e, 1);
-                  },
-                ),
-                this.closeFileActionModal());
-            }
-          }),
-        document
-          .getElementById("uploadFileBtn")
-          .addEventListener("click", () => this.uploadFile()),
-        document
-          .getElementById("downloadFileBtn")
-          .addEventListener("click", () => {
-            this.selectedFile &&
-              (this.downloadFile(), this.closeFileActionModal());
-          }),
-        document
-          .getElementById("deleteFileBtn")
-          .addEventListener("click", () => {
-            this.selectedFile &&
-              (this.deleteFile(), this.closeFileActionModal());
-          }),
-        document
-          .getElementById("ReNameFileBtn")
-          .addEventListener("click", () => {
-            this.selectedFile &&
-              (this.reNameFile(), this.closeFileActionModal());
-          }),
-        document
-          .getElementById("SetFilePermissionBtn")
-          .addEventListener("click", () => {
-            this.selectedFile &&
-              (this.setFilePermission(), this.closeFileActionModal());
-          }),
-        document
-          .getElementById("refreshAppsBtn")
-          .addEventListener("click", () => {
-            ((document.getElementById("appSearch").value = ""),
-              this.listApps("", !0));
-          }),
-        document
-          .getElementById("installAppBtn")
-          .addEventListener("click", () => this.installApp()),
+        document.getElementById("homeBtn").addEventListener("click", () => this.goHomeDirectory()),
+        document.getElementById("installFileAppBtn").addEventListener("click", () => {
+          if (this.selectedFile) {
+            const e = this.selectedFile.getAttribute("data-path");
+            (this.printConsole("正在检查应用安装权限...", "info"),
+              this.showProgress("file", "正在检查应用安装权限...", -1),
+              this.executeAdbCommand(
+                "shell settings get secure install_non_market_apps",
+                (t, s) => {
+                  "1" != t
+                    ? this.executeAdbCommand(
+                        "shell settings put secure install_non_market_apps 1",
+                        (t, s) => {
+                          this.installAppWithProgress(e, 1);
+                        },
+                      )
+                    : this.installAppWithProgress(e, 1);
+                },
+              ),
+              this.closeFileActionModal());
+          }
+        }),
+        document.getElementById("uploadFileBtn").addEventListener("click", () => this.uploadFile()),
+        document.getElementById("downloadFileBtn").addEventListener("click", () => {
+          this.selectedFile && (this.downloadFile(), this.closeFileActionModal());
+        }),
+        document.getElementById("deleteFileBtn").addEventListener("click", () => {
+          this.selectedFile && (this.deleteFile(), this.closeFileActionModal());
+        }),
+        document.getElementById("ReNameFileBtn").addEventListener("click", () => {
+          this.selectedFile && (this.reNameFile(), this.closeFileActionModal());
+        }),
+        document.getElementById("SetFilePermissionBtn").addEventListener("click", () => {
+          this.selectedFile && (this.setFilePermission(), this.closeFileActionModal());
+        }),
+        document.getElementById("refreshAppsBtn").addEventListener("click", () => {
+          ((document.getElementById("appSearch").value = ""), this.listApps("", !0));
+        }),
+        document.getElementById("installAppBtn").addEventListener("click", () => this.installApp()),
         document
           .getElementById("appSearch")
           .addEventListener("input", (e) => this.filterApps(e.target.value)),
-        document
-          .getElementById("enableAppBtn")
-          .addEventListener("click", () => {
-            this.selectedApp &&
-              (this.enableApp(
-                this.selectedApp.packageName,
-                this.selectedApp.appName,
-              ),
-              this.closeAppActionModal());
-          }),
-        document
-          .getElementById("disabledAppBtn")
-          .addEventListener("click", () => {
-            this.selectedApp &&
-              (this.disabledApp(
-                this.selectedApp.packageName,
-                this.selectedApp.appName,
-              ),
-              this.closeAppActionModal());
-          }),
-        document
-          .getElementById("unHideAppBtn")
-          .addEventListener("click", () => {
-            this.selectedApp &&
-              (this.unHideApp(
-                this.selectedApp.packageName,
-                this.selectedApp.appName,
-              ),
-              this.closeAppActionModal());
-          }),
+        document.getElementById("enableAppBtn").addEventListener("click", () => {
+          this.selectedApp &&
+            (this.enableApp(this.selectedApp.packageName, this.selectedApp.appName),
+            this.closeAppActionModal());
+        }),
+        document.getElementById("disabledAppBtn").addEventListener("click", () => {
+          this.selectedApp &&
+            (this.disabledApp(this.selectedApp.packageName, this.selectedApp.appName),
+            this.closeAppActionModal());
+        }),
+        document.getElementById("unHideAppBtn").addEventListener("click", () => {
+          this.selectedApp &&
+            (this.unHideApp(this.selectedApp.packageName, this.selectedApp.appName),
+            this.closeAppActionModal());
+        }),
         document.getElementById("hideAppBtn").addEventListener("click", () => {
           this.selectedApp &&
-            (this.hideApp(
-              this.selectedApp.packageName,
-              this.selectedApp.appName,
-            ),
+            (this.hideApp(this.selectedApp.packageName, this.selectedApp.appName),
             this.closeAppActionModal());
         }),
         document.getElementById("clearAppBtn").addEventListener("click", () => {
           this.selectedApp &&
-            (this.clearApp(
-              this.selectedApp.packageName,
-              this.selectedApp.appName,
-            ),
+            (this.clearApp(this.selectedApp.packageName, this.selectedApp.appName),
             this.closeAppActionModal());
         }),
-        document
-          .getElementById("uninstallAppBtn")
-          .addEventListener("click", () => {
-            this.selectedApp &&
-              (this.uninstallApp(
-                this.selectedApp.packageName,
-                this.selectedApp.appName,
-              ),
-              this.closeAppActionModal());
-          }),
+        document.getElementById("uninstallAppBtn").addEventListener("click", () => {
+          this.selectedApp &&
+            (this.uninstallApp(this.selectedApp.packageName, this.selectedApp.appName),
+            this.closeAppActionModal());
+        }),
         document.querySelectorAll(".close").forEach((e) => {
           "fileActionClose" === e.id
             ? e.addEventListener("click", () => this.closeFileActionModal())
@@ -286,62 +211,46 @@ const adbUrls = [
             ? this.closeFileActionModal()
             : "appActionModal" === e.target.id && this.closeAppActionModal();
         }),
-        document
-          .getElementById("fileBrowser")
-          .addEventListener("click", (e) => {
-            const t = e.target.closest(".file-item");
-            if (t) {
-              const e = t.getAttribute("data-path");
-              if ("true" === t.getAttribute("data-dir"))
-                ((this.currentDirectory = e),
-                  (document.getElementById("currentPath").value = e),
-                  this.listFiles(e));
-              else {
-                this.selectedFile = t;
-                const e = this.selectedFile
-                  .getAttribute("data-path")
-                  .split("/")
-                  .filter((e) => e)
-                  .pop();
-                (e.toLowerCase().endsWith(".apk") ||
-                e.toLowerCase().endsWith(".apk.1")
-                  ? (document.getElementById(
-                      "installFileAppBtn",
-                    ).style.display = "")
-                  : (document.getElementById(
-                      "installFileAppBtn",
-                    ).style.display = "none"),
-                  this.showFileActionModal());
-              }
-            }
-          }),
-        document
-          .getElementById("fileBrowser")
-          .addEventListener("touchstart", (e) => {
-            t = setTimeout(() => {
-              const t = e.touches[0],
-                s = document.elementFromPoint(t.clientX, t.clientY),
-                i = s ? ("file-item" !== s.className ? s.parentNode : s) : null;
-              i &&
-                (i.getAttribute("data-path"),
-                i.getAttribute("data-dir"),
-                (this.selectedFile = i),
+        document.getElementById("fileBrowser").addEventListener("click", (e) => {
+          const t = e.target.closest(".file-item");
+          if (t) {
+            const e = t.getAttribute("data-path");
+            if ("true" === t.getAttribute("data-dir"))
+              ((this.currentDirectory = e),
+                (document.getElementById("currentPath").value = e),
+                this.listFiles(e));
+            else {
+              this.selectedFile = t;
+              const e = this.selectedFile
+                .getAttribute("data-path")
+                .split("/")
+                .filter((e) => e)
+                .pop();
+              (e.toLowerCase().endsWith(".apk") || e.toLowerCase().endsWith(".apk.1")
+                ? (document.getElementById("installFileAppBtn").style.display = "")
+                : (document.getElementById("installFileAppBtn").style.display = "none"),
                 this.showFileActionModal());
-            }, 500);
-          }),
-        document
-          .getElementById("fileBrowser")
-          .addEventListener("touchend", () => clearTimeout(t)),
-        document
-          .getElementById("fileBrowser")
-          .addEventListener("touchmove", () => clearTimeout(t)),
-        document
-          .getElementById("currentPath")
-          .addEventListener("keydown", (e) => {
-            "Enter" === e.key &&
-              ((this.currentDirectory = e.target.value),
-              this.listFiles(this.currentDirectory));
-          }),
+            }
+          }
+        }),
+        document.getElementById("fileBrowser").addEventListener("touchstart", (e) => {
+          t = setTimeout(() => {
+            const t = e.touches[0],
+              s = document.elementFromPoint(t.clientX, t.clientY),
+              i = s ? ("file-item" !== s.className ? s.parentNode : s) : null;
+            i &&
+              (i.getAttribute("data-path"),
+              i.getAttribute("data-dir"),
+              (this.selectedFile = i),
+              this.showFileActionModal());
+          }, 500);
+        }),
+        document.getElementById("fileBrowser").addEventListener("touchend", () => clearTimeout(t)),
+        document.getElementById("fileBrowser").addEventListener("touchmove", () => clearTimeout(t)),
+        document.getElementById("currentPath").addEventListener("keydown", (e) => {
+          "Enter" === e.key &&
+            ((this.currentDirectory = e.target.value), this.listFiles(this.currentDirectory));
+        }),
         document.getElementById("appList").addEventListener("click", (e) => {
           const t = e.target.closest(".app-item");
           if (t) {
@@ -372,9 +281,7 @@ const adbUrls = [
                 this.updateStatus("正在初始化ADB", "disconnected"),
                 this.setupAdb());
               const t = plus.storage.getItem("currentDevice");
-              t &&
-                isNetworkDevice(t) &&
-                (document.getElementById("ipAddress").value = t);
+              t && isNetworkDevice(t) && (document.getElementById("ipAddress").value = t);
             },
             (e) => {
               this.printConsole("错误：权限被拒绝", "error");
@@ -417,33 +324,22 @@ const adbUrls = [
                   this.executeCommandWithoutAdb("ls -l", (e) => {}),
                   this.executeCommandWithoutAdb(`rm -rf ${i}`, (e) => {
                     this.executeCommandWithoutAdb(`mkdir ${i}`, (e) => {
-                      this.executeCommandWithoutAdb(
-                        `chmod -R 777 ${i}`,
-                        (e) => {
-                          ((this.adbCache = i),
-                            this.executeAdbCommand("start-server", (e, t) => {
-                              0 !== t
-                                ? (this.printConsole(
-                                    `ADB初始化失败: ${e}`,
-                                    "error",
-                                  ),
-                                  this.updateStatus("ADB初始化失败", "error"))
-                                : ((this.adbCache = i),
-                                  this.printConsole("ADB初始化完成", "success"),
-                                  this.updateStatus("未连接", "disconnected"),
-                                  ["connectBtn", "disconnectBtn"].forEach(
-                                    (e) => {
-                                      ((document.getElementById(e).disabled =
-                                        !1),
-                                        (document.getElementById(
-                                          e,
-                                        ).style.display = ""));
-                                    },
-                                  ),
-                                  this.discoverDevices());
-                            }));
-                        },
-                      );
+                      this.executeCommandWithoutAdb(`chmod -R 777 ${i}`, (e) => {
+                        ((this.adbCache = i),
+                          this.executeAdbCommand("start-server", (e, t) => {
+                            0 !== t
+                              ? (this.printConsole(`ADB初始化失败: ${e}`, "error"),
+                                this.updateStatus("ADB初始化失败", "error"))
+                              : ((this.adbCache = i),
+                                this.printConsole("ADB初始化完成", "success"),
+                                this.updateStatus("未连接", "disconnected"),
+                                ["connectBtn", "disconnectBtn"].forEach((e) => {
+                                  ((document.getElementById(e).disabled = !1),
+                                    (document.getElementById(e).style.display = ""));
+                                }),
+                                this.discoverDevices());
+                          }));
+                      });
                     });
                   }));
               });
@@ -452,19 +348,13 @@ const adbUrls = [
           plus.io.resolveLocalFileSystemURL(
             this.adbPath,
             (e) => {
-              this.executeCommandWithoutAdb(
-                `cp -rf ${e.fullPath} ${o}`,
-                (e, t) => {
-                  0 !== t
-                    ? r(e, t)
-                    : this.executeCommandWithoutAdb(
-                        `chmod -R 777 ${o}`,
-                        (e, t) => {
-                          r(e, t);
-                        },
-                      );
-                },
-              );
+              this.executeCommandWithoutAdb(`cp -rf ${e.fullPath} ${o}`, (e, t) => {
+                0 !== t
+                  ? r(e, t)
+                  : this.executeCommandWithoutAdb(`chmod -R 777 ${o}`, (e, t) => {
+                      r(e, t);
+                    });
+              });
             },
             (e) => {
               (this.printConsole("找不到ADB文件: " + (e.message || e), "error"),
@@ -510,17 +400,9 @@ const adbUrls = [
                     (e) => {
                       (this.printConsole("ADB包下载成功，开始解压...", "info"),
                         c(e.fullPath, (t) => {
-                          if (t)
-                            (this.printConsole(
-                              "ADB包解压成功，开始初始化...",
-                              "info",
-                            ),
-                              l());
+                          if (t) (this.printConsole("ADB包解压成功，开始初始化...", "info"), l());
                           else {
-                            this.printConsole(
-                              "ADB包解压失败，稍后重新下载...",
-                              "error",
-                            );
+                            this.printConsole("ADB包解压失败，稍后重新下载...", "error");
                             try {
                               e.remove();
                             } catch {}
@@ -529,10 +411,7 @@ const adbUrls = [
                         }));
                     },
                     () => {
-                      (this.printConsole(
-                        "ADB包下载失败，稍后重新下载...",
-                        "error",
-                      ),
+                      (this.printConsole("ADB包下载失败，稍后重新下载...", "error"),
                         setTimeout(d, 1e3));
                     },
                   );
@@ -611,11 +490,7 @@ const adbUrls = [
             }
           }
           (this.updateDeviceList(),
-            e &&
-              this.printConsole(
-                `发现 ${this.devices.length} 台设备`,
-                "success",
-              ),
+            e && this.printConsole(`发现 ${this.devices.length} 台设备`, "success"),
             e && this.updateStatus("扫描完成", "connected"),
             t && t(s, i));
         }));
@@ -628,8 +503,7 @@ const adbUrls = [
           (t.value = ""),
           (t.textContent = "-- 未找到设备 --"),
           e.appendChild(t),
-          void (document.getElementById("deviceListGroup").style.display =
-            "none")
+          void (document.getElementById("deviceListGroup").style.display = "none")
         );
       }
       ((e.innerHTML = '<option value="">-- 请选择设备 --</option>'),
@@ -711,21 +585,14 @@ const adbUrls = [
                 );
               case "offline":
                 return (
-                  this.printConsole(
-                    `连接失败: ${n.type || s}, 正在尝试重新连接...`,
-                    "error",
-                  ),
-                  void this.executeAdbCommand(
-                    ["-s", n.id, "reconnect"],
-                    (e, s) => {
-                      0 !== s
-                        ? (this.printConsole(`重新连接失败: ${e}`, "error"),
-                          this.updateStatus("连接失败", "error"),
-                          t && t(!1, `${e}`, n))
-                        : (this.onConnectSuccess(n.id),
-                          t && t(!0, "连接成功", n));
-                    },
-                  )
+                  this.printConsole(`连接失败: ${n.type || s}, 正在尝试重新连接...`, "error"),
+                  void this.executeAdbCommand(["-s", n.id, "reconnect"], (e, s) => {
+                    0 !== s
+                      ? (this.printConsole(`重新连接失败: ${e}`, "error"),
+                        this.updateStatus("连接失败", "error"),
+                        t && t(!1, `${e}`, n))
+                      : (this.onConnectSuccess(n.id), t && t(!0, "连接成功", n));
+                  })
                 );
             }
             (this.printConsole(`连接失败: ${n.type || s}`, "error"),
@@ -797,44 +664,28 @@ const adbUrls = [
         }),
         this.executeAdbCommand("shell ifconfig wlan0", (e) => {
           const t = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.exec(e);
-          document.getElementById("deviceIP").textContent =
-            (t && t[0]) || "未知";
+          document.getElementById("deviceIP").textContent = (t && t[0]) || "未知";
         }),
         this.executeAdbCommand("shell getprop ro.serialno", (e) => {
           document.getElementById("deviceSN").textContent = e || "未知";
         }),
-        this.executeAdbCommand(
-          "shell getprop ro.build.version.incremental",
-          (e) => {
-            document.getElementById("firmwareVersion").textContent =
-              e || "未知";
-          },
-        ),
-        this.executeAdbCommand(
-          "shell getprop ro.build.version.release",
-          (e) => {
-            document.getElementById("androidVersion").textContent = e || "未知";
-          },
-        ),
+        this.executeAdbCommand("shell getprop ro.build.version.incremental", (e) => {
+          document.getElementById("firmwareVersion").textContent = e || "未知";
+        }),
+        this.executeAdbCommand("shell getprop ro.build.version.release", (e) => {
+          document.getElementById("androidVersion").textContent = e || "未知";
+        }),
         this.executeAdbCommand("shell dumpsys meminfo | grep RAM:", (e) => {
           document.getElementById("memoryInfo").textContent = e;
           const t = this.formatSize(
-              1024 *
-                parseInt(
-                  /Total RAM: (\S+)(\s)?(k|K)/g.exec(e)[1].replace(/\,/g, ""),
-                ),
+              1024 * parseInt(/Total RAM: (\S+)(\s)?(k|K)/g.exec(e)[1].replace(/\,/g, "")),
             ),
             s = this.formatSize(
-              1024 *
-                (parseInt(
-                  /Free RAM: (\S+)(\s)?(k|K)/g.exec(e)[1].replace(/\,/g, ""),
-                ) -
-                  15e3),
+              1024 * (parseInt(/Free RAM: (\S+)(\s)?(k|K)/g.exec(e)[1].replace(/\,/g, "")) - 15e3),
             );
           document.getElementById("memoryInfo").textContent = `${s} / ${t}`;
         }),
-        (document.getElementById("storageInfo").parentNode.style.display =
-          "none"),
+        (document.getElementById("storageInfo").parentNode.style.display = "none"),
         this.executeAdbCommand("shell dumpsys battery", (e) => {
           const t = e.match(/level: (\d+)/),
             s = e.match(/status: (\d+)/);
@@ -869,8 +720,7 @@ const adbUrls = [
         ((this.isInShellMode = !0),
         (document.getElementById("shellBtn").innerHTML =
           '<i class="fas fa-sign-out-alt"></i> 退出Shell'),
-        (document.getElementById("consoleInput").placeholder =
-          "输入Shell命令，按Enter执行"),
+        (document.getElementById("consoleInput").placeholder = "输入Shell命令，按Enter执行"),
         this.printConsole('已进入Shell模式，输入"exit"退出', "info"));
     },
     exitShellMode: function () {
@@ -893,23 +743,17 @@ const adbUrls = [
         ((this.isInShellMode = !1),
         (document.getElementById("shellBtn").innerHTML =
           '<i class="fas fa-terminal"></i> 进入Shell'),
-        (document.getElementById("consoleInput").placeholder =
-          "输入ADB命令，按Enter执行"),
+        (document.getElementById("consoleInput").placeholder = "输入ADB命令，按Enter执行"),
         this.printConsole("已退出Shell模式", "info"));
     },
     executeShellCommand: function (e) {
-      if (!this.isConnected)
-        return void this.printConsole("错误: 未连接设备", "error");
+      if (!this.isConnected) return void this.printConsole("错误: 未连接设备", "error");
       if ("exit" === e.trim()) return void this.exitShellMode();
       const t = parseCommand(e),
         s = plus.android.importClass("java.lang.String");
       try {
         const e = this.currentProcess.getOutputStream();
-        (e.write(
-          new s(`${t.join(" ").replace(/(?<!\\)"/g, '\\"')}\n`).getBytes(
-            "UTF-8",
-          ),
-        ),
+        (e.write(new s(`${t.join(" ").replace(/(?<!\\)"/g, '\\"')}\n`).getBytes("UTF-8")),
           e.flush());
       } catch {
         this._exitShellMode();
@@ -934,9 +778,7 @@ const adbUrls = [
       const o = Array.isArray(e) ? e : parseCommand(e),
         r = ["./adb"];
       ("adb" === o[0] && o.shift(),
-        this.currentDevice &&
-          !o[0].startsWith("-s") &&
-          r.push("-s", this.currentDevice),
+        this.currentDevice && !o[0].startsWith("-s") && r.push("-s", this.currentDevice),
         o[0].startsWith("-s") && r.push(o.shift(), o.shift()),
         r.push(...o));
       let l = ["shell", "pull", "push"].find((e) => o[0].includes(e))
@@ -973,21 +815,17 @@ const adbUrls = [
             if (l) {
               let t = l.querySelector("#message");
               const s = document.createElement("div");
-              if (
-                ((s.innerText = e), t.appendChild(s), Date.now() - c >= 100)
-              ) {
+              if (((s.innerText = e), t.appendChild(s), Date.now() - c >= 100)) {
                 c = Date.now();
                 const e = document.getElementById("consoleOutput");
                 e.scrollTop = e.scrollHeight;
               }
             }
             if (!d) return;
-            document.body.contains(d) ||
-              (d = this.printConsole("", "info", !1));
+            document.body.contains(d) || (d = this.printConsole("", "info", !1));
             const t = d.querySelector("#message"),
               s = t.querySelectorAll("div");
-            if (s.length && s.length < 3 && s[s.length - 1].innerText === e)
-              return;
+            if (s.length && s.length < 3 && s[s.length - 1].innerText === e) return;
             const i = document.createElement("div");
             if (
               (1 === s.length && (i.style.display = "inline-block"),
@@ -1029,17 +867,9 @@ const adbUrls = [
                     let o = !1;
                     for (; null !== (i = e.readLine());) {
                       const r = decodeURIComponent(escape(String(i))).trim();
-                      if (
-                        ((d = e.getFilePointer()),
-                        (h = 0),
-                        r.startsWith("exec_start:"))
-                      )
-                        n = !0;
+                      if (((d = e.getFilePointer()), (h = 0), r.startsWith("exec_start:"))) n = !0;
                       else if (n) {
-                        if (
-                          /^(\^C)?exit_code: -?(\d+)/.test(r) ||
-                          r.startsWith("exec_end")
-                        ) {
+                        if (/^(\^C)?exit_code: -?(\d+)/.test(r) || r.startsWith("exec_end")) {
                           ((n = !1), (o = !0));
                           const i = /exit_code: (\S+)/.exec(r),
                             l = i ? parseInt(i[1]) : -1;
@@ -1077,9 +907,7 @@ const adbUrls = [
             };
             r();
           } catch (i) {
-            !a && h++ < p
-              ? setTimeout(() => n(e, t, s), 100)
-              : ((a = !0), s && s(!1, -1));
+            !a && h++ < p ? setTimeout(() => n(e, t, s), 100) : ((a = !0), s && s(!1, -1));
           }
         else setTimeout(() => n(e, t, s), 10);
       };
@@ -1122,18 +950,13 @@ const adbUrls = [
               g.put("PS1", "exec$ "),
               g.put("PATH", `${g.get("PATH")}:./bin`),
               g.put("LD_LIBRARY_PATH", "./lib"),
-              o &&
-                (g.put("HOME", "../"),
-                g.put("TMPDIR", "../../cache/adb-cache"))),
+              o && (g.put("HOME", "../"), g.put("TMPDIR", "../../cache/adb-cache"))),
             (this.currentProcess = m.start()),
             plus.android.importClass(this.currentProcess),
             o)
           ) {
             (plus.android.invoke(this.currentProcess.getInputStream(), "close"),
-              plus.android.invoke(
-                this.currentProcess.getErrorStream(),
-                "close",
-              ),
+              plus.android.invoke(this.currentProcess.getErrorStream(), "close"),
               plus.android.importClass("java.io.OutputStream"));
             const e = this.currentProcess.getOutputStream(),
               o = plus.android.importClass("java.lang.String");
@@ -1141,11 +964,7 @@ const adbUrls = [
               e.flush(),
               e.write(new o("sh ./exec ").getBytes("UTF-8")),
               e.write(new o(a.toArray().join(" ")).getBytes("UTF-8")),
-              e.write(
-                new o(
-                  ' && echo "exit_code: $?" || echo "exit_code: -1"',
-                ).getBytes("UTF-8"),
-              ),
+              e.write(new o(' && echo "exit_code: $?" || echo "exit_code: -1"').getBytes("UTF-8")),
               e.write(new o("\n").getBytes("UTF-8")),
               e.flush());
             let r = "",
@@ -1153,8 +972,7 @@ const adbUrls = [
             n(
               h,
               (e, t, n) => {
-                (null != e && s && s(e, t, n),
-                  t ? ((i = n), (l = !0)) : (r += e + "\n"));
+                (null != e && s && s(e, t, n), t ? ((i = n), (l = !0)) : (r += e + "\n"));
               },
               (s, n) => {
                 l || (i = n);
@@ -1181,10 +999,7 @@ const adbUrls = [
               for (; null !== (l = o.readLine());) {
                 if (c) continue;
                 const e = l.trim();
-                if (
-                  /^(\^C)?exit_code: -?(\d+)/.test(e) ||
-                  e.startsWith("exec_end")
-                ) {
+                if (/^(\^C)?exit_code: -?(\d+)/.test(e) || e.startsWith("exec_end")) {
                   c = !0;
                   const t = /exit_code: (\S+)/.exec(e);
                   i = t ? parseInt(t[1]) : -1;
@@ -1249,10 +1064,7 @@ const adbUrls = [
             const p = n ? "" : this.formatSize(parseInt(d)),
               u = document.createElement("div");
             ((u.className = "file-item"),
-              u.setAttribute(
-                "data-path",
-                e + (e.endsWith("/") ? "" : "/") + a + (n ? "/" : ""),
-              ),
+              u.setAttribute("data-path", e + (e.endsWith("/") ? "" : "/") + a + (n ? "/" : "")),
               u.setAttribute("data-dir", n),
               u.setAttribute("data-perm", permToNumber(i)),
               (u.innerHTML = `\n                    <i class="fas ${n ? "fa-folder" : "fa-file"} file-icon"></i>\n                    <div class="file-name">${a}</div>\n                    <div class="file-size">${p}</div>\n                `),
@@ -1284,16 +1096,12 @@ const adbUrls = [
         (this.selectedFile = null));
     },
     goHomeDirectory: function () {
-      ((this.currentDirectory = "/sdcard/"),
-        this.listFiles(this.currentDirectory));
+      ((this.currentDirectory = "/sdcard/"), this.listFiles(this.currentDirectory));
     },
     createFolder: function () {
       const e = prompt("请输入文件夹名称:");
       if (!e) return;
-      const t =
-        this.currentDirectory +
-        (this.currentDirectory.endsWith("/") ? "" : "/") +
-        e;
+      const t = this.currentDirectory + (this.currentDirectory.endsWith("/") ? "" : "/") + e;
       this.executeAdbCommand(["shell", "mkdir", `"${t}"`], (e, s) => {
         0 !== s
           ? (this.printConsole(`创建文件夹失败: ${e}`, "error"),
@@ -1304,30 +1112,20 @@ const adbUrls = [
       });
     },
     uploadFile: function () {
-      alert(
-        "文件选择提示：\n✔ 请在「设备目录」中选择文件\n✖ 不要在「最近/下载内容」中选择文件",
-      );
+      alert("文件选择提示：\n✔ 请在「设备目录」中选择文件\n✖ 不要在「最近/下载内容」中选择文件");
       var e = !1;
       this.chooseFile(
         { title: "请选择文件", multiple: !1, mime: "*/*", path: "/" },
         (t) => {
           if (e) return;
-          ((e = !0),
-            this.printConsole(
-              "选择了文件：" + JSON.stringify(t.files),
-              "info",
-            ));
+          ((e = !0), this.printConsole("选择了文件：" + JSON.stringify(t.files), "info"));
           const s = t.files[0];
-          if (!s || !s.startsWith("/"))
-            return void alert("不支持的目录，请在「设备目录」中选择！");
+          if (!s || !s.startsWith("/")) return void alert("不支持的目录，请在「设备目录」中选择！");
           const i = s
               .split("/")
               .filter((e) => e)
               .pop(),
-            n =
-              this.currentDirectory +
-              (this.currentDirectory.endsWith("/") ? "" : "/") +
-              i;
+            n = this.currentDirectory + (this.currentDirectory.endsWith("/") ? "" : "/") + i;
           this.uploadFileWithProgress(s, n);
         },
         (e) => {
@@ -1354,15 +1152,13 @@ const adbUrls = [
             const n = /(\d+)\%\]/.exec(e);
             if (n) {
               let e = parseInt(n[1]);
-              s != e &&
-                ((s = e), 100 !== s && this.setProgress("file", "上传文件", s));
+              s != e && ((s = e), 100 !== s && this.setProgress("file", "上传文件", s));
             }
           },
         ));
     },
     downloadFile: function () {
-      if (!this.selectedFile)
-        return void this.printConsole("请先选择要下载的文件", "error");
+      if (!this.selectedFile) return void this.printConsole("请先选择要下载的文件", "error");
       let e = this.selectedFile
         .getAttribute("data-path")
         .split("/")
@@ -1370,10 +1166,7 @@ const adbUrls = [
       const t = e.pop();
       if (((e = e.join("/")), !confirm(`确定要下载 ${e}/${t} 吗？`))) return;
       const s = `/sdcard/Download/${t}`;
-      this.downloadFileWithProgress(
-        this.selectedFile.getAttribute("data-path"),
-        s,
-      );
+      this.downloadFileWithProgress(this.selectedFile.getAttribute("data-path"), s);
     },
     downloadFileWithProgress: function (e, t) {
       t = t.startsWith("file://") ? t.substring(7) : t;
@@ -1399,8 +1192,7 @@ const adbUrls = [
         ));
     },
     deleteFile: function () {
-      if (!this.selectedFile)
-        return void this.printConsole("请先选择要删除的文件", "error");
+      if (!this.selectedFile) return void this.printConsole("请先选择要删除的文件", "error");
       let e = this.selectedFile
         .getAttribute("data-path")
         .split("/")
@@ -1408,17 +1200,14 @@ const adbUrls = [
       const t = e.pop();
       ((e = e.join("/")),
         confirm(`确定要删除 ${e}/${t} 吗？`) &&
-          this.executeAdbCommand(
-            ["shell", "rm", "-r", `"${e}/${t}"`],
-            (s, i) => {
-              0 !== i
-                ? (this.printConsole(`删除文件失败: ${s}`, "error"),
-                  this.showProgress("file", "删除文件失败", 0))
-                : (this.printConsole(`删除文件成功: ${e}/${t}`, "success"),
-                  this.showProgress("file", `删除文件成功: ${e}/${t}`, 100),
-                  this.listFiles(this.currentDirectory, !1));
-            },
-          ));
+          this.executeAdbCommand(["shell", "rm", "-r", `"${e}/${t}"`], (s, i) => {
+            0 !== i
+              ? (this.printConsole(`删除文件失败: ${s}`, "error"),
+                this.showProgress("file", "删除文件失败", 0))
+              : (this.printConsole(`删除文件成功: ${e}/${t}`, "success"),
+                this.showProgress("file", `删除文件成功: ${e}/${t}`, 100),
+                this.listFiles(this.currentDirectory, !1));
+          }));
     },
     reNameFile: function () {
       let e = this.selectedFile
@@ -1430,20 +1219,14 @@ const adbUrls = [
       const s = prompt("请输入新的文件名称:", t);
       s &&
         s !== t &&
-        this.executeAdbCommand(
-          ["shell", "mv", `"${e}/${t}"`, `"${e}/${s}"`],
-          (i, n) => {
-            0 !== n
-              ? (this.printConsole(`重命名文件失败: ${i}`, "error"),
-                this.showProgress("file", "重命名文件失败", 0))
-              : (this.printConsole(
-                  `重命名文件成功: ${e}/${t} -> ${e}/${s}`,
-                  "success",
-                ),
-                this.showProgress("file", `重命名文件成功: ${e}/${s}`, 100),
-                this.listFiles(this.currentDirectory, !1));
-          },
-        );
+        this.executeAdbCommand(["shell", "mv", `"${e}/${t}"`, `"${e}/${s}"`], (i, n) => {
+          0 !== n
+            ? (this.printConsole(`重命名文件失败: ${i}`, "error"),
+              this.showProgress("file", "重命名文件失败", 0))
+            : (this.printConsole(`重命名文件成功: ${e}/${t} -> ${e}/${s}`, "success"),
+              this.showProgress("file", `重命名文件成功: ${e}/${s}`, 100),
+              this.listFiles(this.currentDirectory, !1));
+        });
     },
     setFilePermission: function () {
       const e = prompt(
@@ -1457,24 +1240,14 @@ const adbUrls = [
         .filter((e) => e);
       const s = t.pop();
       ((t = t.join("/")),
-        this.executeAdbCommand(
-          ["shell", "chmod", "-R", e, `"${t}/${s}"`],
-          (i, n) => {
-            0 !== n
-              ? (this.printConsole(`设置文件权限失败: ${i}`, "error"),
-                this.showProgress("file", "设置文件权限失败", 0))
-              : (this.printConsole(
-                  `设置文件权限成功: ${t}/${s} ${e}`,
-                  "success",
-                ),
-                this.showProgress(
-                  "file",
-                  `设置文件权限成功: ${t}/${s} ${e}`,
-                  100,
-                ),
-                this.listFiles(this.currentDirectory, !1));
-          },
-        ));
+        this.executeAdbCommand(["shell", "chmod", "-R", e, `"${t}/${s}"`], (i, n) => {
+          0 !== n
+            ? (this.printConsole(`设置文件权限失败: ${i}`, "error"),
+              this.showProgress("file", "设置文件权限失败", 0))
+            : (this.printConsole(`设置文件权限成功: ${t}/${s} ${e}`, "success"),
+              this.showProgress("file", `设置文件权限成功: ${t}/${s} ${e}`, 100),
+              this.listFiles(this.currentDirectory, !1));
+        }));
     },
     listApps: function (e = "", t = !1) {
       const s = document.getElementById("appList");
@@ -1486,11 +1259,7 @@ const adbUrls = [
         (i.all.forEach((t) => {
           const { packageName: n, path: o } = t;
           if (e && !n.toLowerCase().includes(e.toLowerCase())) return;
-          const r = i.enable.includes(n)
-              ? "enable"
-              : i.disabled.includes(n)
-                ? "disabled"
-                : "hide",
+          const r = i.enable.includes(n) ? "enable" : i.disabled.includes(n) ? "disabled" : "hide",
             l = document.createElement("div");
           ((l.className = "app-item"),
             (l.innerHTML = `\n                        <div class="app-icon" status="${r}">\n                            <i class="fas fa-mobile-alt"></i>\n                        </div>\n                        <div class="app-info">\n                            <div class="app-name">${n}</div>\n                            <div class="app-package">${n}</div>\n                            <div class="app-path">${o}</div>\n                        </div>\n                    `),
@@ -1525,10 +1294,8 @@ const adbUrls = [
             (e.split("\n").forEach((e) => {
               if (!e.trim()) return;
               if (e.trim().startsWith("all_packages")) return void (s = i.all);
-              if (e.trim().startsWith("enable_packages"))
-                return void (s = i.enable);
-              if (e.trim().startsWith("disable_packages"))
-                return void (s = i.disabled);
+              if (e.trim().startsWith("enable_packages")) return void (s = i.enable);
+              if (e.trim().startsWith("disable_packages")) return void (s = i.disabled);
               const t = /package:((.*?)\=)?(\S+)/g.exec(e);
               if (!t) return;
               const n = t[2],
@@ -1590,22 +1357,19 @@ const adbUrls = [
       confirm(`确定要启用应用 "${t}" 吗？`) &&
         (this.printConsole(`启用应用: ${t}`, "info"),
         this.showProgress("app", "正在启用应用...", -1),
-        this.executeAdbCommand(
-          ["shell", "/system/bin/pm", "enable", "--user", "0", e],
-          (s, i) => {
-            if (0 !== i)
-              (this.printConsole(`启用应用失败: ${s}`, "error"),
-                this.showProgress("app", "启用应用失败", 0));
-            else {
-              (this.printConsole(`已启用应用: ${t}`, "success"),
-                this.showProgress("app", `已启用应用: ${t}`, 100));
-              const s = this.apps.disabled.findIndex((t) => t === e);
-              (-1 !== s && this.apps.disabled.splice(s, 1),
-                this.apps.enable.push(e),
-                this.listApps(document.getElementById("appSearch").value));
-            }
-          },
-        ));
+        this.executeAdbCommand(["shell", "/system/bin/pm", "enable", "--user", "0", e], (s, i) => {
+          if (0 !== i)
+            (this.printConsole(`启用应用失败: ${s}`, "error"),
+              this.showProgress("app", "启用应用失败", 0));
+          else {
+            (this.printConsole(`已启用应用: ${t}`, "success"),
+              this.showProgress("app", `已启用应用: ${t}`, 100));
+            const s = this.apps.disabled.findIndex((t) => t === e);
+            (-1 !== s && this.apps.disabled.splice(s, 1),
+              this.apps.enable.push(e),
+              this.listApps(document.getElementById("appSearch").value));
+          }
+        }));
     },
     disabledApp: function (e, t) {
       confirm(`确定要停用应用 "${t}" 吗？`) &&
@@ -1632,38 +1396,32 @@ const adbUrls = [
       confirm(`确定要显示应用 "${t}" 吗？`) &&
         (this.printConsole(`显示应用: ${t}`, "info"),
         this.showProgress("app", "正在显示应用...", -1),
-        this.executeAdbCommand(
-          ["shell", "/system/bin/pm", "unhide", e],
-          (s, i) => {
-            0 !== i
-              ? (this.printConsole(`显示应用失败: ${s}`, "error"),
-                this.showProgress("app", "显示应用失败", 0))
-              : (this.printConsole(`已显示应用: ${t}`, "success"),
-                this.showProgress("app", `已显示应用: ${t}`, 100),
-                this.apps.enable.push(e),
-                this.listApps(document.getElementById("appSearch").value));
-          },
-        ));
+        this.executeAdbCommand(["shell", "/system/bin/pm", "unhide", e], (s, i) => {
+          0 !== i
+            ? (this.printConsole(`显示应用失败: ${s}`, "error"),
+              this.showProgress("app", "显示应用失败", 0))
+            : (this.printConsole(`已显示应用: ${t}`, "success"),
+              this.showProgress("app", `已显示应用: ${t}`, 100),
+              this.apps.enable.push(e),
+              this.listApps(document.getElementById("appSearch").value));
+        }));
     },
     hideApp: function (e, t) {
       confirm(`确定要隐藏应用 "${t}" 吗？`) &&
         (this.printConsole(`隐藏应用: ${t}`, "info"),
         this.showProgress("app", "正在隐藏应用...", -1),
-        this.executeAdbCommand(
-          ["shell", "/system/bin/pm", "hide", e],
-          (s, i) => {
-            if (0 !== i)
-              (this.printConsole(`隐藏应用失败: ${s}`, "error"),
-                this.showProgress("app", "隐藏应用失败", 0));
-            else {
-              (this.printConsole(`已隐藏应用: ${t}`, "success"),
-                this.showProgress("app", `已隐藏应用: ${t}`, 100));
-              const s = this.apps.enable.findIndex((t) => t === e);
-              (-1 !== s && this.apps.enable.splice(s, 1),
-                this.listApps(document.getElementById("appSearch").value));
-            }
-          },
-        ));
+        this.executeAdbCommand(["shell", "/system/bin/pm", "hide", e], (s, i) => {
+          if (0 !== i)
+            (this.printConsole(`隐藏应用失败: ${s}`, "error"),
+              this.showProgress("app", "隐藏应用失败", 0));
+          else {
+            (this.printConsole(`已隐藏应用: ${t}`, "success"),
+              this.showProgress("app", `已隐藏应用: ${t}`, 100));
+            const s = this.apps.enable.findIndex((t) => t === e);
+            (-1 !== s && this.apps.enable.splice(s, 1),
+              this.listApps(document.getElementById("appSearch").value));
+          }
+        }));
     },
     clearApp: function (e, t) {
       confirm(`确定要清除应用数据 "${t}" 吗？`) &&
@@ -1681,34 +1439,25 @@ const adbUrls = [
       confirm(`确定要卸载应用 "${t}" 吗？`) &&
         (this.printConsole(`卸载应用: ${t}`, "info"),
         this.showProgress("app", "正在卸载应用...", -1),
-        this.executeAdbCommand(
-          `shell /system/bin/pm uninstall ${e}`,
-          (e, s) => {
-            0 !== s
-              ? (this.printConsole(`卸载应用失败: ${e}`, "error"),
-                this.showProgress("app", "卸载应用失败", 0))
-              : (this.printConsole(`已卸载应用: ${t}`, "success"),
-                this.showProgress("app", `已卸载应用: ${t}`, 100),
-                setTimeout(() => {
-                  this.listApps(document.getElementById("appSearch").value, !0);
-                }, 500));
-          },
-        ));
+        this.executeAdbCommand(`shell /system/bin/pm uninstall ${e}`, (e, s) => {
+          0 !== s
+            ? (this.printConsole(`卸载应用失败: ${e}`, "error"),
+              this.showProgress("app", "卸载应用失败", 0))
+            : (this.printConsole(`已卸载应用: ${t}`, "success"),
+              this.showProgress("app", `已卸载应用: ${t}`, 100),
+              setTimeout(() => {
+                this.listApps(document.getElementById("appSearch").value, !0);
+              }, 500));
+        }));
     },
     installApp: function () {
-      alert(
-        "应用选择提示：\n✔ 请在「设备目录」中选择应用\n✖ 不要在「最近/下载内容」中选择应用",
-      );
+      alert("应用选择提示：\n✔ 请在「设备目录」中选择应用\n✖ 不要在「最近/下载内容」中选择应用");
       var e = !1;
       this.chooseFile(
         { title: "请选择应用", multiple: !1, mime: "*/*", path: "/" },
         (t) => {
           if (e) return;
-          ((e = !0),
-            this.printConsole(
-              "选择了文件：" + JSON.stringify(t.files),
-              "info",
-            ));
+          ((e = !0), this.printConsole("选择了文件：" + JSON.stringify(t.files), "info"));
           const s = t.files[0];
           s && s.startsWith("/")
             ? (this.printConsole("正在检查应用安装权限...", "info"),
@@ -1754,32 +1503,19 @@ const adbUrls = [
                       .pop()}`,
                     "success",
                   ),
-                  this.showProgress(
-                    0 === t ? "app" : "file",
-                    "安装应用成功",
-                    100,
-                  ),
+                  this.showProgress(0 === t ? "app" : "file", "安装应用成功", 100),
                   setTimeout(() => {
-                    this.listApps(
-                      document.getElementById("appSearch").value,
-                      !0,
-                    );
+                    this.listApps(document.getElementById("appSearch").value, !0);
                   }, 500))
                 : (this.printConsole(`安装应用失败: ${i}`, "error"),
-                  this.showProgress(
-                    0 === t ? "app" : "file",
-                    "安装应用失败",
-                    0,
-                  )),
-                e != s &&
-                  this.executeAdbCommand(`shell rm -f ${s}`, (e, t) => {}));
+                  this.showProgress(0 === t ? "app" : "file", "安装应用失败", 0)),
+                e != s && this.executeAdbCommand(`shell rm -f ${s}`, (e, t) => {}));
             },
             null,
             0,
           ));
       };
-      if (((e = e.startsWith("file://") ? e.substring(7) : e), 1 === t))
-        return s(e, e);
+      if (((e = e.startsWith("file://") ? e.substring(7) : e), 1 === t)) return s(e, e);
       const i = e,
         n = "/data/local/tmp/tmp.apk";
       let o = -1;
@@ -1797,8 +1533,7 @@ const adbUrls = [
             0 !== t
               ? (this.printConsole(`上传应用失败: ${e}`, "error"),
                 this.showProgress("app", "上传应用失败", 0))
-              : (-1 === o &&
-                  this.showProgress("app", "上传应用成功，等待安装...", -1),
+              : (-1 === o && this.showProgress("app", "上传应用成功，等待安装...", -1),
                 this.printConsole(
                   `上传应用成功: ${i
                     .split("/")
@@ -1827,17 +1562,13 @@ const adbUrls = [
       n.className = "console-line" + (t ? ` ${t}-output` : "");
       const o = new Date().toTimeString().substr(0, 8),
         r = document.createElement("span");
-      ((r.className = "timestamp"),
-        (r.innerText = `[${o}]`),
-        s && n.appendChild(r));
+      ((r.className = "timestamp"), (r.innerText = `[${o}]`), s && n.appendChild(r));
       const l = document.createElement("span");
       if (((l.id = "message"), n.appendChild(l), e)) {
         let t = document.createElement("div");
         t.style.display = "inline-block";
         for (let s of e.split("\n"))
-          ((t.innerHTML = s),
-            l.appendChild(t),
-            (t = document.createElement("div")));
+          ((t.innerHTML = s), l.appendChild(t), (t = document.createElement("div")));
       }
       return (i.appendChild(n), (i.scrollTop = i.scrollHeight), n);
     },
@@ -1881,9 +1612,7 @@ const adbUrls = [
     },
     showProgress: function (e, t, s) {
       clearTimeout(this.hideProgressTimer);
-      const i = document
-        .getElementById(`${e}Progress`)
-        .querySelector(".progress-bar");
+      const i = document.getElementById(`${e}Progress`).querySelector(".progress-bar");
       (-1 === s
         ? (i.classList.add("indeterminate"), (i.style.width = "100%"))
         : (i.classList.remove("indeterminate"), (i.style.width = `${s}%`)),
@@ -1897,9 +1626,7 @@ const adbUrls = [
     },
     setProgress: function (e, t, s) {
       clearTimeout(this.hideProgressTimer);
-      const i = document
-          .getElementById(`${e}Progress`)
-          .querySelector(".progress-bar"),
+      const i = document.getElementById(`${e}Progress`).querySelector(".progress-bar"),
         n = document.getElementById(`${e}ProgressText`);
       (() => {
         (-1 === s
@@ -1915,9 +1642,7 @@ const adbUrls = [
     },
     simulateProgress: function (e, t, s) {
       let i = Date.now();
-      const n = document
-          .getElementById(`${e}Progress`)
-          .querySelector(".progress-bar"),
+      const n = document.getElementById(`${e}Progress`).querySelector(".progress-bar"),
         o = document.getElementById(`${e}ProgressText`),
         r = () => {
           const l = Date.now() - i,
@@ -1951,9 +1676,7 @@ const adbUrls = [
           plus.android.importClass("android.provider.DocumentsContract")),
         d = plus.android.importClass("android.os.Environment"),
         a = new r(r.ACTION_GET_CONTENT);
-      if (
-        (a.addCategory(r.CATEGORY_OPENABLE), a.setType(e.mime || "*/*"), e.path)
-      ) {
+      if ((a.addCategory(r.CATEGORY_OPENABLE), a.setType(e.mime || "*/*"), e.path)) {
         let t = `:${e.path}`;
         (t.endsWith("/") && t.substring(0, t.length - 1),
           a.putExtra(
@@ -1971,8 +1694,7 @@ const adbUrls = [
           const a = l.getClipData(),
             h = [];
           if (a && a.getItemCount() > 0)
-            for (let e = 0; e < a.getItemCount(); e++)
-              h.push(a.getItemAt(e).getUri());
+            for (let e = 0; e < a.getItemCount(); e++) h.push(a.getItemAt(e).getUri());
           else l.getData() && h.push(l.getData());
           t &&
             t({
@@ -1982,22 +1704,15 @@ const adbUrls = [
                   if ("file" === t.toLowerCase()) return e.getPath();
                   if ("content" === t.toLowerCase()) {
                     const t = e.getPath();
-                    if (t.startsWith("/external_files"))
-                      return "/sdcard" + t.substring(15);
+                    if (t.startsWith("/external_files")) return "/sdcard" + t.substring(15);
                   }
                   if (c.isDocumentUri(n, e)) {
                     const t = c.getDocumentId(e).split(":"),
                       s = t[0];
                     if ("primary" === s.toLowerCase())
-                      return (
-                        d.getExternalStorageDirectory().toString() + "/" + t[1]
-                      );
+                      return d.getExternalStorageDirectory().toString() + "/" + t[1];
                     if ("home" === s.toLowerCase())
-                      return (
-                        d.getExternalStorageDirectory().toString() +
-                        "/Documents/" +
-                        t[1]
-                      );
+                      return d.getExternalStorageDirectory().toString() + "/Documents/" + t[1];
                   }
                   return o.VERSION.SDK_INT >= 29
                     ? e.toString()
@@ -2008,9 +1723,7 @@ const adbUrls = [
                             r = [o];
                           try {
                             if (
-                              ((i = n
-                                .getContentResolver()
-                                .query(e, r, t, s, null)),
+                              ((i = n.getContentResolver().query(e, r, t, s, null)),
                               null != i && i.moveToFirst())
                             ) {
                               const e = i.getColumnIndexOrThrow(o);
@@ -2027,10 +1740,7 @@ const adbUrls = [
               ),
             });
         }),
-        n.startActivityForResult(
-          r.createChooser(a, e.title || "请选择文件"),
-          i,
-        ));
+        n.startActivityForResult(r.createChooser(a, e.title || "请选择文件"), i));
     },
   },
   parseCommand = (e) => (e || "").match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [],
@@ -2045,10 +1755,7 @@ function permToNumber(e) {
   ].reduce((e, t) => e + t, 0);
   for (let e = 0; e < 9; e += 3) {
     const i = t.slice(e, e + 3);
-    s +=
-      ("r" === i[0] ? 4 : 0) +
-      ("w" === i[1] ? 2 : 0) +
-      (i[2].match(/[xsStT]/) ? 1 : 0);
+    s += ("r" === i[0] ? 4 : 0) + ("w" === i[1] ? 2 : 0) + (i[2].match(/[xsStT]/) ? 1 : 0);
   }
   return i > 0 ? i + s : s;
 }

@@ -1,0 +1,17 @@
+{
+  "name": "r1-control",
+  "private": true,
+  "description": "Static control pages for the Phicomm R1 speaker",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && node scripts/check-assets.mjs && node scripts/check-scripts.mjs",
+    "test": "python3 -m unittest discover -s tests -v"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
