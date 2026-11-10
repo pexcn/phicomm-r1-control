@@ -78,18 +78,8 @@ h3 {
     script.id = "refresh";
     document.body.appendChild(script);
   }
-  script.onload = () => {
-    var Storage = localStorage;
-    Storage.setItem("refresh.js", script.src);
-  };
-  script.onerror = () => {
-    var Storage = localStorage;
-    if (Storage.getItem("refresh.js")) {
-      var script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = Storage.getItem("refresh.js");
-      document.body.appendChild(script);
-    }
+  script.onerror = function () {
+    h3.textContent = '页面资源加载失败，请检查本站资源或刷新重试。';
   };
   script.src = R1Config.assetUrl("refresh.js?t=" + Date.now());
 }

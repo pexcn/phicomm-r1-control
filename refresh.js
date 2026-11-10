@@ -1,5 +1,5 @@
 if (!window.control_host) {
-	window.control_host = 'r1.wxfsq.com';
+	window.control_host = new URL(R1Config.assetBaseUrl).host;
 }
 const web_ver = 2863;
 const downurl = 'https://xfdown.lanzouq.com/';

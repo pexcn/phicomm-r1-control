@@ -1,19 +1,20 @@
+var config_wifi_asset_base = new URL('../', document.currentScript.src);
 document.body.style = 'background-color:#A9D0F5;';
 var link = document.createElement('link');
 link.rel = 'stylesheet';
-link.href = 'http://' + control_host + '/new_r1_control.css';
+link.href = new URL('new_r1_control.css', config_wifi_asset_base).href;
 document.getElementsByTagName("head")[0].appendChild(link);
 
 var script = document.createElement('script');
 script.onerror = function () {
-	var script = document.createElement('script');
-	script.type = 'text/javascript';
-	script.src = 'http://' + control_host + '/jquery-3.6.0.min.js';
-	main_div.appendChild(script);
-}
+	this.onerror = null;
+	var fallback = document.createElement('script');
+	fallback.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js';
+	document.head.appendChild(fallback);
+};
 script.type = 'text/javascript';
-script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js';
-document.getElementsByTagName("head")[0].appendChild(script);
+script.src = new URL('jquery-3.6.0.min.js', config_wifi_asset_base).href;
+document.head.appendChild(script);
 
 var config_wifi_div = document.createElement("div");
 config_wifi_div.style = 'text-align:center;';

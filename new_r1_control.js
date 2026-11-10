@@ -1,6 +1,6 @@
 var r1_loader_base = new URL('./', document.currentScript.src).href;
 if (!control_host) {
-	var control_host = 'r1.wxfsq.com';
+	var control_host = new URL(r1_loader_base).host;
 }
 if (!ver) {
 	var ver = 1000;
