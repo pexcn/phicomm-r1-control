@@ -69,7 +69,7 @@ class BrowserTests(unittest.TestCase):
         self.page.get_by_role("button", name="确定", exact=True).click()
         self.page.get_by_role("button", name="进入配网页面", exact=True).click()
         self.page.wait_for_selector("#ssid")
-        self.assertTrue(self.page.url.startswith(self.base + "config_wifi/"))
+        self.assertTrue(self.page.url.startswith(self.base + "pages/wifi/"))
         self.assertEqual(self.page.locator("#encryption option").count(), 3)
         self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
 
@@ -77,12 +77,12 @@ class BrowserTests(unittest.TestCase):
         fallback = []
         def cdn(route):
             fallback.append(route.request.url)
-            route.fulfill(path=ROOT / "jquery-3.6.0.min.js")
+            route.fulfill(path=ROOT / "assets/vendor/jquery/jquery-3.6.0.min.js")
         self.context.route("https://cdnjs.cloudflare.com/ajax/libs/jquery/**", cdn)
-        self.page.goto(self.base + "config_wifi/")
+        self.page.goto(self.base + "pages/wifi/")
         self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
         self.assertEqual(fallback, [])
-        self.context.route(self.base + "jquery-3.6.0.min.js", lambda route: route.abort())
+        self.context.route(self.base + "assets/vendor/jquery/jquery-3.6.0.min.js", lambda route: route.abort())
         self.page.reload()
         self.page.wait_for_function("typeof jQuery !== 'undefined'")
         self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
@@ -90,13 +90,13 @@ class BrowserTests(unittest.TestCase):
         # 兼容旧配网入口；资源基址应取脚本所在目录。
         self.context.route(self.base + "legacy-wifi.html", lambda route: route.fulfill(
             content_type="text/html", body='<html><head></head><body>'
-            '<script src="config_wifi/main.js"></script></body></html>'))
+            '<script src="assets/js/tools/legacy-wifi.js"></script></body></html>'))
         self.page.goto(self.base + "legacy-wifi.html")
         self.page.wait_for_function("typeof jQuery !== 'undefined'")
         self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
         self.assertEqual(len(fallback), 2)
         self.assertEqual(self.page.locator('link[rel="stylesheet"]').get_attribute("href"),
-                         self.base + "new_r1_control.css")
+                         self.base + "assets/css/classic.css")
 
     def test_queue_deletion_uses_current_confirmed_connection(self):
         self.classic()
@@ -120,6 +120,25 @@ class BrowserTests(unittest.TestCase):
         self.page.evaluate("state.ver=1887; resetEchoVersionConfirmation()")
         self.assertFalse(self.page.evaluate("hasMusicQueueCapability()"))
 
+    def test_relocated_tool_pages_load_local_assets(self):
+        missing = []
+        self.page.on("response", lambda response: missing.append(response.url)
+                     if response.status == 404 and response.url.startswith(self.origin) else None)
+        for name in ["adb", "dlna", "mdns", "device-scan"]:
+            with self.subTest(page=name):
+                self.page.goto(self.base + f"pages/{name}/")
+                self.assertEqual(self.page.evaluate("R1Config.assetBaseUrl"), self.base)
+                self.assertGreater(len(self.page.locator("body").inner_text()), 0)
+        self.assertEqual(missing, [])
+
+    def test_default_music_cover_uses_local_speaker_icon(self):
+        self.classic()
+        self.page.evaluate("buildMusicPanel(ui.container)")
+        self.page.wait_for_function("ui.musicPic.complete && ui.musicPic.naturalWidth > 0")
+        self.assertEqual(self.page.evaluate("ui.musicPic.src"), self.base + "favicon.svg")
+        self.page.evaluate("ui.musicPic.src='missing-album-cover.jpg'")
+        self.page.wait_for_function("ui.musicPic.src===ui.musicPic.placeholderSrc && ui.musicPic.complete")
+
     def test_custom_eq_save_reload_and_apply(self):
         self.classic()
         setup = """() => {
@@ -142,7 +161,7 @@ class BrowserTests(unittest.TestCase):
 
     def test_modern_panels_at_mobile_width(self):
         self.page.set_viewport_size({"width": 390, "height": 900})
-        self.page.goto(self.base + "newui/")
+        self.page.goto(self.base + "pages/modern/")
         self.page.get_by_role("button", name="关闭", exact=True).click()
         for name in ["音乐", "屏幕", "音效", "蓝牙", "设备"]:
             self.page.get_by_role("button", name=name, exact=True).filter(visible=True).click()
@@ -150,7 +169,7 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate("document.documentElement.scrollWidth"), 390)
 
     def test_scan_abort_closes_sockets_and_settles_promise(self):
-        self.page.goto(self.base + "newui/")
+        self.page.goto(self.base + "pages/modern/")
         self.page.wait_for_function("typeof R1WS !== 'undefined'")
         result = self.page.evaluate("""async () => {
             const sockets=[];
@@ -234,9 +253,9 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate("sockets[1].url"), "ws://192.0.2.10/")
         self.assertEqual(self.page.evaluate("R1Config.parseDeviceAddress(state.ip).url"),
                          "ws://192.0.2.10/")
-        self.page.goto(base + "newui/")
+        self.page.goto(base + "pages/modern/")
         self.page.get_by_role("button", name="关闭", exact=True).wait_for()
-        self.assertEqual(self.page.url, base + "newui/")
+        self.assertEqual(self.page.url, base + "pages/modern/")
         self.assertEqual(self.page.evaluate("R1Config.assetBaseUrl"), base)
         self.page.get_by_placeholder("IP、主机名或 wss://代理地址").fill(endpoint)
         self.page.get_by_role("dialog").get_by_role("button", name="连接", exact=True).click()
@@ -250,7 +269,7 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate("sockets[1].url"), endpoint)
         self.assertEqual(self.page.evaluate("localStorage.r1_last_ip"), endpoint)
         self.assertEqual(self.page.get_by_role("button", name="切换到 HTTP").count(), 0)
-        self.page.goto(base + "config_wifi/")
+        self.page.goto(base + "pages/wifi/")
         self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
         self.assertTrue(self.page.url.startswith(base))
 

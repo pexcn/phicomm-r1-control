@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=0,viewport-fit=cover" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="renderer" content="webkit" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#1976d2" />
+    <title>R1音箱控制器</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="../../assets/images/app-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <script src="../../assets/js/shared/config.js"></script>
+
+    <!-- React（本地 vendor，内网/热点无外网也能用；加载失败自动回退 CDN） -->
+    <script src="../../assets/js/modern/vendor-loader.js"></script>
+
+    <!-- 新版外壳与功能页基线（变量挂在 --mui-* 上，亮暗主题自动跟随） -->
+    <link rel="stylesheet" type="text/css" href="../../assets/css/modern/theme.css?v=7" />
+    <!-- 样式基线（播放器样式在此文件中，后加载优先生效） -->
+    <link rel="stylesheet" type="text/css" href="../../assets/css/modern/app.css?v=11" />
+    <!-- 播放器适配补丁（最后加载） -->
+    <link rel="stylesheet" type="text/css" href="../../assets/css/modern/player.css?v=7" />
+    <!-- WebSocket 通信层 -->
+    <!-- 图标引擎：与旧版一致的 iconify-icon（iPhone 兼容）；加载失败时内联 SVG 兜底 -->
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+    <script type="text/javascript" src="../../assets/js/modern/websocket.js?v=14"></script>
+    <!-- 图标（内联 SVG，无外部依赖） -->
+    <script type="text/javascript" src="../../assets/js/modern/icons.js?v=2"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="../../assets/js/modern/bootstrap.js"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 
 `next` 已整合作者 2026-11-10 公开发布的网页快照（网页版本 `2863`），
 包含原控制界面、新 UI、配网、设备扫描和 ADB 工具页面。
-主程序保存为可读的 [js/r1_control.js](js/r1_control.js)。
+主程序保存为可读的 [assets/js/classic/controller.js](assets/js/classic/controller.js)。
 
 ## 使用
 
@@ -14,7 +14,7 @@ Python 3.10+ 可直接启动页面和音乐接口转发，不需要安装服务�
 python3 serve.py
 ```
 
-打开 `http://127.0.0.1:8000/`，从连接页可进入 `newui/`。
+打开 `http://127.0.0.1:8000/`，从连接页可进入 `pages/modern/`。
 需要其他设备访问时使用 `--bind 0.0.0.0`；端口可用 `--port` 指定。
 音乐接口默认转发到作者服务，服务地址可用 `--upstream` 指定。
 
@@ -22,10 +22,31 @@ python3 serve.py
 静态部署支持页面和使用作者 CORS 接口的搜索；新 UI 的排行榜还需同源 API 转发，
 可运行 `serve.py` 或在自己的服务器配置 `/api/hotlist`。
 
-自部署设置位于 [js/config.js](js/config.js)：
+自部署设置位于 [assets/js/shared/config.js](assets/js/shared/config.js)：
 `musicApiUrl` 控制搜索、封面和歌词接口，`serviceBaseUrl` 控制排行榜等服务接口，
 `scanProxyBaseUrl` 可选，默认直接连接局域网设备。
 资源地址从配置脚本所在目录推导，支持项目子目录部署。
+
+## 目录
+
+| 路径 | 用途 |
+| --- | --- |
+| `index.html` | 原控制界面入口 |
+| `pages/` | `modern`、`wifi`、`adb`、`dlna`、`mdns`、`device-scan` 页面 |
+| `assets/js/` | `classic`、`modern`、`shared`、`tools` 脚本 |
+| `assets/css/` | 页面样式 |
+| `assets/images/` | 应用图标、唱片和唱针图片 |
+| `assets/vendor/` | 第三方浏览器库及其许可 |
+| `scripts/` | 开发检查工具 |
+| `tests/` | 浏览器与接口回归 |
+| `docs/` | 上游快照分析与协议记录 |
+
+页面入口由 `newui/`、`config_wifi/`、`adb/` 等旧路径迁移至 `pages/`，
+部署时应整体上传当前目录并更新书签。历史分析报告中的路径仍指当时的上游快照。
+根目录的 `new_r1_control.js` 保留为音箱固件固定脚本地址的兼容入口。
+配网页保留内联样式和逻辑，供 Android App 保存为单文件离线页面。
+
+## 连接地址
 
 连接页和新 UI 都支持以下地址，重连时保留自定义端口、代理路径和查询参数：
 

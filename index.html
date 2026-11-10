@@ -17,151 +17,15 @@
       name="keywords"
       content="R1,斐讯R1,R1音箱,R1音箱控制,R1音箱控制页面"
     />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" type="image/png" sizes="192x192" href="./icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/app-icon.png" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <script type="text/javascript">
-      window.subTitle = "R1音箱控制页面";
-    </script>
-    <script src="./js/config.js"></script>
-    <style type="text/css">
-      html {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-
-      .body {
-        background: linear-gradient(145deg, #4c7ec3, #9ac4e8, #4a8ec7);
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-attachment: fixed;
-        background-size: cover;
-      }
-
-      a {
-        color: white;
-      }
-
-      h3 {
-        text-align: center;
-        color: white;
-      }
-
-      .reload_btn {
-        margin: 15px 0px 15px 0px;
-        width: 100px;
-        height: 50px;
-        border-radius: 25px;
-        background: rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(4px);
-        border: none;
-        box-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.2),
-          0 6px 20px 0 rgba(0, 0, 0, 0.19);
-      }
-
-      .reload_btn:active {
-        background: rgba(255, 255, 255, 0.8);
-        transform: translateY(3px);
-      }
-    </style>
+    <script src="assets/js/shared/config.js"></script>
+    <link rel="stylesheet" href="./assets/css/entry.css" />
   </head>
 
   <body class="body">
     <script id="refresh" type="text/javascript"></script>
-    <script type="text/javascript">
-      if (!!window.ActiveXObject || "ActiveXObject" in window) {
-        alert("抱歉，本页面不支持IE内核！");
-      }
-
-      window.addEventListener("load", function () {
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("./sw.js").catch(function (error) {
-            console.warn("Service Worker 注册失败", error);
-          });
-        }
-      });
-
-      var Storage = localStorage;
-      loadjs();
-
-      var control_host = location.host;
-      var custom_ip = true;
-      var ip = "";
-      function loadjs() {
-        if (!window._loadjs) {
-          window._loadjs = true;
-        } else {
-          return;
-        }
-
-        var temp_div = document.createElement("div");
-        temp_div.id = "temp_div";
-        temp_div.style = "text-align:center;";
-        document.body.appendChild(temp_div);
-
-        var h3 = document.createElement("h3");
-        h3.innerHTML = "页面加载中。";
-        temp_div.appendChild(h3);
-
-        var btn = document.createElement("input");
-        btn.type = "button";
-        btn.classList.add("reload_btn");
-        btn.value = "刷新页面";
-        btn.onclick = function () {
-          time = new Date().getTime();
-          setCookie("time", time, 604800);
-          location.reload();
-        };
-        temp_div.appendChild(btn);
-
-        var params = location.href
-          .substr(location.href.indexOf("?") + 1)
-          .split("&");
-        for (var i = 0; i < params.length; i++) {
-          var param = params[i].split("=");
-          if (param[0] == "ip") {
-            ip = param[1];
-            if (ip.split(":").length < 2) {
-              ip += ":8080";
-            }
-            custom_ip = false;
-          }
-        }
-
-        var script = document.getElementById("refresh");
-        script.onerror = function () {
-          h3.textContent = '页面资源加载失败，请检查本站资源或刷新重试。';
-        };
-        script.src = R1Config.assetUrl("refresh.js?t=" + Date.now());
-      }
-
-      function isWechatOrQQ() {
-        const ua = navigator.userAgent.toLowerCase();
-        return (
-          ua.includes("micromessenger") ||
-          /\sqq\//.test(ua) ||
-          ua.includes("v1_and_sq_")
-        );
-      }
-
-      function setCookie(cname, cvalue, exdays) {
-        var d = new Date();
-        d.setTime(d.getTime() + exdays * 1000);
-        var expires = "expires=" + d.toGMTString();
-        document.cookie = cname + "=" + cvalue + "; " + expires;
-      }
-
-      function getCookie(cname) {
-        var name = cname + "=";
-        var ca = document.cookie.split(";");
-        for (var i = 0; i < ca.length; i++) {
-          var c = ca[i].trim();
-          if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
-        }
-        return "";
-      }
-    </script>
+    <script src="./assets/js/classic/entry.js"></script>
   </body>
 </html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AirPlay设备扫描工具</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="../../assets/images/app-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <!--<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>-->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../assets/css/tools/mdns.css" />
+  <script src="../../assets/js/shared/config.js"></script>
+</head>
+  <body>
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-wifi"></i> AirPlay设备扫描工具</h1>
+        <!--<p class="subtitle">使用mDNS协议扫描同一网络中的所有可用设备</p>-->
+      </header>
+
+      <div class="dashboard">
+        <div class="card" style="grid-column: span 2">
+          <div class="card-title">
+            <i class="fas fa-network-wired"></i> 网络控制面板
+          </div>
+          <div class="controls">
+            <p>
+              点击下方按钮开始扫描网络中的设备。扫描可能需要几秒钟时间，请耐心等待。
+            </p>
+
+            <div class="btn-group">
+              <button id="scanBtn" class="btn-scan">
+                <i class="fas fa-search"></i> 开始扫描
+              </button>
+              <button id="stopBtn" class="btn-stop" disabled>
+                <i class="fas fa-stop"></i> 停止扫描
+              </button>
+
+              <button
+                onclick="dlna()"
+                style="
+                  color: white;
+                  background: linear-gradient(45deg, #3498db, #2980b9);
+                "
+              >
+                <i class="fa fa-wifi"></i> DLNA设备扫描
+              </button>
+            </div>
+
+            <div class="status" class="btn-scan">
+              <div id="statusIndicator" class="status-indicator idle"></div>
+              <span id="statusText">等待环境初始化...</span>
+            </div>
+
+            <!-- <div class="service-types">
+                        <p>扫描的服务类型：</p>
+                        <div class="tags">
+                            <span class="tag">_http._tcp</span>
+                            <span class="tag">_printer._tcp</span>
+                            <span class="tag">_smb._tcp</span>
+                            <span class="tag">_ssh._tcp</span>
+                            <span class="tag">_googlecast._tcp</span>
+                        </div>
+                    </div>-->
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 2; display: none">
+          <div class="card-title">
+            <i class="fas fa-chart-pie"></i> 设备分布统计
+          </div>
+          <div id="chart"></div>
+        </div>
+
+        <div class="card" style="grid-column: span 2">
+          <div class="card-title">
+            <i class="fas fa-laptop"></i> 发现的设备列表
+          </div>
+          <div class="devices-list" id="devicesList"></div>
+        </div>
+      </div>
+
+      <footer>
+        <p>AirPlay扫描工具</p>
+      </footer>
+    </div>
+
+    <script src="../../assets/js/tools/mdns-page.js"></script>
+  </body>
+</html>
