@@ -158,7 +158,7 @@ Android 官方在 [2017-12 安全公告](https://source.android.com/docs/securit
 | 队列操作 | 没有新增的 `QueueEdit` 接口及对应处理方法 | 新增“下一首插队、移动位置、删除队列项”；网络播放器实现这些操作 | `MsgHandler` 方法号 27/28/29；`QueueEdit`；`new_NetPlayer.insertNext/moveInQueue/removeFromQueue` |
 | 蓝牙服务策略 | 已有蓝牙开关、扫描、配对、A2DP 和服务常开等基础能力 | 增加持久化的独立蓝牙服务允许/禁止开关；与 DLNA/AirPlay/MiPlay 统一处理服务状态 | `Set_Bluetooth_Open`；`bluetooth_open`；`notifyServiceSettingsChanged/reconcileExternalServices` |
 | 播放源切换与回调 | 原有多播放源实现 | 新增外部会话仲裁、当前会话回调检查和引擎适配层，处理接管、断开、静音以及旧会话状态 | `ExternalSessionArbiter`、`ExternalSession`、`SessionCallbackGuard`、`MusicEngineAdapter`、`DlnaExoEngine` |
-| 底层混音器 | 没有 `TinyMixController` 类及新增接口族 | 增加硬件 mixer 查询、枚举、读写及 PCM 状态监听；为分路音量等新网页控件提供设备端接口 | `TinyMixController`；`setMixerValue/getMixerValue/getMixerValues/getTinyMixerAll/listAllControls` |
+| 底层混音器 | 没有 `TinyMixController` 类及新增接口族 | 增加硬件 mixer 查询、枚举、读写、配置保存与恢复；为分路音量等新网页控件提供设备端接口 | `TinyMixController`；`setMixerValue/getMixerValue/getMixerValues/getTinyMixerAll/listAllControls`；未确认 PCM 监听已启用 |
 | 上传与安装 | 已经能上传文件、触发安装；不是全无上传功能 | 新增任务化上传、状态查询、批次 begin/seal/abort/resolve、取消/删除、历史和安装保护；安装后结合服务就绪状态处理结果 | `com.xiaofei.upload.*`；`/upload/status`、`/upload/batch/*`；`UploadTaskManager` 和 EchoService 上传健康检查线程 |
 | 截屏 | 旧实现创建 `DisplayMetrics` 后反射调用截图接口 | 改为用 `WindowManager` 取得实际屏幕尺寸，检查空值及无效尺寸，再调用截图接口 | 两版 `Screencap.screenShotByReflect` 和 1.8.87 `SurfaceControl.screenshot` 路径 |
 | 音频可视化/灯效实现 | 已有音频可视化及灯光功能 | 新增并接入 `VisualizerEffect` 等实现，把多个 FFT 效果分支抽到独立代码；还有新的 LED 相关类 | `PlayerVisualizer` 调用 `VisualizerEffect.effect0..effect4`；不能仅靠新类数量断言新增了多少种可见灯效 |
@@ -216,3 +216,25 @@ AirPlay/DLNA、断开后恢复，以及修复说明。
 ```
 
 结论绑定上述样本，不把同名、同版本号的其他构建视为已验证。
+
+## 七、升级取舍与副作用
+
+基础播放和蓝牙等功能在 1.8.73 已存在；若当前运行稳定，单纯为了版本号无需立即升级。
+希望使用 MiPlay、队列编辑、新的蓝牙服务策略或上传安装任务管理时，1.8.87 有明确功能价值。
+它改动了核心播放器和服务协调，不能将其视为已经验证无兼容风险的小补丁。
+
+补充核对的默认行为：
+
+- `MiPlayRuntime.start` 以 `miplay_open` 和 `Service_Normally_Open` 判断是否启用，
+  两个缺省值均为 1。旧版也使用相同的常开设置键；若用户原本常开，升级后可能直接增加 MiPlay 活动。
+  新增接收、发现及后台逻辑可能增加资源占用，但本次没有 CPU、内存或长时间运行测量。
+- 蓝牙、AirPlay、DLNA 和 MiPlay 的启停与会话接管逻辑有变化，
+  常用投放组合的断开、恢复、语音打断和重启恢复需要真机检查；这不是已观察到故障的声明。
+- `TinyMixController.setMixerValue` 成功后保存设置，初始化路径会读取并恢复已保存的 mixer 值。
+  首次使用为空的设置集合不表示会无条件重写全部音量；但手动调整分路音量后，其效果可以持续。
+- 普通覆盖更新通常保留应用数据；新增配置和硬件状态不保证在覆盖回旧 APK 时全部自动复原。
+  两份样本同证书、同清单版本号，不等于本次已经实测过用户设备上的降级和完整恢复。
+
+升级前保留 1.8.73 原件，记录当前音量、EQ、播放器和投放开关。
+若尝试升级，优先用覆盖更新保留数据，关闭不用的 MiPlay，先验证原有使用方式，再逐项启用新功能。
+本次没有执行升级、降级或用户数据迁移。
