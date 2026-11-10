@@ -2798,12 +2798,12 @@ function buildMusicPanel(e) {
   t.appendChild(i);
   var n = makeEl("img", {
     id: "music_pic",
-    src: R1Config.assetUrl("pic/nopic.jpg"),
+    src: R1Config.assetUrl("favicon.svg"),
     style:
       "display:block;width:240px;height:240px;border-radius:50%;object-fit:cover;border:4px solid rgba(var(--mask-color),0.25);box-shadow:0 6px 24px rgba(0,0,0,0.35);-webkit-animation:img 30s linear infinite;animation:img 30s linear infinite;animation-play-state:paused;user-select:none;-webkit-user-drag:none",
     draggable: "false",
   });
-  ((n.nopic = R1Config.assetUrl("pic/nopic.jpg")),
+  ((n.placeholderSrc = R1Config.assetUrl("favicon.svg")),
     (n.onload = function () {
       updateCoverBackground();
     }),
@@ -2812,7 +2812,7 @@ function buildMusicPanel(e) {
         this._coverPending ||
         this._coverLoading ||
         (restoreCoverBackground(),
-        this.src !== this.nopic && (this.src = this.nopic));
+        this.src !== this.placeholderSrc && (this.src = this.placeholderSrc));
     }),
     (ui.musicPic = n),
     i.appendChild(n));
@@ -3417,7 +3417,7 @@ function updateFullscreenBg(e) {
           ui.musicPic.complete &&
           0 !== ui.musicPic.naturalWidth &&
           ui.musicPic.src &&
-          -1 === ui.musicPic.src.indexOf("nopic") &&
+          -1 === ui.musicPic.src.indexOf("favicon.svg") &&
           ui.musicPic._failedBackgroundCover !== ui.musicPic.src
             ? safeBackgroundUrl(ui.musicPic.src)
             : "",
@@ -3677,7 +3677,7 @@ function updateFullscreenTitle() {
       ui.fullscreenCover)
     ) {
       var i = ui.musicPic && ui.musicPic.src;
-      if (i && -1 === i.indexOf("nopic")) {
+      if (i && -1 === i.indexOf("favicon.svg")) {
         var n = ui.fullscreenCover;
         if (
           n.src !== i &&
@@ -4741,12 +4741,12 @@ function transitionCoverImage(e, t, i, n) {
 }
 function updateMusicCover(e) {
   var t = ui.musicPic;
-  if (t && (e = e || t.nopic) && t._requestedCover !== e) {
+  if (t && (e = e || t.placeholderSrc) && t._requestedCover !== e) {
     (waitMusicCover(),
       (t._coverPending = !1),
-      (t._coverLoading = e !== t.nopic),
+      (t._coverLoading = e !== t.placeholderSrc),
       (t._requestedCover = e),
-      e === t.nopic && restoreCoverBackground());
+      e === t.placeholderSrc && restoreCoverBackground());
     var i = t._coverRequest;
     (clearTimeout(t._coverTimer), (t.style.opacity = "1"));
     var n = new Image();
@@ -4756,7 +4756,7 @@ function updateMusicCover(e) {
       (n.onerror = function () {
         t === ui.musicPic &&
           t._coverRequest === i &&
-          ((t._coverLoading = !1), restoreCoverBackground(), a(t.nopic || e));
+          ((t._coverLoading = !1), restoreCoverBackground(), a(t.placeholderSrc || e));
       }),
       (n.src = e));
   }
@@ -4772,10 +4772,10 @@ function updateMusicCover(e) {
         },
         function () {
           ((t._coverLoading = !1),
-            n === e && n !== t.nopic && (t._failedBackgroundCover = ""));
+            n === e && n !== t.placeholderSrc && (t._failedBackgroundCover = ""));
         },
       ),
-      state.lrcFullscreen && ui.fullscreenCover && n !== t.nopic)
+      state.lrcFullscreen && ui.fullscreenCover && n !== t.placeholderSrc)
     ) {
       var a = ui.fullscreenCover;
       ((a._requestedCover = n), (a._coverRequest = (a._coverRequest || 0) + 1));
@@ -4842,7 +4842,7 @@ function updateCoverBackground() {
     var e = safeBackgroundUrl(ui.musicPic.src);
     if (
       !e ||
-      e.indexOf("nopic") > -1 ||
+      e.indexOf("favicon.svg") > -1 ||
       (ui.musicPic.complete && 0 === ui.musicPic.naturalWidth) ||
       ui.musicPic._failedBackgroundCover === e
     )
@@ -5944,7 +5944,7 @@ function fetchTrackInfo() {
           } else
             (ui.musicPic &&
               ui.musicPic._coverPending &&
-              updateMusicCover(ui.musicPic.nopic),
+              updateMusicCover(ui.musicPic.placeholderSrc),
               (state.lyrics = [[-1, "暂无歌词"]]));
           (state.musicInfo &&
             !state.lyricTiming.length &&
@@ -5987,7 +5987,7 @@ function fetchTrackInfo() {
                   (state.lyrics = [[-1, "暂无歌词"]]),
                   ui.musicPic &&
                     ui.musicPic._coverPending &&
-                    updateMusicCover(ui.musicPic.nopic),
+                    updateMusicCover(ui.musicPic.placeholderSrc),
                   updateLyrics(!0));
               },
             }));
@@ -6194,7 +6194,7 @@ function updatePlayerState(e) {
             setPageTitle(document.title),
             ui.musicPic &&
               ((ui.musicPic._coverTrack = null),
-              updateMusicCover(ui.musicPic.nopic)),
+              updateMusicCover(ui.musicPic.placeholderSrc)),
             ui.musicLyrics && (ui.musicLyrics.innerHTML = ""),
             updateFullscreenTitle());
         }
