@@ -12,6 +12,13 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `material.css`：M3 字体层级、颜色角色、形状与交互动效；深浅主题均使用翡翠绿色系。
 - `styles.css`：页面布局和响应式适配。
 - `components/MaterialState.vue`：复合控件的 Material Web 涟漪与键盘焦点状态。
+- `components/TurntablePlayer.vue`：黑胶旋转、暂停停靠、封面大图与键盘关闭。
+- `lib/turntable.ts`：以固定支点计算唱针圆弧，让针尖随进度从黑胶外圈向内圈移动。
+
+唱片与唱针图片由 `upstream/original/newui/images/` 中的原件直接打包为本站静态资源，
+不加载原版业务脚本、不修改原件。原图尺寸改变时需复核唱针支点和针尖标定。
+旋转与唱针跟随设备上报状态；时长未知时落在外圈，播完或暂停时停转并移出唱针。
+暂停保留当前转角，封面大图独立静止显示；启用减少动态效果时关闭旋转与摆臂过渡。
 
 Roboto 400/500/700 字重本地打包，中文使用系统字体回退；图标使用官方 Material Symbols。
 常规操作使用 Material Web 组件；导航、队列和遥控等复合控件复用其状态层，

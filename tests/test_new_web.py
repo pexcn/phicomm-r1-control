@@ -83,6 +83,25 @@ class NewWebTests(unittest.TestCase):
     def sent(self):
         return self.page.evaluate('mockSockets.at(-1).sent')
 
+    def mock_music(self, **changes):
+        self.page.evaluate('''changes => {
+          const socket = mockSockets.at(-1);
+          if (!socket.musicOverride) {
+            socket.musicOverride = {};
+            const reply = socket.reply.bind(socket);
+            socket.reply = message => {
+              if (message.type === 'get_info') message = {...message, data: {
+                ...message.data, ...socket.musicOverride,
+                music_info: {...message.data.music_info, ...socket.musicOverride.music_info},
+              }};
+              reply(message);
+            };
+          }
+          socket.musicOverride = {...socket.musicOverride, ...changes,
+            music_info: {...socket.musicOverride.music_info, ...changes.music_info}};
+          socket.send(JSON.stringify({type:'get_info'}));
+        }''', changes)
+
     def test_standalone_build_theme_and_isolated_storage(self):
         self.page.goto(self.base)
         self.assertEqual(self.page.evaluate('mockSockets.length'), 0)
@@ -197,6 +216,76 @@ class NewWebTests(unittest.TestCase):
         self.assertTrue({'get_info', 'max_vol', 'list'} <= {message['type'] for message in self.sent()})
         self.assertEqual(self.page.get_by_role('button', name='删除 晚风', exact=True).count(), 0)
         self.assertEqual(self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:auto-connect'))"), True)
+
+    def test_turntable_moves_inward_and_preserves_rotation_on_pause(self):
+        self.start()
+        rotor = self.page.locator('.turntable-rotor')
+        needle = self.page.locator('.turntable-needle')
+        self.assertTrue(self.page.get_by_role('button', name='放大当前歌曲封面', exact=True).is_disabled())
+        angles = []
+        for position in [0, 50000, 99000]:
+            self.mock_music(music_info={'position': position, 'duration': 100000})
+            self.page.wait_for_function('(value)=>document.querySelector("#music-progress").value === value', arg=position)
+            self.page.wait_for_function("!document.querySelector('.turntable-needle').getAnimations().some(a=>a.playState === 'running')")
+            angles.append(needle.evaluate('el=>Math.atan2(new DOMMatrix(getComputedStyle(el).transform).b, new DOMMatrix(getComputedStyle(el).transform).a) * 180 / Math.PI'))
+        self.assertTrue(angles[0] < angles[1] < angles[2])
+        self.page.wait_for_function("document.querySelector('.turntable-rotor').getAnimations()[0]?.playState === 'running'")
+        before = rotor.evaluate('el=>el.getAnimations()[0].currentTime')
+        self.mock_music(play_state=False)
+        self.page.get_by_role('button', name='继续播放', exact=True).wait_for()
+        self.page.wait_for_function("document.querySelector('.turntable-rotor').getAnimations()[0]?.playState === 'paused'")
+        self.page.evaluate('() => new Promise(requestAnimationFrame)')
+        paused = rotor.evaluate('el=>el.getAnimations()[0].currentTime')
+        self.assertGreaterEqual(paused, before - 2)
+        self.page.wait_for_timeout(100)
+        self.assertAlmostEqual(rotor.evaluate('el=>el.getAnimations()[0].currentTime'), paused, delta=2)
+        self.page.wait_for_function("!document.querySelector('.turntable-needle').getAnimations().some(a=>a.playState === 'running')")
+        parked = needle.evaluate('el=>Math.atan2(new DOMMatrix(getComputedStyle(el).transform).b, new DOMMatrix(getComputedStyle(el).transform).a) * 180 / Math.PI')
+        self.assertAlmostEqual(parked, -28.5, delta=.01)
+        self.mock_music(play_state=True)
+        self.page.wait_for_function("document.querySelector('.turntable-rotor').getAnimations()[0]?.playState === 'running'")
+        self.assertGreaterEqual(rotor.evaluate('el=>el.getAnimations()[0].currentTime'), paused - 2)
+        self.mock_music(music_info={'position':100000})
+        self.page.wait_for_function("document.querySelector('.turntable-rotor').getAnimations()[0]?.playState === 'paused'")
+        self.page.emulate_media(reduced_motion='reduce')
+        self.mock_music(music_info={'position':0, 'duration':0})
+        self.page.wait_for_function("getComputedStyle(document.querySelector('.turntable-rotor')).animationName === 'none'")
+
+    def test_cover_viewer_preserves_full_image_and_handles_missing_artwork(self):
+        self.start()
+        self.context.route('https://artwork.test/cover.png', lambda route: route.fulfill(body=screen_png(), content_type='image/png'))
+        self.context.route('https://artwork.test/broken.png', lambda route: route.fulfill(body=b'not an image', content_type='image/png'))
+        self.mock_music(music_info={'albumUrl':'https://artwork.test/cover.png'})
+        cover = self.page.get_by_role('button', name='放大当前歌曲封面', exact=True)
+        self.page.wait_for_function("!document.querySelector('.turntable-cover').disabled")
+        self.assertEqual(self.page.get_by_text('点击封面查看大图', exact=True).count(), 0)
+        commands = [m for m in self.sent() if m['type'] not in ['get_info', 'max_vol', 'list']]
+        cover.click()
+        viewer = self.page.get_by_role('dialog', name='歌曲封面大图', exact=True)
+        self.assertTrue(viewer.evaluate("el=>el.matches(':modal')"))
+        image = viewer.locator('img')
+        self.page.wait_for_function("document.querySelector('.cover-viewer-content img').naturalWidth > 0")
+        ratio = image.evaluate('el=>({natural:el.naturalWidth/el.naturalHeight, display:el.clientWidth/el.clientHeight, animations:el.getAnimations().length})')
+        self.assertAlmostEqual(ratio['natural'], ratio['display'], places=2)
+        self.assertEqual(ratio['animations'], 0)
+        self.assertEqual(self.page.evaluate('getComputedStyle(document.body).overflow'), 'hidden')
+        self.page.keyboard.press('Escape')
+        viewer.wait_for(state='hidden')
+        self.assertTrue(cover.evaluate("el=>el.matches(':focus')"))
+        cover.click()
+        viewer.get_by_role('button', name='关闭封面大图', exact=True).click()
+        viewer.wait_for(state='hidden')
+        cover.click()
+        viewer.click(position={'x':5,'y':300})
+        viewer.wait_for(state='hidden')
+        self.assertEqual([m for m in self.sent() if m['type'] not in ['get_info', 'max_vol', 'list']], commands)
+        cover.click()
+        self.mock_music(music_info={'id':'mock:new-track','albumUrl':'https://artwork.test/broken.png'})
+        viewer.wait_for(state='hidden')
+        self.page.locator('.turntable-placeholder').wait_for()
+        self.assertTrue(cover.is_disabled())
+        self.mock_music(music_info={'albumUrl':'https://artwork.test/cover.png'})
+        self.page.wait_for_function("!document.querySelector('.turntable-cover').disabled")
 
     def test_manual_disconnect_stays_disconnected_after_reload_until_reconnected(self):
         self.start()

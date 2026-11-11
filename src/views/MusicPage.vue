@@ -3,6 +3,7 @@ import MaterialState from "../components/MaterialState.vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
+import TurntablePlayer from "../components/TurntablePlayer.vue";
 import { action, array, flag, formatTime, numeric, object } from "../lib/protocol";
 import {
   canEditQueue,
@@ -49,13 +50,6 @@ let requestNumber = 0;
 const timerOpen = ref(false);
 const sleepMinutes = ref(30);
 const queueOpen = ref(false);
-const coverFailed = ref(false);
-watch(
-  () => state.music.cover,
-  () => {
-    coverFailed.value = false;
-  },
-);
 watch(
   () => state.session,
   () => {
@@ -178,16 +172,15 @@ function setTimer() {
         <article class="card listening-card">
           <div class="now-playing">
             <div class="album-art">
-              <img
-                v-if="state.music.cover && !coverFailed"
-                :src="state.music.cover"
-                alt="当前歌曲封面"
-                referrerpolicy="no-referrer"
-                @error="coverFailed = true"
+              <TurntablePlayer
+                :cover="state.music.cover"
+                :title="state.music.title"
+                :artist="state.music.artist"
+                :track-id="state.music.id"
+                :playing="state.music.playing"
+                :position="state.music.position"
+                :duration="state.music.duration"
               />
-              <div v-else class="album-placeholder">
-                <AppIcon name="music" :size="72" /><span>R1 Control</span>
-              </div>
             </div>
             <div class="song-details">
               <span class="tonal-label">{{ state.music.playing ? "正在播放" : "已暂停" }}</span>
