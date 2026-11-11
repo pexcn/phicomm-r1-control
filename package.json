@@ -6,14 +6,15 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "vue-tsc --noEmit",
-    "build": "npm run typecheck && python3 tools/upstream/sync.py check && vite build && node scripts/prepare-site.mjs",
+    "build": "npm run typecheck && python3 upstream/sync.py check && vite build && node scripts/prepare-site.mjs",
     "preview": "vite preview --host 0.0.0.0",
+    "serve": "python3 scripts/serve.py",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && npm run typecheck && node scripts/check-assets.mjs && node scripts/check-scripts.mjs && python3 tools/upstream/sync.py check",
+    "check": "npm run format:check && npm run typecheck && node scripts/check-site.mjs",
     "test": "npm run test:unit && npm run build && python3 -m unittest discover -s tests -v",
     "test:unit": "node --experimental-strip-types --test tests/web/*.test.mjs",
-    "upstream:build": "python3 tools/upstream/sync.py build"
+    "upstream:build": "python3 upstream/sync.py build"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
@@ -29,5 +30,28 @@
   "dependencies": {
     "@material/web": "^2.5.0",
     "vue": "^3.5.45"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "all",
+    "endOfLine": "lf",
+    "overrides": [
+      {
+        "files": "*.webmanifest",
+        "options": {
+          "parser": "json"
+        }
+      },
+      {
+        "files": "*.svg",
+        "options": {
+          "parser": "html"
+        }
+      }
+    ]
   }
 }

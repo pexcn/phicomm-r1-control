@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""保存原作者发布快照，并用显式补丁生成可独立部署的 upstream/。"""
+"""校验原作者原件与部署补丁，生成 dist/upstream/。"""
 import argparse
 import hashlib
 import json
@@ -10,13 +10,13 @@ import tempfile
 from urllib.parse import urlsplit
 from urllib.request import urlopen
 
-ROOT = Path(__file__).resolve().parents[2]
-TOOLS = ROOT / "tools" / "upstream"
-SNAPSHOT = TOOLS / "snapshot"
-MANIFEST = TOOLS / "source.json"
-PATCHES = TOOLS / "patches.json"
-OVERLAYS = TOOLS / "overlays"
-OUTPUT = ROOT / "upstream"
+ROOT = Path(__file__).resolve().parents[1]
+UPSTREAM = ROOT / "upstream"
+ORIGINAL = UPSTREAM / "original"
+MANIFEST = UPSTREAM / "source.json"
+PATCHES = UPSTREAM / "patches.json"
+OVERLAYS = UPSTREAM / "overlays"
+OUTPUT = ROOT / "dist" / "upstream"
 LOCAL_DOCS = {"README.md", "AGENTS.md"}
 
 
@@ -37,7 +37,7 @@ def safe_path(name):
     return name
 
 
-def render(manifest, source=SNAPSHOT):
+def render(manifest, source=ORIGINAL):
     files = {}
     metadata = []
     expected = {entry["path"] for entry in manifest["files"]}
@@ -94,7 +94,7 @@ def write_output(files, output):
 def verify(files, output):
     expected = set(files)
     actual = {path.relative_to(output).as_posix() for path in output.rglob("*") if path.is_file()}
-    errors = [f"意外文件: {name}" for name in actual - expected - LOCAL_DOCS]
+    errors = [f"意外文件: {name}" for name in actual - expected]
     for name, data in files.items():
         path = output / name
         if not path.is_file() or path.read_bytes() != data:
@@ -118,12 +118,12 @@ def capture(manifest, output):
                     raise ValueError(f"上游资源跳转到其他站点: {url}")
                 target.write_bytes(response.read())
         else:
-            shutil.copyfile(SNAPSHOT / name, target)
+            shutil.copyfile(ORIGINAL / name, target)
         print(name)
 
 
 def import_snapshot(manifest, source, snapshot_date, web_version):
-    if source.resolve() == SNAPSHOT.resolve():
+    if source.resolve().is_relative_to(ORIGINAL.resolve()) or ORIGINAL.resolve().is_relative_to(source.resolve()):
         raise ValueError("请从独立的候选目录导入，不要原地修改快照")
     updated = dict(manifest, snapshot_date=snapshot_date, web_version=web_version)
     updated["files"] = [dict(entry, sha256=digest((source / safe_path(entry["path"])).read_bytes()))
@@ -134,26 +134,25 @@ def import_snapshot(manifest, source, snapshot_date, web_version):
         staged = Path(temp)
         write_output(files, staged)
         verify(files, staged)
-    previous = OUTPUT / "snapshot.json"
-    old_paths = {entry["path"] for entry in read_json(previous)["files"] if "sha256" in entry} \
-        if previous.exists() else set()
+    old_paths = {path.relative_to(ORIGINAL).as_posix() for path in ORIGINAL.rglob("*") if path.is_file()}
     for name in old_paths - {entry["path"] for entry in updated["files"]}:
-        stale = SNAPSHOT / safe_path(name)
+        stale = ORIGINAL / safe_path(name)
         if stale.is_file():
             stale.unlink()
     for entry in updated["files"]:
-        target = SNAPSHOT / entry["path"]
+        target = ORIGINAL / entry["path"]
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source / entry["path"], target)
     MANIFEST.write_text(json.dumps(updated, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    write_output(files, OUTPUT)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("build")
-    sub.add_parser("check")
+    build = sub.add_parser("build")
+    build.add_argument("--output", type=Path, default=OUTPUT)
+    check = sub.add_parser("check")
+    check.add_argument("--output", type=Path, help="另外校验指定目录的生成结果")
     fetch = sub.add_parser("fetch")
     fetch.add_argument("--output", type=Path, required=True)
     diff = sub.add_parser("diff")
@@ -183,9 +182,14 @@ def main():
     else:
         files = render(manifest)
         if args.command == "build":
-            write_output(files, OUTPUT)
-        verify(files, OUTPUT)
-        print(f"Verified {len(manifest['files'])} original files and {len(files)} generated files.")
+            output = args.output.resolve()
+            if output.is_relative_to(UPSTREAM) or UPSTREAM.is_relative_to(output):
+                raise ValueError("生成目录不得与 upstream/ 源码目录重叠")
+            write_output(files, output)
+            verify(files, output)
+        elif args.output is not None:
+            verify(files, args.output)
+        print(f"Verified {len(manifest['files'])} original files and {len(files)} rendered files.")
 
 
 if __name__ == "__main__":

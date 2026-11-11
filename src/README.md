@@ -12,7 +12,8 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 开发运行 `npm run dev`；发布运行 `npm run build`，产物位于 `dist/`。
 Vite 使用相对资源和 hash 导航，支持 GitHub Pages 的项目子目录。
 根目录 `index.html` 是新版入口；发布脚本保留 `/upstream/` 原作者版。
-`tools/upstream/snapshot/` 只供同步和校验，不包含在发布产物中。
+`upstream/original/` 保存唯一原件；构建时生成 `dist/upstream/`，生成结果不提交。
+固定静态资源位于 `public/`，它们的访问地址不受源码目录影响。
 
 新版浏览器存储统一使用 `phicomm-r1:web:` 前缀；不读取原页面的账号或设置。
 原作者更新仍按 `upstream/README.md` 处理，不直接合并界面代码到这里。

@@ -10,6 +10,7 @@ Google Material Web 组件。浅色采用 [DC1 网页](https://github.com/pexcn/
 ## 使用与部署
 
 建议使用 Node.js 24；最低支持 Node 20.19 或 22.12。
+开发和构建还需 Python 3.10+，用于校验与生成原作者版。
 
 ```sh
 npm ci
@@ -20,10 +21,10 @@ npm run dev
 
 ```sh
 npm run build
-python3 serve.py
+npm run serve
 ```
 
-打开 `http://127.0.0.1:8000/`。`serve.py` 提供 `dist/` 和可选的音乐接口转发；
+打开 `http://127.0.0.1:8000/`。`scripts/serve.py` 提供 `dist/` 和可选的音乐接口转发；
 需要其他设备访问时加 `--bind 0.0.0.0`，端口用 `--port` 指定。
 没有构建产物时会提示先运行 `npm run build`。
 
@@ -74,7 +75,7 @@ python3 serve.py
 
 网页保持当前 HTTPS、域名与端口。HTTPS 页面直接访问局域网的明文 WebSocket
 取决于浏览器的本地网络访问支持和授权；不支持时需要自己的 WSS 反向代理。
-GitHub Pages 和 `serve.py` 均不提供音箱代理或 TLS，也不能为音箱固件增加这些能力。
+GitHub Pages 和 `scripts/serve.py` 均不提供音箱代理或 TLS，也不能为音箱固件增加这些能力。
 
 音乐搜索、封面和歌词默认使用原作者的 `https://r1.wxfsq.com/music` 接口，
 可在设置中换成协议兼容、允许跨域的 HTTP(S) 服务。搜索源是否可用、歌曲权限、
@@ -87,20 +88,23 @@ GitHub Pages 和 `serve.py` 均不提供音箱代理或 TLS，也不能为音箱
 
 ## 目录与原作者同步
 
-| 路径                       | 用途                                           |
-| -------------------------- | ---------------------------------------------- |
-| `src/`                     | 独立新版组件、样式与通信层                     |
-| `scripts/prepare-site.mjs` | 合并静态发布产物，保留原作者和兼容入口         |
-| `dist/`                    | 构建产物，不提交 Git                           |
-| `upstream/`                | 可部署的原作者参考版及 AI 合并说明             |
-| `tools/upstream/`          | 未修改的原始快照、来源指纹、部署补丁与同步脚本 |
-| `tests/`                   | 协议、浏览器、服务器与快照回归                 |
-| `docs/`                    | 历史分析、来源和协议记录                       |
+| 路径                       | 用途                                         |
+| -------------------------- | -------------------------------------------- |
+| `src/`                     | 独立新版组件、样式与通信层                   |
+| `scripts/prepare-site.mjs` | 合并静态发布产物，保留原作者和兼容入口       |
+| `dist/`                    | 构建产物，不提交 Git                         |
+| `upstream/`                | 原作者原件、部署补丁、同步工具与 AI 合并说明 |
+| `public/`                  | favicon 和音箱固定脚本等原样发布的静态文件   |
+| `tests/`                   | 协议、浏览器、服务器与快照回归               |
+| `docs/`                    | 历史分析、来源和协议记录                     |
 
-`tools/upstream/snapshot/` 约 1.9 MB，用来比较原作者原始文件，避免把本地部署适配
-误认为原作者更新。它只参与校验，不发布到 Pages。当前保留双份以沿用已经验证的
-同步流程；将来若要减少重复，可另行改成 `upstream/` 保存纯原件、构建时应用补丁，
-不能直接删除快照破坏来源基线。更新原作者版前先读 [AI 维护指南](upstream/README.md)。
+`upstream/original/` 只保存一份原作者文件；来源指纹、补丁、适配脚本和同步工具均在
+`upstream/`。构建时生成 `dist/upstream/`，不提交生成结果，也不发布原件目录和维护工具。
+更新原作者版前先读 [AI 维护指南](upstream/README.md)。
+
+`public/favicon.svg` 和 `public/new_r1_control.js` 由 Vite 原样发布，访问地址保持
+`/favicon.svg` 和 `/new_r1_control.js`。本地服务工具位于 `scripts/serve.py`，
+可用 `npm run serve -- --port 8080` 指定端口；Prettier 配置集中在 `package.json`。
 
 新版存储使用 `phicomm-r1:web:` 前缀，原作者版使用 `phicomm-r1:upstream:`；
 不读取旧改造版的账号和设置，不自动导入旧设备地址，也不自动连接已保存地址。
@@ -115,8 +119,10 @@ npm run build
 ```
 
 `check` 包含格式、Vue/TypeScript 类型、原作者浏览器脚本、本地资源与原作者快照校验。
-`npm run format` 格式化自有代码，原作者原件、生成的原作者版和第三方文件均排除。
-仅修改原作者部署补丁时运行 `npm run upstream:build`，然后重新验证。
+`npm run format` 格式化自有代码，原作者原件、精确补丁上下文和构建产物均排除。
+仅修改原作者部署补丁时运行 `npm run upstream:build`，再用
+`python3 upstream/sync.py check --output dist/upstream` 核对生成结果。
+`npm run check` 在临时目录验证部署资源，不依赖已有的 `dist/`。
 
 完整回归还需 Python Playwright 和 Chromium：
 

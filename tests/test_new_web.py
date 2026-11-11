@@ -189,6 +189,8 @@ class NewWebTests(unittest.TestCase):
         self.assertGreater(self.page.locator('a[href$="/project/upstream/"]').count(), 0)
         self.assertFalse((ROOT / 'dist/tools').exists())
         self.assertTrue((ROOT / 'dist/THIRD-PARTY-LICENSES.md').is_file())
+        for private in ['original', 'overlays', 'source.json', 'patches.json', 'sync.py', 'AGENTS.md']:
+            self.assertFalse((ROOT / 'dist/upstream' / private).exists(), private)
 
     def test_published_routes_only_keep_new_web_and_upstream(self):
         self.page.goto(self.base)

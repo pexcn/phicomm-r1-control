@@ -11,17 +11,19 @@ from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
+SITE = ROOT / "dist"
 
 
+@unittest.skipUnless((SITE / "upstream/index.html").exists(), "Run npm run build before browser regression")
 class BrowserTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        handler = functools.partial(SimpleHTTPRequestHandler, directory=str(ROOT.parent))
+        handler = functools.partial(SimpleHTTPRequestHandler, directory=str(SITE.parent))
         cls.server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.thread.start()
         cls.origin = f"http://127.0.0.1:{cls.server.server_port}"
-        cls.base = cls.origin + "/" + ROOT.name + "/"
+        cls.base = cls.origin + "/" + SITE.name + "/"
         cls.playwright = sync_playwright().start()
         executable = os.environ.get("CHROMIUM_PATH") or shutil.which("chromium")
         cls.browser = cls.playwright.chromium.launch(executable_path=executable, headless=True)
@@ -115,7 +117,7 @@ class BrowserTests(unittest.TestCase):
             name = urlsplit(route.request.url).path.removeprefix("/project/")
             if not name or name.endswith("/"):
                 name += "index.html"
-            target = ROOT / name
+            target = SITE / name
             route.fulfill(path=target) if target.is_file() else route.fulfill(status=404)
         self.context.route(base + "**", resource)
         self.page.add_init_script("Object.defineProperty(navigator,'userAgent',{value:'iPhone Safari'})")

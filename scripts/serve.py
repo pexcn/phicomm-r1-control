@@ -86,7 +86,7 @@ def main():
     origin = urlsplit(args.upstream)
     if origin.scheme not in ("http", "https") or not origin.netloc or origin.path not in ("", "/") or origin.query or origin.fragment:
         parser.error("--upstream 必须是 HTTP(S) 源地址，不带路径或参数")
-    root = Path(__file__).resolve().parent
+    root = Path(__file__).resolve().parents[1]
     site = root / "dist"
     if not (site / "index.html").is_file():
         parser.error("缺少构建产物，请先运行 npm run build")
