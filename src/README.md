@@ -7,7 +7,7 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `lib/client.ts`：WebSocket 生命周期、轮询、重连和旧连接消息隔离。
 - `lib/protocol.ts`：协议数据与地址校验。
 - `lib/speaker.ts`：设备状态和操作；不实现音乐账号登录。
-- `material.css`：M3 字体层级、颜色角色、形状与交互动效；浅色使用 DC1 绿色，深色使用蓝色。
+- `material.css`：M3 字体层级、颜色角色、形状与交互动效；深浅主题均使用翡翠绿色系。
 - `styles.css`：页面布局和响应式适配。
 - `components/MaterialState.vue`：复合控件的 Material Web 涟漪与键盘焦点状态。
 

@@ -1,4 +1,4 @@
-/* Material Design 3 roles; light green follows DC1, dark blue follows VoHive. */
+/* Material Design 3 roles; both themes use emerald green. */
 @property --md-filled-button-container-shape {
   syntax: "<length>";
   inherits: true;
@@ -37,21 +37,21 @@
   --text: #1b3328;
   --muted: #5d7065;
   --border: #dce5df;
-  --accent: #24694e;
+  --accent: #007a50;
   --on-accent: #fff;
-  --soft: #e7f1eb;
-  --success: #24694e;
+  --soft: #d8eee0;
+  --success: var(--accent);
   --success-bg: #e0f0e6;
   --danger: #a63d35;
   --danger-bg: #fff0ed;
   --md-sys-color-primary: var(--accent);
   --md-sys-color-on-primary: var(--on-accent);
-  --md-sys-color-primary-container: #c8e8d5;
-  --md-sys-color-on-primary-container: #0a3826;
-  --md-sys-color-secondary: #506458;
+  --md-sys-color-primary-container: #b2f3d3;
+  --md-sys-color-on-primary-container: #003824;
+  --md-sys-color-secondary: #4d6356;
   --md-sys-color-on-secondary: #fff;
   --md-sys-color-secondary-container: var(--soft);
-  --md-sys-color-on-secondary-container: #1b3328;
+  --md-sys-color-on-secondary-container: #143c28;
   --md-sys-color-tertiary: #3e6373;
   --md-sys-color-on-tertiary: #fff;
   --md-sys-color-tertiary-container: #c1e8fa;
@@ -71,7 +71,7 @@
   --md-sys-color-outline-variant: var(--border);
   --md-sys-color-inverse-surface: #26352c;
   --md-sys-color-inverse-on-surface: #edf5ef;
-  --md-sys-color-inverse-primary: #a4d5b9;
+  --md-sys-color-inverse-primary: #55dfa5;
   --md-sys-color-error: var(--danger);
   --md-sys-color-on-error: #fff;
   --md-sys-color-error-container: var(--danger-bg);
@@ -112,18 +112,18 @@
   --text: #e2e2e9;
   --muted: #c3c6cf;
   --border: #43474e;
-  --accent: #aac7ff;
-  --on-accent: #0a305f;
-  --soft: #3d4758;
+  --accent: #55dfa5;
+  --on-accent: #003824;
+  --soft: #164f37;
   --success: #7ddba0;
   --success-bg: #1f4d33;
   --danger: #ffb4ab;
   --danger-bg: #432d36;
-  --md-sys-color-primary-container: #274777;
-  --md-sys-color-on-primary-container: #d6e3ff;
-  --md-sys-color-secondary: #bdc7dc;
-  --md-sys-color-on-secondary: #273141;
-  --md-sys-color-on-secondary-container: #d9e3f8;
+  --md-sys-color-primary-container: #005236;
+  --md-sys-color-on-primary-container: #b2f3d3;
+  --md-sys-color-secondary: #adcfba;
+  --md-sys-color-on-secondary: #173b28;
+  --md-sys-color-on-secondary-container: #b4f4d2;
   --md-sys-color-tertiary: #dabde0;
   --md-sys-color-on-tertiary: #3d2844;
   --md-sys-color-tertiary-container: #553f5b;
@@ -137,7 +137,7 @@
   --md-sys-color-outline: #8d9199;
   --md-sys-color-inverse-surface: #e2e2e9;
   --md-sys-color-inverse-on-surface: #2e3036;
-  --md-sys-color-inverse-primary: #415f91;
+  --md-sys-color-inverse-primary: #007a50;
   --md-sys-color-on-error: #690005;
   --md-sys-color-on-error-container: #ffdad6;
 }
