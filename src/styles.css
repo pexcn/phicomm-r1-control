@@ -141,7 +141,7 @@ strong {
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: 50%;
   background: var(--accent);
   color: var(--on-accent);
   flex-shrink: 0;
@@ -1345,7 +1345,6 @@ body:has(md-dialog[open]) :is(.sidebar, .topbar, .bottom-nav, .snackbar, .skip-l
   .mobile-brand .brand-icon {
     width: 32px;
     height: 32px;
-    border-radius: 10px;
   }
   .topbar-actions {
     gap: 0;
