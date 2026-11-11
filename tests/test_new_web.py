@@ -85,6 +85,7 @@ class NewWebTests(unittest.TestCase):
 
     def test_standalone_build_theme_and_isolated_storage(self):
         self.page.goto(self.base)
+        self.assertEqual(self.page.evaluate('mockSockets.length'), 0)
         self.assertEqual(self.page.evaluate('typeof R1WS'), 'undefined')
         self.assertEqual(self.page.evaluate('typeof R1Config'), 'undefined')
         self.assertEqual(self.page.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()"), '#007a50')
@@ -182,6 +183,36 @@ class NewWebTests(unittest.TestCase):
         self.assertIn({'type': 'set_position', 'position': 120000}, sent)
         self.assertEqual(self.page.get_by_role('button', name='删除 晚风').count(), 0)
         self.assertFalse(any('login' in str(message).lower() or message['type'] == 'send_to_unisound' for message in sent))
+
+    def test_reload_restores_last_successful_endpoint_and_reads_fresh_state(self):
+        address = 'wss://speaker.example/room/ws?key=a%2Fb'
+        self.start(1887, address)
+        self.assertEqual(self.page.get_by_role('button', name='删除 晚风', exact=True).count(), 1)
+        # Addresses saved before automatic restore was introduced must also work.
+        self.page.evaluate("localStorage.removeItem('phicomm-r1:web:auto-connect')")
+        self.page.reload()
+        self.page.get_by_role('heading', name='夜航', exact=True).wait_for()
+        self.assertEqual(self.page.evaluate('mockSockets.length'), 1)
+        self.assertEqual(self.page.evaluate('mockSockets[0].url'), address)
+        self.assertTrue({'get_info', 'max_vol', 'list'} <= {message['type'] for message in self.sent()})
+        self.assertEqual(self.page.get_by_role('button', name='删除 晚风', exact=True).count(), 0)
+        self.assertEqual(self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:auto-connect'))"), True)
+
+    def test_manual_disconnect_stays_disconnected_after_reload_until_reconnected(self):
+        self.start()
+        self.page.locator('.sidebar a[href="#/device"]').click()
+        self.page.get_by_role('button', name='断开连接', exact=True).click()
+        self.page.reload()
+        self.page.get_by_role('main').get_by_role('button', name='连接音箱', exact=True).wait_for()
+        self.assertEqual(self.page.evaluate('mockSockets.length'), 0)
+        self.assertEqual(self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:auto-connect'))"), False)
+        self.page.get_by_role('main').get_by_role('button', name='连接音箱', exact=True).click()
+        self.assertEqual(self.page.get_by_label('音箱地址', exact=True).input_value(), 'ws://192.0.2.10:8080/')
+        self.page.locator('#connection-dialog').get_by_role('button', name='连接', exact=True).click()
+        self.page.get_by_role('heading', name='客厅音箱', exact=True).wait_for()
+        self.page.reload()
+        self.page.get_by_role('heading', name='客厅音箱', exact=True).wait_for()
+        self.assertEqual(self.page.evaluate('mockSockets.length'), 1)
 
     def test_queue_capability_and_stale_connection_are_not_carried_to_next_device(self):
         self.start(1887)

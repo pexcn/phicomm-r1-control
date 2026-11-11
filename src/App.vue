@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MaterialState from "./components/MaterialState.vue";
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import AppIcon from "./components/AppIcon.vue";
 import ConnectionDialog from "./components/ConnectionDialog.vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
@@ -17,6 +17,7 @@ import {
   dispose,
   pages,
   readPanel,
+  restoreConnection,
   state,
   type Page,
 } from "./lib/speaker";
@@ -34,6 +35,7 @@ function hashChange() {
 }
 window.addEventListener("hashchange", hashChange);
 watch([page, connected], () => readPanel(page.value));
+onMounted(restoreConnection);
 function focusMain() {
   document.getElementById("main-content")?.focus();
 }

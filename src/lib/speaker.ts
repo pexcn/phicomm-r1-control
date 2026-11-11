@@ -199,6 +199,7 @@ const client = new SpeakerClient((event) => {
       state.error = "";
       state.connectionDialog = false;
       save("address", state.address);
+      save("auto-connect", true);
     }
   } else if (event.kind === "frame") showFrame(URL.createObjectURL(event.frame));
   else receive(event.message);
@@ -218,9 +219,20 @@ export function connect(address: string): boolean {
 }
 
 export function disconnect(): void {
+  save("auto-connect", false);
   stopScreen();
   client.disconnect();
   state.error = "";
+}
+
+export function restoreConnection(): void {
+  if (
+    state.status !== "disconnected" ||
+    !state.address ||
+    load<unknown>("auto-connect", true) === false
+  )
+    return;
+  connect(state.address);
 }
 
 export function send(message: Message): boolean {
