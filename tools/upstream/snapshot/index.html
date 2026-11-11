@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,user-scalable=0,maximum-scale=1,viewport-fit=cover"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="renderer" content="webkit" />
+    <meta name="force-rendering" content="webkit" />
+    <title>R1音箱控制页面</title>
+    <meta name="full-screen" content="yes" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="x5-page-mode" content="app" />
+    <meta
+      name="keywords"
+      content="R1,斐讯R1,R1音箱,R1音箱控制,R1音箱控制页面"
+    />
+    <link rel="manifest" href="manifest.json" />
+    <script type="text/javascript">
+      window.subTitle = "R1音箱控制页面";
+    </script>
+    <style type="text/css">
+      html {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .body {
+        background: linear-gradient(145deg, #4c7ec3, #9ac4e8, #4a8ec7);
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+      }
+
+      a {
+        color: white;
+      }
+
+      h3 {
+        text-align: center;
+        color: white;
+      }
+
+      .reload_btn {
+        margin: 15px 0px 15px 0px;
+        width: 100px;
+        height: 50px;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(4px);
+        border: none;
+        box-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.2),
+          0 6px 20px 0 rgba(0, 0, 0, 0.19);
+      }
+
+      .reload_btn:active {
+        background: rgba(255, 255, 255, 0.8);
+        transform: translateY(3px);
+      }
+    </style>
+  </head>
+
+  <body class="body">
+    <script id="refresh" type="text/javascript"></script>
+    <script type="text/javascript">
+      if (!!window.ActiveXObject || "ActiveXObject" in window) {
+        alert("抱歉，本页面不支持IE内核！");
+      }
+
+      window.addEventListener("load", (e) => {
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", function () {
+            navigator.serviceWorker.register("./sw.js").then(function () {
+              console.log("Service Worker Registered");
+            });
+          });
+        }
+      });
+
+      var Storage = localStorage;
+      if (
+        location.protocol !== "https:" &&
+        location.port != 8080 &&
+        !location.href.includes("type=message") &&
+        !isWechatOrQQ()
+      ) {
+        location.href = "http://" + location.host + ":8080/" + location.search;
+      } else {
+        loadjs();
+      }
+
+      var control_host = location.host;
+      var custom_ip = true;
+      var ip = "";
+      var baidu_hm_id = "36cc6ff0e40596620b90812580f295a1";
+      //var beian = '';
+      function loadjs() {
+        if (!window._loadjs) {
+          window._loadjs = true;
+        } else {
+          return;
+        }
+
+        var temp_div = document.createElement("div");
+        temp_div.id = "temp_div";
+        temp_div.style = "text-align:center;";
+        document.body.appendChild(temp_div);
+
+        var h3 = document.createElement("h3");
+        h3.innerHTML = "页面加载中。";
+        temp_div.appendChild(h3);
+
+        var btn = document.createElement("input");
+        btn.type = "button";
+        btn.classList.add("reload_btn");
+        btn.value = "刷新页面";
+        btn.onclick = function () {
+          time = new Date().getTime();
+          setCookie("time", time, 604800);
+          location.reload();
+        };
+        temp_div.appendChild(btn);
+
+        if (typeof beian == "string") {
+          var div = document.createElement("div");
+          div.id = "beian_div";
+          div.style = "position: absolute; left: 5px;";
+          div.innerHTML = "<a href='//beian.miit.gov.cn/'>" + beian + "</a>";
+          temp_div.appendChild(div);
+        }
+
+        var params = location.href
+          .substr(location.href.indexOf("?") + 1)
+          .split("&");
+        for (var i = 0; i < params.length; i++) {
+          var param = params[i].split("=");
+          if (param[0] == "ip") {
+            ip = param[1];
+            if (ip.split(":").length < 2) {
+              ip += ":8080";
+            }
+            custom_ip = false;
+          }
+        }
+
+        var script = document.getElementById("refresh");
+        script.onload = () => {
+          var Storage = localStorage;
+          Storage.setItem("refresh.js", script.src);
+        };
+        script.onerror = () => {
+          var Storage = localStorage;
+          if (Storage.getItem("refresh.js")) {
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = Storage.getItem("refresh.js");
+            document.body.appendChild(script);
+          }
+        };
+        script.src =
+          location.protocol +
+          "//" +
+          location.host +
+          "/refresh.js?t=" +
+          new Date().getTime();
+      }
+
+      function isWechatOrQQ() {
+        const ua = navigator.userAgent.toLowerCase();
+        return (
+          ua.includes("micromessenger") ||
+          /\sqq\//.test(ua) ||
+          ua.includes("v1_and_sq_")
+        );
+      }
+
+      function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + exdays * 1000);
+        var expires = "expires=" + d.toGMTString();
+        document.cookie = cname + "=" + cvalue + "; " + expires;
+      }
+
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(";");
+        for (var i = 0; i < ca.length; i++) {
+          var c = ca[i].trim();
+          if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+        }
+        return "";
+      }
+    </script>
+  </body>
+</html>

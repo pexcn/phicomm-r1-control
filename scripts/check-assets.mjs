@@ -27,7 +27,11 @@ function checkReference(value, owner, base = path.dirname(owner)) {
 
 const files = ["index.html", "new_r1_control.js", "service-worker.js"]
   .map((file) => path.join(root, file))
-  .concat(filesIn(path.join(root, "pages")), filesIn(path.join(root, "assets")))
+  .concat(
+    filesIn(path.join(root, "pages")),
+    filesIn(path.join(root, "assets")),
+    filesIn(path.join(root, "upstream")),
+  )
   .filter((file) => !file.includes(`${path.sep}vendor${path.sep}`));
 
 for (const file of files) {
@@ -45,6 +49,9 @@ for (const file of files) {
     }
   }
   if (file.endsWith(".js")) {
+    for (const match of source.matchAll(/R1Upstream\.assetUrl\(["']([^"']+)["']/g)) {
+      checkReference(match[1], file, path.join(root, "upstream"));
+    }
     for (const match of source.matchAll(/R1Config\.assetUrl\(["']([^"']+)["']/g)) {
       checkReference(match[1], file, root);
     }

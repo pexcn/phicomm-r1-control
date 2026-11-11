@@ -1,0 +1,6 @@
+# Preserve upstream bytes, including BOMs, CRLF and minified whitespace.
+/tools/upstream/snapshot/** -text -whitespace
+/upstream/** -text -whitespace
+/upstream/README.md text eol=lf whitespace
+/upstream/AGENTS.md text eol=lf whitespace
+/upstream/snapshot.json text eol=lf whitespace

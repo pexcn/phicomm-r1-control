@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "patches": [
+    {
+      "path": "index.html",
+      "reason": "subdirectory deployment",
+      "old": "<head>",
+      "new": "<head>\n    <script src=\"js/deployment.js\"></script>",
+      "count": 1
+    },
+    {
+      "path": "newui/index.html",
+      "reason": "subdirectory deployment",
+      "old": "<head>",
+      "new": "<head>\n    <script src=\"../js/deployment.js\"></script>",
+      "count": 1
+    },
+    {
+      "path": "config_wifi/index.html",
+      "reason": "subdirectory deployment",
+      "old": "<head>",
+      "new": "<head>\n    <script src=\"../js/deployment.js\"></script>",
+      "count": 1
+    },
+    {
+      "path": "dlna.html",
+      "reason": "subdirectory deployment",
+      "old": "<head>",
+      "new": "<head>\n    <script src=\"js/deployment.js\"></script>",
+      "count": 1
+    },
+    {
+      "path": "mdns.html",
+      "reason": "subdirectory deployment",
+      "old": "<head>",
+      "new": "<head>\n    <script src=\"js/deployment.js\"></script>",
+      "count": 1
+    },
+    {
+      "path": "device_scan.html",
+      "reason": "subdirectory deployment",
+      "old": "<head>",
+      "new": "<head>\n    <script src=\"js/deployment.js\"></script>",
+      "count": 1
+    },
+    {
+      "path": "adb/index.html",
+      "reason": "subdirectory deployment",
+      "old": "<head>",
+      "new": "<head>\n    <script src=\"../js/deployment.js\"></script>",
+      "count": 1
+    },
+    {
+      "path": "index.html",
+      "reason": "Keep the current origin and protocol",
+      "old": "      if (\r\n        location.protocol !== \"https:\" &&\r\n        location.port != 8080 &&\r\n        !location.href.includes(\"type=message\") &&\r\n        !isWechatOrQQ()\r\n      ) {\r\n        location.href = \"http://\" + location.host + \":8080/\" + location.search;\r\n      } else {\r\n        loadjs();\r\n      }",
+      "new": "      loadjs();",
+      "count": 1
+    },
+    {
+      "path": "index.html",
+      "reason": "Disable third-party analytics",
+      "old": "var baidu_hm_id = \"36cc6ff0e40596620b90812580f295a1\";",
+      "new": "var baidu_hm_id = null;",
+      "count": 1
+    },
+    {
+      "path": "index.html",
+      "reason": "Load the local snapshot",
+      "old": "script.src =\r\n          location.protocol +\r\n          \"//\" +\r\n          location.host +\r\n          \"/refresh.js?t=\" +\r\n          new Date().getTime();",
+      "new": "script.src = R1Upstream.assetUrl(\"refresh.js?t=\" + Date.now());",
+      "count": 1
+    },
+    {
+      "path": "index.html",
+      "reason": "Do not load stale remote scripts",
+      "old": "script.src = Storage.getItem(\"refresh.js\");",
+      "new": "script.src = R1Upstream.assetUrl(\"refresh.js?t=\" + Date.now());",
+      "count": 1
+    },
+    {
+      "path": "refresh.js",
+      "reason": "subdirectory deployment",
+      "old": "window.control_host = 'r1.wxfsq.com';",
+      "new": "window.control_host = R1Upstream.host;",
+      "count": 1
+    },
+    {
+      "path": "refresh.js",
+      "reason": "subdirectory deployment",
+      "old": "location.protocol + \"//\" + control_host + \"/new_r1_control.css?t=\" + time",
+      "new": "R1Upstream.assetUrl(\"new_r1_control.css?t=\" + time)",
+      "count": 1
+    },
+    {
+      "path": "refresh.js",
+      "reason": "subdirectory deployment",
+      "old": "location.protocol + '//' + control_host + '/js/r1_control.min.js?t=' + time",
+      "new": "R1Upstream.assetUrl('js/r1_control.min.js?t=' + time)",
+      "count": 1
+    },
+    {
+      "path": "new_r1_control.js",
+      "reason": "subdirectory deployment",
+      "old": "if (!control_host)",
+      "new": "var upstream_base_url = new URL('./', document.currentScript.src).href;\nif (!control_host)",
+      "count": 1
+    },
+    {
+      "path": "new_r1_control.js",
+      "reason": "subdirectory deployment",
+      "old": "var control_host = 'r1.wxfsq.com';",
+      "new": "var control_host = new URL(upstream_base_url).host;",
+      "count": 1
+    },
+    {
+      "path": "new_r1_control.js",
+      "reason": "subdirectory deployment",
+      "old": "location.protocol + \"//\" + control_host + \"/new_r1_control.css?t=\" + time",
+      "new": "new URL(\"new_r1_control.css?t=\" + time, upstream_base_url).href",
+      "count": 1
+    },
+    {
+      "path": "new_r1_control.js",
+      "reason": "Use the snapshot icon",
+      "old": "https://q1.qlogo.cn/g?b=qq&nk=203017966&s=100",
+      "new": "\" + new URL(\"icon.png\", upstream_base_url).href + \"",
+      "count": 1
+    },
+    {
+      "path": "new_r1_control.js",
+      "reason": "subdirectory deployment",
+      "old": "location.protocol + '//' + control_host + '/?connect_ip=' + location.host",
+      "new": "upstream_base_url + '?connect_ip=' + encodeURIComponent(location.host)",
+      "count": 1
+    },
+    {
+      "path": "new_r1_control.js",
+      "reason": "subdirectory deployment",
+      "old": "location.protocol + '//' + control_host + '/js/connect.js?t=' + new Date().getTime()",
+      "new": "new URL('js/connect.js?t=' + Date.now(), upstream_base_url).href",
+      "count": 1
+    },
+    {
+      "path": "js/connect.js",
+      "reason": "Load the local snapshot",
+      "old": "script.src =\r\n    location.protocol +\r\n    \"//\" +\r\n    control_host +\r\n    \"/refresh.js?t=\" +\r\n    new Date().getTime();",
+      "new": "script.src = R1Upstream.assetUrl(\"refresh.js?t=\" + Date.now());",
+      "count": 1
+    },
+    {
+      "path": "js/connect.js",
+      "reason": "subdirectory deployment",
+      "old": "script.src = Storage.getItem(\"refresh.js\");",
+      "new": "script.src = R1Upstream.assetUrl(\"refresh.js?t=\" + Date.now());",
+      "count": 1
+    },
+    {
+      "path": "js/connect.js",
+      "reason": "subdirectory deployment",
+      "old": "init();",
+      "new": "if (window.R1Upstream) { init(); } else {\n  var deployment = document.createElement(\"script\");\n  deployment.src = new URL(\"deployment.js\", document.currentScript.src).href;\n  deployment.onload = init;\n  document.head.appendChild(deployment);\n}",
+      "count": 1
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "subdirectory deployment",
+      "old": "DEFAULT_CONTROL_HOST=\"r1.wxfsq.com\"",
+      "new": "DEFAULT_CONTROL_HOST=R1Upstream.host",
+      "count": 1
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "subdirectory deployment",
+      "old": "\"http://\"+state.controlHost+\"/pic/nopic.jpg\"",
+      "new": "R1Upstream.assetUrl(\"pic/nopic.jpg\")",
+      "count": 2
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "subdirectory deployment",
+      "old": "location.protocol+\"//\"+state.controlHost+\"/js/vconsole.min.js\"",
+      "new": "R1Upstream.assetUrl(\"js/vconsole.min.js\")",
+      "count": 1
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "subdirectory deployment",
+      "old": "location.protocol+\"//\"+state.controlHost+\"/jquery-3.6.0.min.js\"",
+      "new": "R1Upstream.assetUrl(\"jquery-3.6.0.min.js\")",
+      "count": 1
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "subdirectory deployment",
+      "old": "location.href=\"http://\"+state.controlHost+\"/?no_auto_connect\"",
+      "new": "location.href=R1Upstream.assetUrl(\"?no_auto_connect\")",
+      "count": 1
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "subdirectory deployment",
+      "old": "history.replaceState(null,\"\",\"/?no_auto_connect\")",
+      "new": "history.replaceState(null,\"\",new URL(\"?no_auto_connect\",R1Upstream.baseUrl).pathname+\"?no_auto_connect\")",
+      "count": 1
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "subdirectory deployment",
+      "old": "location.href=\"http://\"+state.controlHost+\"./config_wifi\"",
+      "new": "location.href=R1Upstream.assetUrl(\"config_wifi/\")",
+      "count": 1
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "Keep local deployment free of group and registration banners",
+      "old": "var n=makeEl(\"div\",{id:\"qun_div\",style:window.screen.width>800?\"position:absolute;left:5px;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%\":\"position:absolute;left:5px;z-index:1\",html:'<a id=\"qun\" target=\"_blank\" href=\"https://jq.qq.com/?_wv=1027&k=hTbg34eR\">交流群：772694950</a>'});if(ui.main.appendChild(n),\"string\"==typeof beian&&window.screen.width>800){var a=makeEl(\"div\",{id:\"beian_div\",style:\"position:relative\"});a.appendChild(makeEl(\"div\",{style:\"position:absolute;left:0;right:0;text-align:center\",html:'<a target=\"_blank\" href=\"https://beian.miit.gov.cn/\">'+beian+\"</a>\"})),ui.main.appendChild(a)}",
+      "new": "",
+      "count": 1
+    },
+    {
+      "path": "config_wifi/main.js",
+      "reason": "subdirectory deployment",
+      "old": "'http://' + control_host + '/new_r1_control.css'",
+      "new": "new URL('../new_r1_control.css', document.currentScript.src).href",
+      "count": 1
+    },
+    {
+      "path": "config_wifi/main.js",
+      "reason": "subdirectory deployment",
+      "old": "'http://' + control_host + '/jquery-3.6.0.min.js'",
+      "new": "new URL('jquery-3.6.0.min.js', upstream_wifi_base).href",
+      "count": 1
+    },
+    {
+      "path": "config_wifi/index.html",
+      "reason": "Prefer the bundled dependency",
+      "old": "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js\"></script>",
+      "new": "<script src=\"../jquery-3.6.0.min.js\" onerror=\"this.onerror=null;var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js';document.head.appendChild(s)\"></script>",
+      "count": 1
+    },
+    {
+      "path": "newui/index.html",
+      "reason": "subdirectory deployment",
+      "old": "window.location.replace(window.location.href.replace(/^https:/, 'http:'));",
+      "new": "/* Keep HTTPS on the local deployment. */",
+      "count": 1
+    },
+    {
+      "path": "newui/js/ws.js",
+      "reason": "subdirectory deployment",
+      "old": "location.protocol + '//r1.wxfsq.com/music'",
+      "new": "R1Upstream.musicApiUrl",
+      "count": 1
+    },
+    {
+      "path": "newui/js/ws.js",
+      "reason": "subdirectory deployment",
+      "old": "var url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'adb.html?ip=' + encodeURIComponent(ip) + '&t=' + Date.now();",
+      "new": "var url = R1Upstream.assetUrl('adb/?ip=' + encodeURIComponent(ip) + '&t=' + Date.now());",
+      "count": 1
+    },
+    {
+      "path": "newui/js/ws.js",
+      "reason": "subdirectory deployment",
+      "old": "window.open('./config_wifi.html?' + Date.now(), '_blank');",
+      "new": "window.open(R1Upstream.assetUrl('config_wifi/') + '?' + Date.now(), '_blank');",
+      "count": 1
+    },
+    {
+      "path": "newui/js/ws.js",
+      "reason": "Disable the undefined optional server scan proxy; retain direct scanning",
+      "old": "if (isHttpsPage()) {\n                        probeUrl = 'wss://' + (window.control_host || window.location.host) + '/r1ws/' + encodeIpForPath(ip + ':' + port) + '/';\n                    } else {\n                        probeUrl = 'ws://' + ip + ':' + port;\n                    }",
+      "new": "probeUrl = 'ws://' + ip + ':' + port;",
+      "count": 1
+    },
+    {
+      "path": "newui/js/panel-music.js",
+      "reason": "subdirectory deployment",
+      "old": "fetch('/api/covers',",
+      "new": "fetch(R1Upstream.serviceUrl('api/covers'),",
+      "count": 1
+    },
+    {
+      "path": "newui/js/panel-music.js",
+      "reason": "subdirectory deployment",
+      "old": "fetch('/api/music/search?source=' + web.src + '&page=1&keyword=' + encodeURIComponent(kw))",
+      "new": "fetch(R1Upstream.serviceUrl('api/music/search?source=' + web.src + '&page=1&keyword=' + encodeURIComponent(kw)))",
+      "count": 1
+    },
+    {
+      "path": "newui/js/panel-music.js",
+      "reason": "subdirectory deployment",
+      "old": "fetch('/api/music/search?info=' + encodeURIComponent(s.id))",
+      "new": "fetch(R1Upstream.serviceUrl('api/music/search?info=' + encodeURIComponent(s.id)))",
+      "count": 1
+    },
+    {
+      "path": "newui/js/panel-music.js",
+      "reason": "subdirectory deployment",
+      "old": "fetch('/api/hotlist?source=' + src + '&board=' + board)",
+      "new": "fetch(R1Upstream.serviceUrl('api/hotlist?source=' + src + '&board=' + board))",
+      "count": 1
+    },
+    {
+      "path": "config_wifi/main.js",
+      "reason": "Locate legacy Wi-Fi dependencies relative to the snapshot",
+      "old": "document.body.style =",
+      "new": "var upstream_wifi_base = new URL('../', document.currentScript.src).href;\ndocument.body.style =",
+      "count": 1
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "reason": "Preserve the current page path when updating query parameters",
+      "old": "history.replaceState(null,\"\",t.length?\"/?\"+t.join(\"&\"):\"/\")",
+      "new": "history.replaceState(null,\"\",location.pathname+(t.length?\"?\"+t.join(\"&\"):\"\"))",
+      "count": 1
+    }
+  ]
+}

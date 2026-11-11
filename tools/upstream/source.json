@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "origin": "https://r1.wxfsq.com/",
+  "snapshot_date": "2026-11-10",
+  "web_version": 2863,
+  "files": [
+    {
+      "path": "adb/adb-console.min.js",
+      "source_url": "https://r1.wxfsq.com/adb/adb-console.min.js",
+      "sha256": "f5592dbc9780a4f37b02ffc8bd61ec7504249d39a345a98fc3cda9a189d9bedb",
+      "kind": "author"
+    },
+    {
+      "path": "adb/index.html",
+      "source_url": "https://r1.wxfsq.com/adb/",
+      "sha256": "d0931823b8a3972fc9b8fbd253d03688975843f1d5648704057ec5ae459dcf53",
+      "kind": "author"
+    },
+    {
+      "path": "config_wifi/index.html",
+      "source_url": "https://r1.wxfsq.com/config_wifi/index.html",
+      "sha256": "1d085a3e773186009a0f2f7bfea034378f29502ca73f80223fbdae5881cb9364",
+      "kind": "author"
+    },
+    {
+      "path": "config_wifi/main.js",
+      "source_url": "https://r1.wxfsq.com/config_wifi/main.js",
+      "sha256": "5d07f20fb8d79452e563992eca23ea058ee42acd2f4c848657610f54e42f673e",
+      "kind": "author"
+    },
+    {
+      "path": "device_scan.html",
+      "source_url": "https://r1.wxfsq.com/device_scan.html",
+      "sha256": "754a489c3945110645d24cd4328ecc48b7297715020f393ea4852dfe5fbcf8ec",
+      "kind": "author"
+    },
+    {
+      "path": "dlna.html",
+      "source_url": "https://r1.wxfsq.com/dlna.html",
+      "sha256": "850ca702e38d16c4b9bfed8cac94b1163eb313694461481f177a745890ea62c4",
+      "kind": "author"
+    },
+    {
+      "path": "icon.png",
+      "source_url": "https://r1.wxfsq.com/icon.png",
+      "sha256": "a694e76df77867d66b7d32890b151e10783f6e6f92c1e574d273576427e62695",
+      "kind": "author"
+    },
+    {
+      "path": "index.html",
+      "source_url": "https://r1.wxfsq.com/index.html",
+      "sha256": "5bf4d8f7820d8818eb67970e9278405da1835292de07c6a7e48ac29c5423848e",
+      "kind": "author"
+    },
+    {
+      "path": "jquery-3.6.0.min.js",
+      "source_url": "https://r1.wxfsq.com/jquery-3.6.0.min.js",
+      "sha256": "ff1523fb7389539c84c65aba19260648793bb4f5e29329d2ee8804bc37a3fe6e",
+      "kind": "author"
+    },
+    {
+      "path": "js/connect.js",
+      "source_url": "https://r1.wxfsq.com/js/connect.js",
+      "sha256": "4138d99c2dff10a2d1e069c73d60aef818c87526ddaef2358aec8dc96aa08605",
+      "kind": "author"
+    },
+    {
+      "path": "js/r1_control.min.js",
+      "source_url": "https://r1.wxfsq.com/js/r1_control.min.js",
+      "sha256": "5c780f047a2149931abb638cd6a1b7c7003d4bc9a95e99cd4d1c1ee02f94d9ba",
+      "kind": "author"
+    },
+    {
+      "path": "js/vconsole.min.js",
+      "source_url": "git:68f293ad3b3e714e1ab1a4a96caac656918e762a:js/vconsole.min.js",
+      "sha256": "be125d5336ea10fbf31a8ceaf846d3857319bc72f3f7706541e419904208dec7",
+      "kind": "fallback"
+    },
+    {
+      "path": "manifest.json",
+      "source_url": "https://r1.wxfsq.com/manifest.json",
+      "sha256": "e73bb8c6a83389db6ab099f7a0d68afe9fb2647961bb936e4ddad5b6ce6d56b2",
+      "kind": "author"
+    },
+    {
+      "path": "mdns.html",
+      "source_url": "https://r1.wxfsq.com/mdns.html",
+      "sha256": "07059c3cc245d61fbc8464d7aaee02e23da1211ad0d7a4e79743593fde8d2570",
+      "kind": "author"
+    },
+    {
+      "path": "new_r1_control.css",
+      "source_url": "https://r1.wxfsq.com/new_r1_control.css",
+      "sha256": "186de67469d48c82ff22aecda1f204770facca01644218928edbaae60d551075",
+      "kind": "author"
+    },
+    {
+      "path": "new_r1_control.js",
+      "source_url": "https://r1.wxfsq.com/new_r1_control.js",
+      "sha256": "8c73c8152fa50a126acd01734a85c471fc1d0fc472e1d8e93fafa5b3ef0c97b5",
+      "kind": "author"
+    },
+    {
+      "path": "newui/css/app.css",
+      "source_url": "https://r1.wxfsq.com/newui/css/app.css",
+      "sha256": "9dd79c3bc84735578cbacad463ef08d4d8f21b3f98f4a2afa4d6e18cb74d5a3d",
+      "kind": "author"
+    },
+    {
+      "path": "newui/css/player-fix.css",
+      "source_url": "https://r1.wxfsq.com/newui/css/player-fix.css",
+      "sha256": "5c7c84c337ac1f8a933b56863c0a09bc8acce87240fdfa74236a23943c5c98f2",
+      "kind": "author"
+    },
+    {
+      "path": "newui/css/theme.css",
+      "source_url": "https://r1.wxfsq.com/newui/css/theme.css",
+      "sha256": "19df69cd7b6a8025657c8b77dda8b90f527804f6a7b5834db6a8d1b3fcdfec80",
+      "kind": "author"
+    },
+    {
+      "path": "newui/images/disc-ip6.png",
+      "source_url": "https://r1.wxfsq.com/newui/images/disc-ip6.png",
+      "sha256": "6ac48111f6eee6fe72dd8c7d6ba3495e304212db107a901299238a149b0a724a",
+      "kind": "author"
+    },
+    {
+      "path": "newui/images/needle-ip6.png",
+      "source_url": "https://r1.wxfsq.com/newui/images/needle-ip6.png",
+      "sha256": "06eb28d256c0cd57ef90ca03977bef096c3cd1c2faf0a8c3a55800ed5d0dd45e",
+      "kind": "author"
+    },
+    {
+      "path": "newui/index.html",
+      "source_url": "https://r1.wxfsq.com/newui/index.html",
+      "sha256": "a2d6fccccdc6bec99014683282d933bc4dad4ad4268967a624c84e80336d663d",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/app.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/app.js",
+      "sha256": "a46c033e69ee60d4079040c1dc9a0d4e90b9c5364d9205effe21d5ec8663e2e9",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/core.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/core.js",
+      "sha256": "592652b14b55eee056e45d053e62870aa0e2cae7e2da40e58781e2b352250d6f",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/icons.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/icons.js",
+      "sha256": "36fcc178191938549a4679538f0fd5db396147a593b93e161cef5df1c3e61914",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/panel-device.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/panel-device.js",
+      "sha256": "a5fbf253b9e4894418fe87c2cd376a24d101d57f9e915efa6a7adeae3438b28b",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/panel-music.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/panel-music.js",
+      "sha256": "462c4a5f8375095aae4881812ef061d0fa81b901b446379df8f70c67cc5ef2ee",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/ui.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/ui.js",
+      "sha256": "62088e4885134741ce48df03c7bda13b99ee11a88b1f16056c5445fd22744f72",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/vendor/LICENSE.react.txt",
+      "source_url": "https://github.com/facebook/react/blob/v18.2.0/LICENSE",
+      "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "kind": "license"
+    },
+    {
+      "path": "newui/js/vendor/react-dom.production.min.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/vendor/react-dom.production.min.js",
+      "sha256": "21758ed084cd0e37e735722ee4f3957ea960628a29dfa6c3ce1a1d47a2d6e4f7",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/vendor/react.production.min.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/vendor/react.production.min.js",
+      "sha256": "4b4969fa4ef3594324da2c6d78ce8766fbbc2fd121fff395aedf997db0a99a06",
+      "kind": "author"
+    },
+    {
+      "path": "newui/js/ws.js",
+      "source_url": "https://r1.wxfsq.com/newui/js/ws.js",
+      "sha256": "f3f1e4356e5c48ebc169c7f7541dd7a42b4b2506289a3466b79230d3f1e70c69",
+      "kind": "author"
+    },
+    {
+      "path": "pic/nopic.jpg",
+      "source_url": "git:68f293ad3b3e714e1ab1a4a96caac656918e762a:pic/nopic.jpg",
+      "sha256": "46e93055fe2e7d6ada84b3a5a1c7348ece87251a67037583c24bfc91981b8c0d",
+      "kind": "fallback"
+    },
+    {
+      "path": "refresh.js",
+      "source_url": "https://r1.wxfsq.com/refresh.js",
+      "sha256": "ad45e7a2c6de38ddb46f19de6a01a14602c8a6ea2168849af829e0fef4d38cc3",
+      "kind": "author"
+    },
+    {
+      "path": "sw.js",
+      "source_url": "https://r1.wxfsq.com/sw.js",
+      "sha256": "a916ee9d0da6654370379850fe9dee5b0a9d2114f3bca54ab5f9ea38d6706d11",
+      "kind": "author"
+    }
+  ]
+}

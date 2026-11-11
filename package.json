@@ -5,8 +5,9 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && node scripts/check-assets.mjs && node scripts/check-scripts.mjs",
-    "test": "python3 -m unittest discover -s tests -v"
+    "check": "npm run format:check && node scripts/check-assets.mjs && node scripts/check-scripts.mjs && python3 tools/upstream/sync.py check",
+    "test": "python3 -m unittest discover -s tests -v",
+    "upstream:build": "python3 tools/upstream/sync.py build"
   },
   "devDependencies": {
     "prettier": "3.9.10"

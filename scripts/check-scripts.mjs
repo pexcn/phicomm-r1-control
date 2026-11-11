@@ -23,12 +23,27 @@ function check(source, label) {
 for (const file of scriptsIn(path.join(root, "assets", "js"))) {
   check(readFileSync(file, "utf8"), path.relative(root, file));
 }
+for (const file of scriptsIn(path.join(root, "upstream"))) {
+  check(readFileSync(file, "utf8"), path.relative(root, file));
+}
 for (const filename of ["new_r1_control.js", "service-worker.js"]) {
   check(readFileSync(path.join(root, filename), "utf8"), filename);
 }
 // Wi-Fi remains a self-contained HTML5+ offline document.
-const wifi = readFileSync(path.join(root, "pages", "wifi", "index.html"), "utf8");
-for (const match of wifi.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
-  if (match[1].trim()) check(match[1], "pages/wifi/index.html");
+const documents = [
+  "pages/wifi/index.html",
+  "upstream/index.html",
+  "upstream/newui/index.html",
+  "upstream/config_wifi/index.html",
+  "upstream/adb/index.html",
+  "upstream/dlna.html",
+  "upstream/mdns.html",
+  "upstream/device_scan.html",
+];
+for (const document of documents) {
+  const html = readFileSync(path.join(root, document), "utf8");
+  for (const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
+    if (match[1].trim()) check(match[1], document);
+  }
 }
 console.log(`Checked ${checked} browser scripts.`);

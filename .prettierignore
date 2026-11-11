@@ -4,3 +4,8 @@ docs/
 AGENTS.md
 LICENSE
 package-lock.json
+
+# Keep upstream snapshots and generated files byte-stable.
+/upstream/
+tools/upstream/snapshot/
+tools/upstream/patches.json
