@@ -124,6 +124,7 @@ strong {
   z-index: 10;
 }
 .brand {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -134,7 +135,7 @@ strong {
   white-space: nowrap;
   font: var(--type-title-large);
   min-height: 48px;
-  border-radius: 24px;
+  border-radius: var(--md-sys-shape-corner-small);
 }
 .brand-icon {
   display: inline-grid;
@@ -1312,6 +1313,7 @@ body:has(.cover-viewer[open]) {
     z-index: 10;
   }
   .mobile-brand {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1320,7 +1322,7 @@ body:has(.cover-viewer[open]) {
     white-space: nowrap;
     font: var(--type-title-medium);
     min-height: 48px;
-    border-radius: 24px;
+    border-radius: var(--md-sys-shape-corner-small);
   }
   .mobile-brand .brand-icon {
     width: 32px;

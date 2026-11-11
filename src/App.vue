@@ -49,7 +49,7 @@ onBeforeUnmount(() => {
   <a class="skip-link" href="#main-content" @click.prevent="focusMain">跳到内容</a>
   <aside class="sidebar">
     <a class="brand" href="#/music" aria-label="R1 Control 首页"
-      ><MaterialState /><span class="brand-icon"><AppIcon name="speaker" /></span
+      ><md-focus-ring /><span class="brand-icon"><AppIcon name="speaker" /></span
       ><strong>R1 Control</strong></a
     >
     <nav aria-label="主导航">
@@ -74,7 +74,7 @@ onBeforeUnmount(() => {
     <header class="topbar">
       <strong class="topbar-title">{{ title }}</strong
       ><a href="#/music" class="mobile-brand"
-        ><MaterialState /><span class="brand-icon"><AppIcon name="speaker" :size="20" /></span>R1
+        ><md-focus-ring /><span class="brand-icon"><AppIcon name="speaker" :size="20" /></span>R1
         Control</a
       >
       <div class="topbar-actions">
