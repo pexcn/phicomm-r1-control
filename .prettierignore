@@ -9,3 +9,4 @@ package-lock.json
 /upstream/
 tools/upstream/snapshot/
 tools/upstream/patches.json
+dist/

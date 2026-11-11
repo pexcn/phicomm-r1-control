@@ -1,0 +1,126 @@
+// A synthetic device for browser regression; never opens a real connection.
+window.mockVersion = 1873;
+window.mockSockets = [];
+window.WebSocket = class {
+  static OPEN = 1;
+  static CONNECTING = 0;
+  static CLOSED = 3;
+  readyState = 0;
+  sent = [];
+  constructor(url) {
+    this.url = url;
+    mockSockets.push(this);
+    setTimeout(() => {
+      if (this.readyState !== 0) return;
+      this.readyState = 1;
+      this.onopen?.();
+    }, 0);
+  }
+  close() {
+    this.readyState = 3;
+    this.onclose?.();
+  }
+  reply(message) {
+    this.onmessage?.({ data: JSON.stringify(message) });
+  }
+  send(raw) {
+    const message = JSON.parse(raw);
+    this.sent.push(message);
+    const data = {
+      get_info: {
+        ver: mockVersion,
+        u_ver: 1856,
+        Unisound: true,
+        device_name: "客厅音箱",
+        vol: 10,
+        play_state: true,
+        play_mode: 2,
+        dlna_open: true,
+        airplay_open: false,
+        Service_Normally_Open: true,
+        music_info: {
+          id: "mock:track-1",
+          title: "夜航",
+          artist: "示例歌手",
+          album: "城市夜色",
+          position: 92000,
+          duration: 248000,
+        },
+      },
+      max_vol: 30,
+      list: {
+        playIndex: 0,
+        playList: [
+          { id: "track-1", title: "夜航", artist: "示例歌手", duration: 248000 },
+          { id: "track-2", title: "晚风", artist: "示例歌手", duration: 236000 },
+          { id: "track-3", title: "林间光", artist: "示例歌手", duration: 262000 },
+        ],
+      },
+      get_device_info: {
+        nameValuePairs: {
+          incremental: "3448",
+          elapsedRealtime: 14040000,
+          cpuinfo: [0, 0, 0, 22],
+          meminfo: "MemTotal: 501760 kB\r\nMemFree: 120000 kB\r\nCached: 60224 kB",
+        },
+      },
+      get_eq_config: {
+        eq: {
+          sound_effects_eq_enable: true,
+          Current_Preset: 0,
+          Preset_list: [
+            { Preset: 0, Name: "Normal" },
+            { Preset: 1, Name: "Rock" },
+          ],
+          Bands: {
+            minBandLevel: -1500,
+            maxBandLevel: 1500,
+            list: [
+              { Band: 0, Frequency: 60000, BandLevel: 0 },
+              { Band: 1, Frequency: 230000, BandLevel: 200 },
+              { Band: 2, Frequency: 910000, BandLevel: 0 },
+              { Band: 3, Frequency: 3600000, BandLevel: -100 },
+              { Band: 4, Frequency: 14000000, BandLevel: 100 },
+            ],
+          },
+        },
+      },
+      BT_Device: {
+        Enabled: true,
+        Scanning: false,
+        Bonded_Devices: [{ Name: "书房音箱", Address: "AA:BB:CC:DD:EE:01" }],
+        Scan_Devices: [{ Name: "无线耳机", Address: "AA:BB:CC:DD:EE:02" }],
+        A2dp_ConnectedDevices: [],
+        A2dpSink_ConnectedDevices: [],
+      },
+    };
+    if (message.type in data) {
+      setTimeout(
+        () =>
+          this.reply({
+            type: message.type,
+            type_id: message.type_id,
+            code: 200,
+            data: data[message.type],
+          }),
+        0,
+      );
+    }
+    if (message.type === "shell") {
+      const shell = {
+        "web-system": "3448\r\nPhicomm_R1_12CF\r\n14040.00 30000.00",
+        "web-temperature": "60",
+        "web-size": "Physical size: 720x480",
+      };
+      this.reply({
+        type: "shell",
+        type_id: message.type_id,
+        code: 200,
+        data: shell[message.type_id] || "",
+      });
+    }
+    if (message.type === "start_screencap" || message.type === "screencap") {
+      this.reply({ type: "screencap", code: 200, data: window.mockScreen });
+    }
+  }
+};

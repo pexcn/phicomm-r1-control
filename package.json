@@ -1,18 +1,33 @@
 {
   "name": "phicomm-r1-control",
   "private": true,
+  "type": "module",
   "description": "Static control pages for the Phicomm R1 speaker",
   "scripts": {
+    "dev": "vite",
+    "typecheck": "vue-tsc --noEmit",
+    "build": "npm run typecheck && python3 tools/upstream/sync.py check && vite build && node scripts/prepare-site.mjs",
+    "preview": "vite preview --host 0.0.0.0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && node scripts/check-assets.mjs && node scripts/check-scripts.mjs && python3 tools/upstream/sync.py check",
-    "test": "python3 -m unittest discover -s tests -v",
+    "check": "npm run format:check && npm run typecheck && node scripts/check-assets.mjs && node scripts/check-scripts.mjs && python3 tools/upstream/sync.py check",
+    "test": "npm run test:unit && npm run build && python3 -m unittest discover -s tests -v",
+    "test:unit": "node --experimental-strip-types --test tests/web/*.test.mjs",
     "upstream:build": "python3 tools/upstream/sync.py build"
   },
   "devDependencies": {
-    "prettier": "3.9.10"
+    "@types/node": "^24.19.2",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "prettier": "3.9.10",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.8",
+    "vue-tsc": "^3.3.14"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "dependencies": {
+    "@material/web": "^2.5.0",
+    "vue": "^3.5.45"
   }
 }
