@@ -7,17 +7,8 @@ const destination = path.join(root, "dist");
 if (!existsSync(path.join(destination, "index.html"))) {
   throw new Error("Build the independent frontend before preparing the site.");
 }
-for (const directory of ["upstream", "assets", "pages"]) {
-  cpSync(path.join(root, directory), path.join(destination, directory), { recursive: true });
-}
-for (const file of [
-  "favicon.svg",
-  "new_r1_control.js",
-  "site.webmanifest",
-  "service-worker.js",
-  "LICENSE",
-]) {
+cpSync(path.join(root, "upstream"), path.join(destination, "upstream"), { recursive: true });
+for (const file of ["favicon.svg", "new_r1_control.js", "LICENSE"]) {
   copyFileSync(path.join(root, file), path.join(destination, file));
 }
-copyFileSync(path.join(root, "index.html"), path.join(destination, "legacy.html"));
-console.log("Prepared dist/: independent frontend, author reference and compatibility pages.");
+console.log("Prepared dist/: independent frontend and upstream reference.");

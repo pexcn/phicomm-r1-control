@@ -25,13 +25,9 @@ function checkReference(value, owner, base = path.dirname(owner)) {
   if (!existsSync(target)) missing.push(`${path.relative(root, owner)}: ${value}`);
 }
 
-const files = ["index.html", "new_r1_control.js", "service-worker.js"]
+const files = ["index.html", "new_r1_control.js"]
   .map((file) => path.join(root, file))
-  .concat(
-    filesIn(path.join(root, "pages")),
-    filesIn(path.join(root, "assets")),
-    filesIn(path.join(root, "upstream")),
-  )
+  .concat(filesIn(path.join(root, "upstream")))
   .filter((file) => !file.includes(`${path.sep}vendor${path.sep}`));
 
 for (const file of files) {
@@ -52,22 +48,18 @@ for (const file of files) {
     for (const match of source.matchAll(/R1Upstream\.assetUrl\(["']([^"']+)["']/g)) {
       checkReference(match[1], file, path.join(root, "upstream"));
     }
-    for (const match of source.matchAll(/R1Config\.assetUrl\(["']([^"']+)["']/g)) {
+    for (const match of source.matchAll(/["'](upstream\/[^"']+)["']/g)) {
       checkReference(match[1], file, root);
-    }
-    for (const match of source.matchAll(/["']((?:\.\.\/)*(?:assets|pages)\/[^"']+)["']/g)) {
-      const reference = match[1].replace(/^(?:\.\.\/)+/, "");
-      checkReference(reference, file, root);
     }
   }
 }
 
-const manifestPath = path.join(root, "site.webmanifest");
+const manifestPath = path.join(root, "upstream", "manifest.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 for (const icon of manifest.icons) checkReference(icon.src, manifestPath);
 checkReference(manifest.start_url, manifestPath);
-for (const directory of ["modern", "wifi", "adb", "dlna", "mdns", "device-scan"]) {
-  assert.ok(statSync(path.join(root, "pages", directory, "index.html")).isFile());
+for (const directory of ["newui", "config_wifi", "adb"]) {
+  assert.ok(statSync(path.join(root, "upstream", directory, "index.html")).isFile());
 }
 assert.deepEqual(missing, [], `Missing local resources:\n${missing.join("\n")}`);
 console.log(`Checked ${referenceCount} local resource references.`);

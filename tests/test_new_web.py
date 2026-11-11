@@ -190,6 +190,17 @@ class NewWebTests(unittest.TestCase):
         self.assertFalse((ROOT / 'dist/tools').exists())
         self.assertTrue((ROOT / 'dist/THIRD-PARTY-LICENSES.md').is_file())
 
+    def test_published_routes_only_keep_new_web_and_upstream(self):
+        self.page.goto(self.base)
+        self.page.locator('.sidebar').get_by_role('link', name='原作者版本', exact=True).wait_for()
+        for retired in ['legacy.html', 'pages', 'assets', 'site.webmanifest', 'service-worker.js']:
+            with self.subTest(path=retired):
+                self.assertFalse((ROOT / 'dist' / retired).exists())
+                response = self.context.request.get(self.base + retired)
+                self.assertEqual(response.status, 404)
+        self.assertEqual(self.context.request.get(self.base + 'upstream/').status, 200)
+        self.assertEqual(self.context.request.get(self.base + 'upstream/newui/').status, 200)
+
 
 if __name__ == '__main__':
     unittest.main()
