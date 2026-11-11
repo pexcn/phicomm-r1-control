@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "./components/AppIcon.vue";
 import ConnectionDialog from "./components/ConnectionDialog.vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
+import ThemeToggle from "./components/ThemeToggle.vue";
 import MusicPage from "./views/MusicPage.vue";
 import ScreenPage from "./views/ScreenPage.vue";
 import SoundPage from "./views/SoundPage.vue";
@@ -19,7 +20,6 @@ import {
   state,
   type Page,
 } from "./lib/speaker";
-import { save } from "./lib/storage";
 
 function currentPage(): Page {
   const id = location.hash.replace(/^#\/?/, "");
@@ -27,43 +27,19 @@ function currentPage(): Page {
 }
 const page = ref<Page>(currentPage());
 const title = computed(() => pages.find((item) => item.id === page.value)!.label);
-const themeQuery = matchMedia("(prefers-color-scheme: dark)");
-const systemDark = ref(themeQuery.matches);
-const dark = computed(
-  () => state.theme === "dark" || (state.theme === "system" && systemDark.value),
-);
 const upstreamUrl = new URL("upstream/", document.baseURI).href;
 
 function hashChange() {
   page.value = currentPage();
 }
-function systemChange(event: MediaQueryListEvent) {
-  systemDark.value = event.matches;
-}
 window.addEventListener("hashchange", hashChange);
-themeQuery.addEventListener("change", systemChange);
-watch(
-  dark,
-  (value) => {
-    document.documentElement.dataset.theme = value ? "dark" : "light";
-    document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", value ? "#111318" : "#f4f7f5");
-  },
-  { immediate: true },
-);
 watch([page, connected], () => readPanel(page.value));
-function toggleTheme() {
-  state.theme = dark.value ? "light" : "dark";
-  save("theme", state.theme);
-}
 function focusMain() {
   document.getElementById("main-content")?.focus();
 }
 onBeforeUnmount(() => {
   dispose();
   window.removeEventListener("hashchange", hashChange);
-  themeQuery.removeEventListener("change", systemChange);
 });
 </script>
 
@@ -109,9 +85,7 @@ onBeforeUnmount(() => {
           <MaterialState /> <span class="status-dot"></span
           ><span class="connection-label">{{ connected ? deviceName : connectionLabel }}</span
           ><AppIcon name="down" :size="16" /></button
-        ><md-icon-button @click="toggleTheme" :aria-label="dark ? '切换浅色模式' : '切换深色模式'"
-          ><AppIcon :name="dark ? 'sun' : 'moon'" /></md-icon-button
-        ><md-icon-button @click="state.settingsDialog = true" aria-label="打开设置"
+        ><ThemeToggle /><md-icon-button @click="state.settingsDialog = true" aria-label="打开设置"
           ><AppIcon name="settings"
         /></md-icon-button>
       </div>

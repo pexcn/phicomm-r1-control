@@ -4,7 +4,9 @@ import { watch, ref } from "vue";
 import { musicApi, notify, state } from "../lib/speaker";
 import { save } from "../lib/storage";
 import AppIcon from "./AppIcon.vue";
+import { themeOrigin, themes, useTheme } from "../lib/theme";
 
+const { mode, setMode } = useTheme();
 const api = ref(state.musicApi);
 const validationError = ref("");
 watch(
@@ -30,10 +32,6 @@ function saveSettings() {
   if (!save("music-api", state.musicApi)) notify("浏览器无法保存设置，本次会话仍可使用。");
   state.settingsDialog = false;
 }
-function theme(value: string) {
-  state.theme = value;
-  save("theme", value);
-}
 </script>
 
 <template>
@@ -49,14 +47,10 @@ function theme(value: string) {
         <h3>外观</h3>
         <div class="segmented" aria-label="外观模式">
           <button
-            v-for="option in [
-              { id: 'light', label: '浅色' },
-              { id: 'dark', label: '深色' },
-              { id: 'system', label: '跟随系统' },
-            ]"
+            v-for="option in themes"
             :key="option.id"
-            :aria-pressed="state.theme === option.id"
-            @click="theme(option.id)"
+            :aria-pressed="mode === option.id"
+            @click="setMode(option.id, themeOrigin($event))"
           >
             <MaterialState />
             {{ option.label }}

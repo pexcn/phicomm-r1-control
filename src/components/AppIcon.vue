@@ -7,6 +7,7 @@ import speaker from "@material-symbols/svg-400/outlined/speaker.svg?raw";
 import settings from "@material-symbols/svg-400/outlined/settings.svg?raw";
 import sun from "@material-symbols/svg-400/outlined/light_mode.svg?raw";
 import moon from "@material-symbols/svg-400/outlined/dark_mode.svg?raw";
+import system from "@material-symbols/svg-400/outlined/brightness_auto.svg?raw";
 import plus from "@material-symbols/svg-400/outlined/add.svg?raw";
 import close from "@material-symbols/svg-400/outlined/close.svg?raw";
 import search from "@material-symbols/svg-400/outlined/search.svg?raw";
@@ -55,6 +56,7 @@ const icons: Record<string, string> = Object.fromEntries(
     settings,
     sun,
     moon,
+    system,
     plus,
     close,
     search,

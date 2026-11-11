@@ -4,6 +4,9 @@
 Google Material Web 组件。浅色和深色均采用翡翠绿色系，桌面侧栏与手机底部导航分别适配。
 Roboto 字体与 Material Symbols 图标随网站本地打包，无需外部字体 CDN。
 字体层级、颜色角色、形状和交互动效集中在 `src/material.css`。
+主题按钮按“跟随系统 → 浅色 → 深色”循环，首次访问跟随系统，并记住本浏览器的选择。
+明暗变化时采用与 [VoHive](https://github.com/pexcn/vohive) 一致的 650ms 圆形扩散动画；
+启用减少动态效果或浏览器不支持 View Transitions 时直接切换。
 
 需配合音箱上的 `new_EchoService`。新版独立实现，不加载原作者版的业务脚本，
 设备协议参考已有记录独立实现；不实现 QQ 音乐、网易云音乐等账号登录。

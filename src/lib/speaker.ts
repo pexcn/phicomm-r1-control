@@ -34,13 +34,11 @@ export const pages: { id: Page; label: string; icon: string }[] = [
 ];
 
 const savedAddress = load("address", "");
-const savedTheme = load("theme", "system");
 const savedApi = load("music-api", "https://r1.wxfsq.com/music");
 export const state = reactive({
   status: "disconnected" as ConnectionStatus,
   session: 0,
   address: typeof savedAddress === "string" ? savedAddress : "",
-  theme: ["light", "dark", "system"].includes(savedTheme) ? savedTheme : "system",
   musicApi: typeof savedApi === "string" ? savedApi : "https://r1.wxfsq.com/music",
   connectionDialog: false,
   settingsDialog: false,

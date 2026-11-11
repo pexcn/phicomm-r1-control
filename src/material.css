@@ -20,6 +20,29 @@
   initial-value: 32px;
 }
 
+/* Keep the previous snapshot still while the target theme expands above it. */
+:root.theme-transition::view-transition-group(root),
+:root.theme-transition::view-transition-old(root),
+:root.theme-transition::view-transition-group(theme-reveal),
+:root.theme-transition::view-transition-new(theme-reveal) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+:root.theme-transition::view-transition-group(root) {
+  z-index: 0;
+}
+:root.theme-transition::view-transition-group(theme-reveal) {
+  z-index: 1;
+  scale: 0;
+}
+:root.theme-transition::view-transition-new(theme-reveal) {
+  width: 100%;
+  height: 100%;
+}
+:root.theme-transition::view-transition {
+  pointer-events: none;
+}
+
 :root {
   color-scheme: light;
   font-family: var(--md-ref-typeface-plain);
