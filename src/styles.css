@@ -7,8 +7,8 @@
 }
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--bg, #f4f7f5);
+  color: var(--text, #1b3328);
   font: var(--type-body-medium);
 }
 button,
@@ -265,6 +265,7 @@ main:focus {
 }
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
 }
 .page-heading {
