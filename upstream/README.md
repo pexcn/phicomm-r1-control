@@ -33,7 +33,7 @@
 
 `upstream/README.md`、`upstream/AGENTS.md` 是本地维护文件，生成脚本会保留它们。
 其余文件不要直接修改，应修改补丁或来源后重新生成。
-根目录 `assets/`、`pages/` 是之前的本地改造版；`src/` 为独立新站预留。
+根目录 `assets/`、`pages/` 是之前的本地改造版；`src/` 是独立新站源码。
 它们不是原始上游基线，不能覆盖回 `tools/upstream/snapshot/`。
 
 ## 必须保留的边界

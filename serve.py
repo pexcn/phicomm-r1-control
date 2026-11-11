@@ -86,7 +86,9 @@ def main():
     origin = urlsplit(args.upstream)
     if origin.scheme not in ("http", "https") or not origin.netloc or origin.path not in ("", "/") or origin.query or origin.fragment:
         parser.error("--upstream 必须是 HTTP(S) 源地址，不带路径或参数")
-    handler = partial(Handler, directory=str(Path(__file__).resolve().parent), upstream=args.upstream)
+    root = Path(__file__).resolve().parent
+    site = root / "dist" if (root / "dist" / "index.html").is_file() else root
+    handler = partial(Handler, directory=str(site), upstream=args.upstream)
     with ThreadingHTTPServer((args.bind, args.port), handler) as server:
         print(f"控制页面：http://{args.bind}:{args.port}/", flush=True)
         try:

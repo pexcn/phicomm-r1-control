@@ -1,133 +1,138 @@
 # Phicomm R1 Control
 
-需配合音箱上的 `new_EchoService`；部分功能还需 `new_Unisound` 或 Android App 的 HTML5+ 宿主。
+为斐讯 R1 音箱独立实现的网页控制器，使用 Vue 3、TypeScript、Vite 与
+Google Material Web 组件。浅色采用 [DC1 网页](https://github.com/pexcn/phicomm-dc1-firmware/tree/master/web)
+的绿色配色，深色采用蓝色主题；桌面侧栏与手机底部导航分别适配。
 
-当前同时保留本地改造版和作者参考版，后续独立新 Web 在 `src/` 开发。
-作者参考版以 2026-11-10 保存的公开网页快照（`web_ver = 2863`）为基线，
-保留原目录、文件名和代码格式，通过明确的部署补丁在 `/upstream/` 运行。
-独立新站尚未重写，根目录当前仍运行已有本地改造版。
+需配合音箱上的 `new_EchoService`。新版不加载作者或旧改造版的业务脚本，
+设备协议参考已有记录独立实现；不实现 QQ 音乐、网易云音乐等账号登录。
 
-## 使用
+## 使用与部署
 
-Python 3.10+ 可直接启动页面和音乐接口转发，不需要安装服务器依赖：
-
-```sh
-python3 serve.py
-```
-
-入口如下，部署到项目子目录时同样适用：
-
-- `/`：当前本地改造版；`/pages/modern/`：本地改造后的新 UI。
-- `/upstream/`：作者经典界面；`/upstream/newui/`：作者新 UI。
-
-从本地连接页也可打开作者参考版。
-需要其他设备访问时使用 `--bind 0.0.0.0`；端口可用 `--port` 指定。
-音乐接口默认转发到作者服务，服务地址可用 `--upstream` 指定。
-
-也可以使用普通静态服务器或部署到 GitHub Pages 的项目子目录。
-静态部署支持页面和使用作者 CORS 接口的搜索；新 UI 的排行榜还需同源 API 转发，
-可运行 `serve.py` 或在自己的服务器配置 `/api/hotlist`。
-
-自部署设置位于 [assets/js/shared/config.js](assets/js/shared/config.js)：
-`musicApiUrl` 控制搜索、封面和歌词接口，`serviceBaseUrl` 控制排行榜等服务接口，
-`scanProxyBaseUrl` 可选，默认直接连接局域网设备。
-资源地址从配置脚本所在目录推导，支持项目子目录部署。
-
-## 目录
-
-| 路径             | 用途                                                        |
-| ---------------- | ----------------------------------------------------------- |
-| `index.html`     | 当前本地改造版入口                                          |
-| `pages/`         | `modern`、`wifi`、`adb`、`dlna`、`mdns`、`device-scan` 页面 |
-| `assets/js/`     | `classic`、`modern`、`shared`、`tools` 脚本                 |
-| `assets/css/`    | 页面样式                                                    |
-| `assets/images/` | 应用图标、唱片和唱针图片                                    |
-| `assets/vendor/` | 第三方浏览器库及其许可                                      |
-| `scripts/`       | 开发检查工具                                                |
-| `tests/`         | 浏览器与接口回归                                            |
-| `docs/`          | 上游快照分析与协议记录                                      |
-
-另外还有：
-
-- `src/`：独立新站源码预留目录。
-- `upstream/`：生成的作者参考版；合并前先读 [维护说明](upstream/README.md)。
-- `tools/upstream/`：原始快照、来源指纹、部署补丁和同步脚本。
-
-本地改造版的页面由 `newui/`、`config_wifi/`、`adb/` 等旧路径迁移至 `pages/`，
-部署时应整体上传当前目录并更新书签。历史分析报告中的路径仍指当时的上游快照。
-根目录的 `new_r1_control.js` 继续加载本地改造版，兼容已有音箱配置。
-使用作者参考版时，可指定 `/upstream/new_r1_control.js`。
-作者版的浏览器存储与本地改造版隔离，不会自动继承彼此的设备、账号和 EQ 缓存。
-配网页保留内联样式和逻辑，供 Android App 保存为单文件离线页面。
-
-## 连接地址
-
-本地改造版的连接页和新 UI 都支持以下地址，重连时保留自定义端口、代理路径和查询参数：
-
-- `192.168.1.10`、`Phicomm_R1_ABCD`：直连音箱，默认端口 `8080`。
-- `192.168.1.10:9090`：使用指定端口。
-- `wss://r1.example.com/speaker/`：通过已配置的 TLS 反向代理连接。
-- `r1.example.com/speaker/`：省略协议时按 `wss://` 处理；也支持完整 `ws://` 地址。
-
-页面保持当前域名、协议和部署目录，不会为连接音箱而自动降级到 HTTP。
-WSS 需要自己的反向代理转发 WebSocket；`serve.py` 不提供设备代理或 TLS。
-上传入口按连接地址推导，例如上述代理地址对应
-`https://r1.example.com/speaker/upload`，需要另行转发该 HTTP 路径。
-
-## 设备兼容与限制
-
-- 旧版设备保留原有协议路径；队列编辑只在当前连接实际确认 EchoService ≥ `1887` 后启用。
-- MiPlay、独立蓝牙服务开关、DSP、扬声器音量和编译时间依赖对应设备能力。
-- HTTPS 页面直连明文 WebSocket 仍取决于浏览器的本地网络访问支持与授权；
-  不支持时可填写 WSS 代理地址。网页改造不会给音箱固件添加 TLS。
-- 配网需要先连接音箱热点，固件配网接口仍为 `http://192.168.43.1:8989`；
-  浏览器可能拦截 HTTPS 页面对该接口的访问，WSS 控制代理不代理配网接口。
-  DLNA/AirPlay 扫描及独立 ADB 控制台需要 Android HTML5+ 宿主。
-- `serve.py` 提供有限接口转发，未恢复作者的服务器源码或缓存系统。
-  音乐服务、账号登录、投放和固件升级仍受外部服务与真实设备限制。
-- manifest 和 Service Worker 已接入；没有实现完整离线应用缓存。
-
-具体变更、来源和验证结果见 [合并说明](docs/upstream-merge-2026-11-10.md)。
-原始对比见 [差异报告](docs/upstream-analysis-2026-11-10.md) 和
-[协议摘要](docs/upstream-protocol-2026-11-10.md)。
-
-## 验证
-
-开发时使用 Node.js 20+ 安装固定版本的格式化工具：
+建议使用 Node.js 24；最低支持 Node 20.19 或 22.12。
 
 ```sh
 npm ci
-npm run check
-npm run format
+npm run dev
 ```
 
-`check` 检查格式、浏览器脚本语法和本地资源引用；`format` 统一项目代码格式。
-HTML、CSS、JavaScript 使用两空格缩进，JavaScript 使用 camelCase 变量和函数名、
-PascalCase 组件和类名，常量使用 UPPER_SNAKE_CASE，目录和文件使用 kebab-case。
-设备协议字段、存储键、DOM ID 和固件兼容接口保留原名。
-第三方压缩分发文件、历史分析数据、作者原始快照和生成的 `upstream/` 不参与格式化。
-`npm run check` 还验证快照和生成结果；修改部署适配后运行 `npm run upstream:build`。
-作者更新应按 [upstream/README.md](upstream/README.md) 的候选抓取、比较与导入流程处理，
-不要用本地改造版覆盖作者原件。
-npm 仅用于开发检查，页面部署和 `serve.py` 不依赖 Node.js。
-
-服务器回归仅需 Python 标准库：
+开发服务器地址见命令输出，它只运行新版前端。
+需要作者版和完整兼容工具入口时，构建完整静态站点：
 
 ```sh
-python3 -m unittest discover -s tests -p test_server.py -v
+npm run build
+python3 serve.py
 ```
 
-浏览器回归需要 Python Playwright 和 Chromium（系统安装或 Playwright 安装均可）：
+打开 `http://127.0.0.1:8000/`。`serve.py` 优先提供 `dist/`，还提供可选的音乐接口转发；
+需要其他设备访问时加 `--bind 0.0.0.0`，端口用 `--port` 指定。
+没有构建产物时，Python 服务仍提供仓库中的旧改造版。
+
+也可直接将 `dist/` 部署到普通静态服务器。推送 `master` 后，GitHub Actions
+使用 Node 构建，再发布到 GitHub Pages；网站运行时不需要 Node 或 Python。
+相对资源地址和 hash 导航支持域名根目录与项目子目录，无需服务器路由重写。
+
+发布入口：
+
+| 地址               | 内容              |
+| ------------------ | ----------------- |
+| `/`                | 独立新版          |
+| `/upstream/`       | 作者经典界面      |
+| `/upstream/newui/` | 作者新 UI         |
+| `/legacy.html`     | 之前的本地改造版  |
+| `/pages/modern/`   | 之前改造后的新 UI |
+
+根目录源码 `index.html` 用作旧版兼容入口，在构建中复制为 `legacy.html`；
+新版源入口是 `src/index.html`。固件固定引用的 `new_r1_control.js` 仍保留原兼容行为。
+
+## 新版功能
+
+- 音乐：当前曲目、封面与歌词、播放/暂停、上下曲、进度、音量、播放模式、
+  队列点播；确认 EchoService ≥ 1.8.87 后开放队列上移与删除。
+- 搜歌：匿名多源搜索，不提供账号登录。精确点播、追加需要当前连接确认
+  EchoService ≥ 1.8.87；旧版设备可尝试依赖设备语音服务的关键词点播。
+- 定时暂停：由当前网页计时，需保持页面打开和连接；浏览器休眠可能延迟执行。
+  换机或断线即取消，不宣称为设备后台定时任务。
+- 屏幕：实时推流、截图、下载、点击/滑动、方向键、文字输入和语音播报。
+  保持原始画面比例，画面下方固定返回、Home、菜单三个系统键。
+  离开页面或隐藏网页停止推流，回到页面后可手动重新开启。
+- 音效：设备上报的 EQ 开关、频段、预设，以及浏览器本地自定义 EQ 保存与应用。
+- 蓝牙：适配器开关、搜索、配对、取消配对与音频输入/输出连接。
+- 设备：固件、EchoService、CPU、内存与运行时间，DLNA/AirPlay/服务常开，
+  名称修改与重启操作。没有回报的状态显示为空或禁用，不伪造设备数据。
+
+配网、设备扫描和 Android 专用 ADB 工具打开保留的作者页面。
+新版不是作者全部高级功能的等价替代；MiPlay 分组、固件上传、Android 宿主能力等
+仍可使用作者参考版。界面能够打开不代表相关硬件功能已经通过真机验证。
+
+## 连接与服务限制
+
+连接框支持：
+
+- `192.168.1.40`、`Phicomm_R1_12CF`：默认端口 `8080`。
+- `192.168.1.40:9090`：自定义端口。
+- `ws://192.168.1.40:80/`：完整明文地址。
+- `wss://r1.example.com/speaker/ws?key=...`：完整 TLS 代理地址，保留路径和参数。
+
+网页保持当前 HTTPS、域名与端口。HTTPS 页面直接访问局域网的明文 WebSocket
+取决于浏览器的本地网络访问支持和授权；不支持时需要自己的 WSS 反向代理。
+GitHub Pages 和 `serve.py` 均不提供音箱代理或 TLS，也不能为音箱固件增加这些能力。
+
+音乐搜索、封面和歌词默认使用作者的 `https://r1.wxfsq.com/music` 接口，
+可在设置中换成协议兼容、允许跨域的 HTTP(S) 服务。搜索源是否可用、歌曲权限、
+歌词和封面取决于外部服务；设备播放控制不依赖该接口。
+可选 Python 转发由 `--upstream` 设置源地址，但它不是作者服务器的完整实现。
+
+文字输入的字符支持取决于设备输入法；语音播报和关键词点播需要相应语音服务。
+原版配网接口是 `http://192.168.43.1:8989`，需先连接音箱热点，可能受浏览器限制。
+独立 ADB、DLNA/AirPlay 扫描等工具需要 Android HTML5+ 宿主。
+
+## 目录与作者同步
+
+| 路径                       | 用途                                           |
+| -------------------------- | ---------------------------------------------- |
+| `src/`                     | 独立新版组件、样式与通信层                     |
+| `scripts/prepare-site.mjs` | 合并静态发布产物，保留作者和兼容入口           |
+| `dist/`                    | 构建产物，不提交 Git                           |
+| `upstream/`                | 可部署的作者参考版及 AI 合并说明               |
+| `tools/upstream/`          | 未修改的原始快照、来源指纹、部署补丁与同步脚本 |
+| `assets/`、`pages/`        | 旧改造版及工具的兼容资源                       |
+| `tests/`                   | 协议、浏览器、服务器与快照回归                 |
+| `docs/`                    | 历史分析、来源和协议记录                       |
+
+`tools/upstream/snapshot/` 约 1.9 MB，用来比较作者原始文件，避免把本地部署适配
+误认为作者更新。它只参与校验，不发布到 Pages。当前保留双份以沿用已经验证的
+同步流程；将来若要减少重复，可另行改成 `upstream/` 保存纯原件、构建时应用补丁，
+不能直接删除快照破坏来源基线。更新作者版前先读 [AI 维护指南](upstream/README.md)。
+
+新版存储使用 `phicomm-r1:web:` 前缀，作者版使用 `phicomm-r1:upstream:`；
+不读取旧改造版的账号和设置，不自动导入旧设备地址，也不自动连接已保存地址。
+新站不注册 Service Worker，不声明离线可用。
+
+## 开发与验证
+
+```sh
+npm run check
+npm run test:unit
+npm run build
+```
+
+`check` 包含格式、Vue/TypeScript 类型、旧浏览器脚本、本地资源与作者快照校验。
+`npm run format` 格式化自有代码，作者原件、生成的作者版和第三方文件均排除。
+仅修改作者部署补丁时运行 `npm run upstream:build`，然后重新验证。
+
+完整回归还需 Python Playwright 和 Chromium：
 
 ```sh
 python3 -m pip install playwright
 python3 -m playwright install chromium
-python3 -m unittest discover -s tests -v
+npm test
 ```
 
-自定义浏览器路径可设置 `CHROMIUM_PATH`。浏览器测试使用模拟连接，不向真实音箱发命令。
+浏览器测试可用 `CHROMIUM_PATH` 指定可执行文件，默认优先系统 Chromium。
+测试使用合成 WebSocket、音箱回包与音乐服务，不连接真实音箱。
+真实设备上的音频输出、投放、蓝牙、屏幕输入和固件版本兼容仍需实际设备核对。
 
-作者入口：<https://r1.wxfsq.com/>；原项目介绍：
-<https://www.right.com.cn/forum/thread-4072249-1-1.html>。
-
-后续开发在 `master` 分支进行。
+根 `LICENSE` 保留木兰宽松许可证第 2 版；依赖构建时生成 `THIRD-PARTY-LICENSES.md`。
+作者参考版的来源与许可边界见 [历史导入说明](docs/upstream-merge-2026-11-10.md)，
+原作者入口：<https://r1.wxfsq.com/>。
