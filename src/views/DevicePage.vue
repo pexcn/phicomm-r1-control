@@ -19,7 +19,7 @@ const tools = [
   { name: "配网向导", path: "upstream/config_wifi/", icon: "wifi" },
   { name: "ADB 控制台", path: "upstream/adb/", icon: "terminal" },
   { name: "设备扫描", path: "upstream/device_scan.html", icon: "search" },
-  { name: "作者经典版", path: "upstream/", icon: "external" },
+  { name: "原作者经典版", path: "upstream/", icon: "external" },
 ];
 const serviceOptions = [
   { label: "DLNA", key: "dlna_open", type: "Set_DLNA_Open", description: "从局域网设备投放媒体" },
@@ -186,7 +186,7 @@ function reboot(serviceOnly: boolean) {
                 }}<AppIcon name="external" :size="14"
               /></a>
             </div>
-            <p class="hint">工具打开保留的作者页面；独立 ADB 需 Android HTML5+ 宿主。</p>
+            <p class="hint">工具打开保留的原作者页面；独立 ADB 需 Android HTML5+ 宿主。</p>
           </article>
         </div>
       </div>
@@ -224,7 +224,7 @@ function reboot(serviceOnly: boolean) {
       </details>
     </template>
     <p class="page-footnote">
-      独立新版 · <a :href="resource('upstream/')">作者参考版</a> ·
+      独立新版 · <a :href="resource('upstream/')">原作者参考版</a> ·
       <button @click="state.settingsDialog = true">设置</button>
     </p>
   </section>

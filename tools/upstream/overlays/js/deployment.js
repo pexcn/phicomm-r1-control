@@ -1,4 +1,4 @@
-/* 本地部署适配；作者代码与本地站点分别使用独立的页面和存储。 */
+/* 本地部署适配；原作者代码与本地站点分别使用独立的页面和存储。 */
 (function () {
   const baseUrl = new URL("../", document.currentScript.src).href;
   const supplied = window.R1Upstream || {};

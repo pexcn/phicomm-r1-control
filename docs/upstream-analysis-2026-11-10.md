@@ -1,4 +1,4 @@
-# 作者线上版本分析与 next 迁移建议
+# 原作者线上版本分析与 next 迁移建议
 
 > 状态更新：后续已按用户要求导入公开前端。本文保留导入前的分析时点，
 > 当前合并范围与限制见 [合并记录](upstream-merge-2026-11-10.md)。
@@ -36,11 +36,11 @@ Babel AST 和 Prettier 3.9.10。REA、Craft Anything 的完整 Evidence 保存�
 
 - **运行观察**：本次浏览器或 HTTP 请求实际得到的结果。
 - **代码确认**：已取得的发布文件中存在对应调用、控件或状态逻辑，尚不等于真机可用。
-- **作者声明**：脚本内 CHANGELOG 的说明，未充分验证的部分单独标记。
+- **原作者声明**：脚本内 CHANGELOG 的说明，未充分验证的部分单独标记。
 
 资源和 SHA-256 见 [资源清单](upstream-assets-2026-11-10.json)。
 下文根页面的函数名和行号对应分析包内 `online.pretty.js`；
-该文件由实际加载的 `r1_control.min.js` 格式化产生，不是作者原始工程文件。
+该文件由实际加载的 `r1_control.min.js` 格式化产生，不是原作者原始工程文件。
 
 ## 发布结构发生了什么变化
 
@@ -58,7 +58,7 @@ Babel AST 和 Prettier 3.9.10。REA、Craft Anything 的完整 Evidence 保存�
 根页面加载链已实际观察到：
 `index.html → refresh.js → new_r1_control.css + js/r1_control.min.js → jQuery`。
 加载过程中还请求百度统计脚本和 `/ip`。
-这些访问不能推导出作者服务器的实现、数据库结构或完整接口列表。
+这些访问不能推导出原作者服务器的实现、数据库结构或完整接口列表。
 
 新 UI 加载的是 `newui/js/ws.js`、`ui.js`、`core.js`、`panel-music.js`、
 `panel-device.js`、`app.js`，并由本地 React / ReactDOM 驱动。
@@ -66,14 +66,14 @@ Babel AST 和 Prettier 3.9.10。REA、Craft Anything 的完整 Evidence 保存�
 
 ## 已确认的重要更新
 
-以下差异以基线代码与当前发布文件核对，日期来自作者 CHANGELOG，
-表示作者标注的日期，不是本次恢复出的 Git 提交日期。
+以下差异以基线代码与当前发布文件核对，日期来自原作者 CHANGELOG，
+表示原作者标注的日期，不是本次恢复出的 Git 提交日期。
 
 | 领域 | 相对基线的更新 | 依据与依赖 | 迁移建议 |
 | --- | --- | --- | --- |
 | 加载和连接 | 根页面取消强制 HTTPS 降级，资源 URL 跟随协议；增加 `local-network-access` 检测、提示、可取消自动连接 | `index.html`、`initLocalNetworkPermission`、`requestAndConnect`、`renderConnectPage`；浏览器实际先提示本地网络权限，再显示无效 IP 提示 | 优先迁移；需要单独验证 Chromium、Safari 和普通 HTTP |
 | 状态组织 | 大量全局变量收拢到 `state`、`ui`、`timers`，统一弹窗及连接清理 | 根脚本开头、`cleanupSpeakerConnection`、`showConnectionNotice` 等 | 按功能引入必要结构；不要把整体重构当成简单修复补丁 |
-| 播放界面 | 图标按钮、全屏歌词、播放列表弹窗、封面背景渐变、歌词高度适配 | `buildMusicPanel`、`createFullscreenLrcOverlay`、`buildPlaylistPanel`；作者标注 2026-10-27 起 | 前端为主；保留现有歌曲和歌词协议 |
+| 播放界面 | 图标按钮、全屏歌词、播放列表弹窗、封面背景渐变、歌词高度适配 | `buildMusicPanel`、`createFullscreenLrcOverlay`、`buildPlaylistPanel`；原作者标注 2026-10-27 起 | 前端为主；保留现有歌曲和歌词协议 |
 | 播放进度 | 拖动后的进度更新保护、暂停拖动分支、投送模式时间状态处理 | `setMusicProgress`、`updatePlayerState`、`syncProgressBar`；对应 2026-11-09 日志 | 可先独立迁移；需播放/暂停真机回归 |
 | 自定义 EQ | 保存 EQ 名称和频段，写入 `localStorage.custom_eqs`，重新选用自定义预设 | `renderEqPreset`、`updateCustomPresets`；2025-07-22 | 适合首批实现；可复用基线 EQ 协议，不需新增服务器 API |
 | 扬声器音量 | 中低音和高音独立滑块，批量发送 `setMixerValue` | `renderSpeakerVolume`，`DAC Digital Volume L/R`，界面门槛 `ver >= 1876`；2025-08-30 | 设备能力项；不要向旧版无条件显示 |

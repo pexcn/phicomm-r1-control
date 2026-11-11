@@ -84,7 +84,7 @@ onBeforeUnmount(() => {
     <div class="sidebar-footer">
       <button @click="state.settingsDialog = true"><AppIcon name="settings" />设置</button
       ><a :href="upstreamUrl"
-        ><AppIcon name="external" />作者版本<AppIcon name="arrow" :size="16"
+        ><AppIcon name="external" />原作者版本<AppIcon name="arrow" :size="16"
       /></a>
     </div>
   </aside>

@@ -1,4 +1,4 @@
-"""音乐 API 转发回归，使用本地上游夹具，不访问作者服务。"""
+"""音乐 API 转发回归，使用本地上游夹具，不访问原作者服务。"""
 import functools
 import json
 from pathlib import Path

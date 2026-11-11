@@ -77,7 +77,7 @@
     {
       "path": "js/deployment.js",
       "kind": "local-overlay",
-      "deployed_sha256": "86f046b528765ddf1d313ffeeab3107108a6cc730859786bee44698f5edfbbe3"
+      "deployed_sha256": "2f90b61d0e79407c925dc142d9167230f1a877aea87a0add17f1a2bad4100822"
     },
     {
       "path": "js/r1_control.min.js",

@@ -68,13 +68,13 @@ GET https://r1.wxfsq.com/music?keyword=<关键词>&source=<qq|kuwo|netease>&page
   这只是当前前端指定的节点，不能保证所有固件都存在。
 - 实际编译时间：从设备信息的 `build_timestamp` 取毫秒数，校验为有效数字后
   格式化成 UTC+08；显示还要求当前确认版本/IP/socket 有效。
-  作者日志标注依赖 1888，本次 `refresh.js` 仍公布 EchoService 1887。
+  原作者日志标注依赖 1888，本次 `refresh.js` 仍公布 EchoService 1887。
 - DSP：`ver >= 1869` 时使用 `sendAction(16384,100,0,开关值)`，
   另查 `persist.route0feture` 与 `tinymix -D 2 "DSP Firmware PRAM"`。
   旧路径直接写设备 property；不能据此推导统一的最低支持版本或音效结果。
 - 上传：根页面只负责打开设备 `/upload`，并通过 postMessage 交换背景资料。
   该分支检查窗口、来源、nonce、消息类型并设置超时；没有取得设备的上传页源码。
-  作者声明的上传/安装进度不能由控制页这段代码独自验证。
+  原作者声明的上传/安装进度不能由控制页这段代码独自验证。
 
 ## 后续回归的最小集合
 

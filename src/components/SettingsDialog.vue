@@ -68,10 +68,10 @@ function theme(value: string) {
       />
       <p v-if="validationError" class="notice error" role="alert">{{ validationError }}</p>
       <p class="hint">
-        用于匿名搜歌、封面和歌词。可更换为兼容作者 /music
+        用于匿名搜歌、封面和歌词。可更换为兼容原作者 /music
         协议且允许跨域的服务；播放控制不依赖此接口。不提供音乐账号登录。
       </p>
-      <p class="hint">设备地址、主题与 EQ 仅保存在本浏览器，与作者版和旧改造版分别存储。</p>
+      <p class="hint">设备地址、主题与 EQ 仅保存在本浏览器，与原作者版分别存储。</p>
     </div>
     <div slot="actions">
       <md-text-button @click="state.settingsDialog = false">取消</md-text-button

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""保存作者发布快照，并用显式补丁生成可独立部署的 upstream/。"""
+"""保存原作者发布快照，并用显式补丁生成可独立部署的 upstream/。"""
 import argparse
 import hashlib
 import json
