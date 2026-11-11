@@ -1,10 +1,11 @@
-# R1 音箱控制页面
+# Phicomm R1 Control
 
 需配合音箱上的 `new_EchoService`；部分功能还需 `new_Unisound` 或 Android App 的 HTML5+ 宿主。
 
-`master` 已整合作者 2026-11-10 公开发布的网页快照（网页版本 `2863`），
-包含原控制界面、新 UI、配网、设备扫描和 ADB 工具页面。
-主程序保存为可读的 [assets/js/classic/controller.js](assets/js/classic/controller.js)。
+当前同时保留本地改造版和作者参考版，后续独立新 Web 在 `src/` 开发。
+作者参考版以 2026-11-10 保存的公开网页快照（`web_ver = 2863`）为基线，
+保留原目录、文件名和代码格式，通过明确的部署补丁在 `/upstream/` 运行。
+独立新站尚未重写，根目录当前仍运行已有本地改造版。
 
 ## 使用
 
@@ -14,7 +15,12 @@ Python 3.10+ 可直接启动页面和音乐接口转发，不需要安装服务�
 python3 serve.py
 ```
 
-打开 `http://127.0.0.1:8000/`，从连接页可进入 `pages/modern/`。
+入口如下，部署到项目子目录时同样适用：
+
+- `/`：当前本地改造版；`/pages/modern/`：本地改造后的新 UI。
+- `/upstream/`：作者经典界面；`/upstream/newui/`：作者新 UI。
+
+从本地连接页也可打开作者参考版。
 需要其他设备访问时使用 `--bind 0.0.0.0`；端口可用 `--port` 指定。
 音乐接口默认转发到作者服务，服务地址可用 `--upstream` 指定。
 
@@ -31,7 +37,7 @@ python3 serve.py
 
 | 路径             | 用途                                                        |
 | ---------------- | ----------------------------------------------------------- |
-| `index.html`     | 原控制界面入口                                              |
+| `index.html`     | 当前本地改造版入口                                          |
 | `pages/`         | `modern`、`wifi`、`adb`、`dlna`、`mdns`、`device-scan` 页面 |
 | `assets/js/`     | `classic`、`modern`、`shared`、`tools` 脚本                 |
 | `assets/css/`    | 页面样式                                                    |
@@ -41,14 +47,22 @@ python3 serve.py
 | `tests/`         | 浏览器与接口回归                                            |
 | `docs/`          | 上游快照分析与协议记录                                      |
 
-页面入口由 `newui/`、`config_wifi/`、`adb/` 等旧路径迁移至 `pages/`，
+另外还有：
+
+- `src/`：独立新站源码预留目录。
+- `upstream/`：生成的作者参考版；合并前先读 [维护说明](upstream/README.md)。
+- `tools/upstream/`：原始快照、来源指纹、部署补丁和同步脚本。
+
+本地改造版的页面由 `newui/`、`config_wifi/`、`adb/` 等旧路径迁移至 `pages/`，
 部署时应整体上传当前目录并更新书签。历史分析报告中的路径仍指当时的上游快照。
-根目录的 `new_r1_control.js` 保留为音箱固件固定脚本地址的兼容入口。
+根目录的 `new_r1_control.js` 继续加载本地改造版，兼容已有音箱配置。
+使用作者参考版时，可指定 `/upstream/new_r1_control.js`。
+作者版的浏览器存储与本地改造版隔离，不会自动继承彼此的设备、账号和 EQ 缓存。
 配网页保留内联样式和逻辑，供 Android App 保存为单文件离线页面。
 
 ## 连接地址
 
-连接页和新 UI 都支持以下地址，重连时保留自定义端口、代理路径和查询参数：
+本地改造版的连接页和新 UI 都支持以下地址，重连时保留自定义端口、代理路径和查询参数：
 
 - `192.168.1.10`、`Phicomm_R1_ABCD`：直连音箱，默认端口 `8080`。
 - `192.168.1.10:9090`：使用指定端口。
@@ -91,7 +105,10 @@ npm run format
 HTML、CSS、JavaScript 使用两空格缩进，JavaScript 使用 camelCase 变量和函数名、
 PascalCase 组件和类名，常量使用 UPPER_SNAKE_CASE，目录和文件使用 kebab-case。
 设备协议字段、存储键、DOM ID 和固件兼容接口保留原名。
-第三方压缩分发文件和历史分析原始数据不参与格式化。
+第三方压缩分发文件、历史分析数据、作者原始快照和生成的 `upstream/` 不参与格式化。
+`npm run check` 还验证快照和生成结果；修改部署适配后运行 `npm run upstream:build`。
+作者更新应按 [upstream/README.md](upstream/README.md) 的候选抓取、比较与导入流程处理，
+不要用本地改造版覆盖作者原件。
 npm 仅用于开发检查，页面部署和 `serve.py` 不依赖 Node.js。
 
 服务器回归仅需 Python 标准库：

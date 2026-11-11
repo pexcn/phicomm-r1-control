@@ -25,8 +25,9 @@ jobs:
       - uses: actions/configure-pages@v6
       - name: Prepare static site
         run: |
+          python3 tools/upstream/sync.py check
           mkdir _site
-          cp -R assets pages index.html favicon.svg new_r1_control.js \
+          cp -R assets pages upstream index.html favicon.svg new_r1_control.js \
             site.webmanifest service-worker.js LICENSE _site/
       - uses: actions/upload-pages-artifact@v5
         with:

@@ -12424,6 +12424,11 @@ function renderConnectPage() {
         location.href = R1Config.assetUrl("pages/wifi/") + "?" + Date.now();
       }),
     ),
+    customIpPageElement.appendChild(
+      makeButton("作者参考版", function () {
+        location.href = R1Config.assetUrl("upstream/");
+      }),
+    ),
     window.plus &&
       (customIpPageElement.appendChild(
         makeButton("进入ADB控制台", function () {

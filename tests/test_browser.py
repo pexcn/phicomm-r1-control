@@ -276,5 +276,71 @@ class BrowserTests(unittest.TestCase):
         self.assertTrue(self.page.url.startswith(base))
 
 
+    def test_upstream_original_entries_and_navigation(self):
+        self.classic()
+        self.page.get_by_role("button", name="作者参考版", exact=True).click()
+        self.page.wait_for_selector("#input")
+        reference = self.base + "upstream/"
+        self.assertTrue(self.page.url.startswith(reference))
+        self.assertEqual(self.page.evaluate("R1Upstream.baseUrl"), reference)
+        self.assertEqual(self.page.evaluate("typeof R1Config"), "undefined")
+        self.assertEqual(self.page.locator("#qun_div, #beian_div").count(), 0)
+        self.assertEqual(self.page.locator('script[src*="js/r1_control.min.js"]').count(), 1)
+        self.page.get_by_role("button", name="进入新UI", exact=True).click()
+        self.page.get_by_role("button", name="关闭", exact=True).wait_for()
+        self.assertTrue(self.page.url.startswith(reference + "newui/"))
+        self.page.goto(reference + "config_wifi/")
+        self.page.wait_for_selector("#ssid")
+        self.assertEqual(self.page.evaluate("jQuery.fn.jquery"), "3.6.0")
+
+    def test_upstream_storage_is_isolated_and_clear_is_scoped(self):
+        self.classic()
+        self.page.evaluate("localStorage.setItem('ip','192.0.2.5'); localStorage.custom_eqs='root'")
+        self.page.goto(self.base + "upstream/?no_auto_connect")
+        self.page.wait_for_selector("#input")
+        self.assertEqual(self.page.locator("#input").input_value(), "")
+        self.page.evaluate("localStorage.setItem('ip','192.0.2.10'); localStorage.custom_eqs='author'")
+        self.assertEqual(self.page.evaluate("localStorage.getItem('custom_eqs')"), "author")
+        self.page.goto(self.base + "upstream/newui/")
+        self.page.wait_for_function("typeof R1Core !== 'undefined'")
+        self.assertEqual(self.page.evaluate("localStorage.getItem('ip')"), "192.0.2.10")
+        self.page.evaluate("localStorage.clear()")
+        self.assertEqual(self.page.evaluate("localStorage.length"), 0)
+        self.page.goto(self.base + "?no_auto_connect")
+        self.page.wait_for_selector("#input")
+        self.assertEqual(self.page.evaluate("localStorage.getItem('ip')"), "192.0.2.5")
+        self.assertEqual(self.page.evaluate("localStorage.custom_eqs"), "root")
+
+    def test_upstream_device_loader_uses_its_own_snapshot(self):
+        self.page.add_init_script("""window.WebSocket=class {
+            static OPEN=1; static CLOSED=3;
+            constructor() { this.readyState=0; }
+            close() { this.readyState=3; }
+        };""")
+        self.context.route(self.origin + "/device/**", lambda route: route.fulfill(
+            content_type="text/html", body=f'<html><head></head><body><script '
+            f'src="{self.base}upstream/new_r1_control.js"></script></body></html>'))
+        self.page.goto(self.origin + "/device/?no_jump")
+        self.page.wait_for_function("typeof App !== 'undefined'")
+        self.assertEqual(self.page.evaluate("R1Upstream.baseUrl"), self.base + "upstream/")
+
+    def test_upstream_keeps_https_and_project_subdirectory(self):
+        base = "https://reference.test/project/"
+        def resource(route):
+            name = urlsplit(route.request.url).path.removeprefix("/project/")
+            if not name or name.endswith("/"):
+                name += "index.html"
+            target = ROOT / name
+            route.fulfill(path=target) if target.is_file() else route.fulfill(status=404)
+        self.context.route(base + "**", resource)
+        self.page.add_init_script("Object.defineProperty(navigator,'userAgent',{value:'iPhone Safari'})")
+        self.page.goto(base + "upstream/?no_auto_connect")
+        self.page.wait_for_selector("#input")
+        self.assertTrue(self.page.url.startswith(base + "upstream/"))
+        self.assertEqual(self.page.evaluate("R1Upstream.baseUrl"), base + "upstream/")
+        self.page.goto(base + "upstream/newui/")
+        self.page.get_by_role("button", name="关闭", exact=True).wait_for()
+        self.assertEqual(self.page.url, base + "upstream/newui/")
+
 if __name__ == "__main__":
     unittest.main()
