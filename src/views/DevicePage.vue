@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MaterialState from "../components/MaterialState.vue";
 import { computed, ref } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -182,7 +183,7 @@ function reboot(serviceOnly: boolean) {
             </div>
             <div class="tool-grid">
               <a v-for="tool in tools" :key="tool.path" :href="resource(tool.path)"
-                ><AppIcon :name="tool.icon" :size="20" />{{ tool.name
+                ><MaterialState /><AppIcon :name="tool.icon" :size="20" />{{ tool.name
                 }}<AppIcon name="external" :size="14"
               /></a>
             </div>
@@ -224,8 +225,8 @@ function reboot(serviceOnly: boolean) {
       </details>
     </template>
     <p class="page-footnote">
-      独立新版 · <a :href="resource('upstream/')">原作者参考版</a> ·
-      <button @click="state.settingsDialog = true">设置</button>
+      独立新版 · <a :href="resource('upstream/')"><MaterialState />原作者参考版</a> ·
+      <button @click="state.settingsDialog = true"><MaterialState />设置</button>
     </p>
   </section>
 </template>

@@ -1,0 +1,228 @@
+/* Material Design 3 roles; light green follows DC1, dark blue follows VoHive. */
+@property --md-filled-button-container-shape {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 20px;
+}
+@property --md-filled-tonal-button-container-shape {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 20px;
+}
+@property --md-outlined-button-container-shape {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 20px;
+}
+@property --md-filled-icon-button-container-shape {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 32px;
+}
+
+:root {
+  color-scheme: light;
+  font-family: var(--md-ref-typeface-plain);
+  font-size: 16px;
+  font-synthesis: none;
+  --md-ref-typeface-plain:
+    Roboto, system-ui, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei",
+    sans-serif;
+  --md-ref-typeface-brand: var(--md-ref-typeface-plain);
+  --bg: #f4f7f5;
+  --surface: #fff;
+  --surface-low: #eef3ef;
+  --surface-high: #e9efeb;
+  --sidebar: #fafcfb;
+  --text: #1b3328;
+  --muted: #5d7065;
+  --border: #dce5df;
+  --accent: #24694e;
+  --on-accent: #fff;
+  --soft: #e7f1eb;
+  --success: #24694e;
+  --success-bg: #e0f0e6;
+  --danger: #a63d35;
+  --danger-bg: #fff0ed;
+  --md-sys-color-primary: var(--accent);
+  --md-sys-color-on-primary: var(--on-accent);
+  --md-sys-color-primary-container: #c8e8d5;
+  --md-sys-color-on-primary-container: #0a3826;
+  --md-sys-color-secondary: #506458;
+  --md-sys-color-on-secondary: #fff;
+  --md-sys-color-secondary-container: var(--soft);
+  --md-sys-color-on-secondary-container: #1b3328;
+  --md-sys-color-tertiary: #3e6373;
+  --md-sys-color-on-tertiary: #fff;
+  --md-sys-color-tertiary-container: #c1e8fa;
+  --md-sys-color-on-tertiary-container: #001f2a;
+  --md-sys-color-surface: var(--bg);
+  --md-sys-color-on-surface: var(--text);
+  --md-sys-color-surface-variant: #e0e5df;
+  --md-sys-color-on-surface-variant: var(--muted);
+  --md-sys-color-surface-dim: #d7ded8;
+  --md-sys-color-surface-bright: #f4f7f5;
+  --md-sys-color-surface-container-lowest: #fff;
+  --md-sys-color-surface-container-low: #fafcfb;
+  --md-sys-color-surface-container: var(--surface-low);
+  --md-sys-color-surface-container-high: var(--surface-high);
+  --md-sys-color-surface-container-highest: #e2e9e4;
+  --md-sys-color-outline: #727972;
+  --md-sys-color-outline-variant: var(--border);
+  --md-sys-color-inverse-surface: #26352c;
+  --md-sys-color-inverse-on-surface: #edf5ef;
+  --md-sys-color-inverse-primary: #a4d5b9;
+  --md-sys-color-error: var(--danger);
+  --md-sys-color-on-error: #fff;
+  --md-sys-color-error-container: var(--danger-bg);
+  --md-sys-color-on-error-container: #410002;
+  --md-sys-color-surface-tint: var(--accent);
+  --md-sys-color-shadow: #000;
+  --md-sys-color-scrim: #000;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-full: 9999px;
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-duration-short2: 100ms;
+  --md-sys-motion-duration-medium1: 250ms;
+  --md-dialog-container-shape: var(--md-sys-shape-corner-extra-large);
+  --type-headline-large: 400 32px/40px var(--md-ref-typeface-plain);
+  --type-headline-medium: 400 28px/36px var(--md-ref-typeface-plain);
+  --type-headline-small: 400 24px/32px var(--md-ref-typeface-plain);
+  --type-title-large: 400 22px/28px var(--md-ref-typeface-plain);
+  --type-title-medium: 500 16px/24px var(--md-ref-typeface-plain);
+  --type-title-small: 500 14px/20px var(--md-ref-typeface-plain);
+  --type-body-large: 400 16px/24px var(--md-ref-typeface-plain);
+  --type-body-medium: 400 14px/20px var(--md-ref-typeface-plain);
+  --type-body-small: 400 12px/16px var(--md-ref-typeface-plain);
+  --type-label-large: 500 14px/20px var(--md-ref-typeface-plain);
+  --type-label-medium: 500 12px/16px var(--md-ref-typeface-plain);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111318;
+  --surface: #191c20;
+  --surface-low: #1d2024;
+  --surface-high: #282a2f;
+  --sidebar: #111318;
+  --text: #e2e2e9;
+  --muted: #c3c6cf;
+  --border: #43474e;
+  --accent: #aac7ff;
+  --on-accent: #0a305f;
+  --soft: #3d4758;
+  --success: #7ddba0;
+  --success-bg: #1f4d33;
+  --danger: #ffb4ab;
+  --danger-bg: #432d36;
+  --md-sys-color-primary-container: #274777;
+  --md-sys-color-on-primary-container: #d6e3ff;
+  --md-sys-color-secondary: #bdc7dc;
+  --md-sys-color-on-secondary: #273141;
+  --md-sys-color-on-secondary-container: #d9e3f8;
+  --md-sys-color-tertiary: #dabde0;
+  --md-sys-color-on-tertiary: #3d2844;
+  --md-sys-color-tertiary-container: #553f5b;
+  --md-sys-color-on-tertiary-container: #f7d9fd;
+  --md-sys-color-surface-variant: #43474e;
+  --md-sys-color-surface-dim: #111318;
+  --md-sys-color-surface-bright: #37393e;
+  --md-sys-color-surface-container-lowest: #0c0e13;
+  --md-sys-color-surface-container-low: #191c20;
+  --md-sys-color-surface-container-highest: #33353a;
+  --md-sys-color-outline: #8d9199;
+  --md-sys-color-inverse-surface: #e2e2e9;
+  --md-sys-color-inverse-on-surface: #2e3036;
+  --md-sys-color-inverse-primary: #415f91;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-on-error-container: #ffdad6;
+}
+
+/* Keep state layers in the component shadow DOM; shape motion follows VoHive. */
+md-filled-button,
+md-filled-tonal-button,
+md-outlined-button {
+  --md-filled-button-container-shape: 20px;
+  --md-filled-tonal-button-container-shape: 20px;
+  --md-outlined-button-container-shape: 20px;
+  transition:
+    --md-filled-button-container-shape 280ms var(--md-sys-motion-easing-standard),
+    --md-filled-tonal-button-container-shape 280ms var(--md-sys-motion-easing-standard),
+    --md-outlined-button-container-shape 280ms var(--md-sys-motion-easing-standard);
+}
+md-filled-button:active:not([disabled]) {
+  --md-filled-button-container-shape: 8px;
+}
+md-filled-tonal-button:active:not([disabled]) {
+  --md-filled-tonal-button-container-shape: 8px;
+}
+md-outlined-button:active:not([disabled]) {
+  --md-outlined-button-container-shape: 8px;
+}
+
+.play-button {
+  --md-filled-icon-button-container-width: 64px;
+  --md-filled-icon-button-container-height: 64px;
+  --md-filled-icon-button-icon-size: 32px;
+  --md-filled-icon-button-container-shape: 32px;
+  transition: --md-filled-icon-button-container-shape 280ms var(--md-sys-motion-easing-standard);
+}
+.play-button:active:not([disabled]) {
+  --md-filled-icon-button-container-shape: 16px;
+}
+
+/* Composed controls use the same ripple and keyboard focus primitives. */
+:where(button, a):has(> md-ripple) {
+  position: relative;
+  isolation: isolate;
+}
+md-ripple {
+  border-radius: inherit;
+  --md-ripple-hover-color: currentColor;
+  --md-ripple-pressed-color: currentColor;
+}
+:where(button, a):has(> md-focus-ring):focus-visible {
+  outline: none;
+}
+.segmented md-focus-ring {
+  --md-focus-ring-outward-offset: -3px;
+}
+.brand strong {
+  font-weight: 400;
+}
+.sidebar nav a .app-icon {
+  flex-shrink: 0;
+}
+.sidebar nav a[aria-current] {
+  color: var(--md-sys-color-on-secondary-container);
+}
+.bottom-nav a[aria-current] > span {
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+md-outlined-select {
+  width: 100%;
+  min-width: 0;
+}
+.screen-toolbar md-outlined-select {
+  width: 180px;
+}
+
+@media (max-width: 760px) {
+  .screen-toolbar md-outlined-select {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  md-filled-button,
+  md-filled-tonal-button,
+  md-outlined-button,
+  .play-button {
+    transition: none;
+  }
+}

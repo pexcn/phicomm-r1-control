@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MaterialState from "../components/MaterialState.vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -234,12 +235,14 @@ function setTimer() {
               ></md-icon-button
             ><md-icon-button aria-label="上一首" @click="send({ type: 'prev' })"
               ><AppIcon name="prev" :size="28" /></md-icon-button
-            ><button
+            ><md-filled-icon-button
               class="play-button"
               :aria-label="state.music.playing ? '暂停播放' : '继续播放'"
               @click="playback"
             >
-              <AppIcon :name="state.music.playing ? 'pause' : 'play'" :size="32" /></button
+              <AppIcon
+                :name="state.music.playing ? 'pause' : 'play'"
+                :size="32" /></md-filled-icon-button
             ><md-icon-button aria-label="下一首" @click="send({ type: 'next' })"
               ><AppIcon name="next" :size="28" /></md-icon-button
             ><md-icon-button aria-label="展开播放队列" @click="queueOpen = !queueOpen"
@@ -282,6 +285,7 @@ function setTimer() {
                 @click="send({ type: 'play', index })"
                 :aria-label="`播放 ${song.title}`"
               >
+                <MaterialState />
                 <span class="track-number">{{ String(index + 1).padStart(2, "0") }}</span
                 ><span class="track-text"
                   ><strong>{{ song.title }}</strong
@@ -306,13 +310,13 @@ function setTimer() {
         </article>
       </div>
       <button class="mobile-queue-toggle card" @click="queueOpen = !queueOpen">
-        <AppIcon name="queue" /><span
+        <MaterialState /> <AppIcon name="queue" /><span
           >播放队列 <small>{{ state.queue.length }} 首</small></span
         ><AppIcon :name="queueOpen ? 'up' : 'arrow'" />
       </button>
       <div class="quick-grid">
         <button class="card quick-card" @click="timerOpen = true">
-          <AppIcon name="clock" :size="28" /><span
+          <MaterialState /> <AppIcon name="clock" :size="28" /><span
             ><strong>定时暂停</strong
             ><small>{{
               state.sleepUntil
@@ -324,11 +328,12 @@ function setTimer() {
             }}</small></span
           ><AppIcon name="arrow" /></button
         ><button class="card quick-card" @click="changeMode">
+          <MaterialState />
           <AppIcon :name="state.music.mode === 1 ? 'shuffle' : 'repeat'" :size="28" /><span
             ><strong>播放模式</strong><small>{{ modeLabel }}</small></span
           ><AppIcon name="arrow" /></button
         ><a class="card quick-card" href="#/sound"
-          ><AppIcon name="equalizer" :size="28" /><span
+          ><MaterialState /><AppIcon name="equalizer" :size="28" /><span
             ><strong>音效</strong><small>调出喜欢的声音</small></span
           ><AppIcon name="arrow"
         /></a>
@@ -348,13 +353,17 @@ function setTimer() {
           :value="keyword"
           @input="keyword = ($event.target as HTMLInputElement).value"
           @keydown.enter.prevent="search"
-        /><label class="select-field"
-          ><span class="sr-only">搜索来源</span
-          ><select v-model="source" aria-label="搜索来源">
-            <option value="qq">QQ 音乐</option>
-            <option value="netease">网易云音乐</option>
-            <option value="kuwo">酷我音乐</option>
-          </select></label
+        /><md-outlined-select
+          label="来源"
+          aria-label="搜索来源"
+          :value="source"
+          @change="source = ($event.target as HTMLElement & { value: string }).value"
+        >
+          <md-select-option value="qq"><div slot="headline">QQ 音乐</div></md-select-option>
+          <md-select-option value="netease"><div slot="headline">网易云音乐</div></md-select-option>
+          <md-select-option value="kuwo"
+            ><div slot="headline">酷我音乐</div></md-select-option
+          > </md-outlined-select
         ><md-filled-button :disabled="searching || !keyword.trim()" @click="search"
           >搜索</md-filled-button
         >
@@ -406,7 +415,7 @@ function setTimer() {
           :aria-pressed="sleepMinutes === minutes"
           @click="sleepMinutes = minutes"
         >
-          {{ minutes }} 分钟
+          <MaterialState /> {{ minutes }} 分钟
         </button>
       </div>
       <p class="hint">需保持本页打开并连接音箱。浏览器休眠可能延迟执行；断线或换机后自动取消。</p>

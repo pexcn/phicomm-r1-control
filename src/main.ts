@@ -1,9 +1,17 @@
 import { createApp } from "vue";
+import "@fontsource/roboto/latin-400.css";
+import "@fontsource/roboto/latin-500.css";
+import "@fontsource/roboto/latin-700.css";
 import "@material/web/button/filled-button.js";
 import "@material/web/button/filled-tonal-button.js";
 import "@material/web/button/outlined-button.js";
 import "@material/web/button/text-button.js";
 import "@material/web/iconbutton/icon-button.js";
+import "@material/web/iconbutton/filled-icon-button.js";
+import "@material/web/ripple/ripple.js";
+import "@material/web/focus/md-focus-ring.js";
+import "@material/web/select/outlined-select.js";
+import "@material/web/select/select-option.js";
 import "@material/web/dialog/dialog.js";
 import "@material/web/switch/switch.js";
 import "@material/web/slider/slider.js";

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MaterialState from "./MaterialState.vue";
 import { watch, ref } from "vue";
 import { musicApi, notify, state } from "../lib/speaker";
 import { save } from "../lib/storage";
@@ -57,6 +58,7 @@ function theme(value: string) {
             :aria-pressed="state.theme === option.id"
             @click="theme(option.id)"
           >
+            <MaterialState />
             {{ option.label }}
           </button>
         </div>

@@ -7,7 +7,13 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `lib/client.ts`：WebSocket 生命周期、轮询、重连和旧连接消息隔离。
 - `lib/protocol.ts`：协议数据与地址校验。
 - `lib/speaker.ts`：设备状态和操作；不实现音乐账号登录。
-- `styles.css`：浅色使用 DC1 绿色配色，深色使用蓝色 Material 配色。
+- `material.css`：M3 字体层级、颜色角色、形状与交互动效；浅色使用 DC1 绿色，深色使用蓝色。
+- `styles.css`：页面布局和响应式适配。
+- `components/MaterialState.vue`：复合控件的 Material Web 涟漪与键盘焦点状态。
+
+Roboto 400/500/700 字重本地打包，中文使用系统字体回退；图标使用官方 Material Symbols。
+常规操作使用 Material Web 组件；导航、队列和遥控等复合控件复用其状态层，
+避免自行覆盖组件内部的悬停、按下和禁用颜色。减少动态效果偏好会关闭形状过渡。
 
 开发运行 `npm run dev`；发布运行 `npm run build`，产物位于 `dist/`。
 Vite 使用相对资源和 hash 导航，支持 GitHub Pages 的项目子目录。

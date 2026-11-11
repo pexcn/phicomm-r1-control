@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MaterialState from "../components/MaterialState.vue";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -142,7 +143,7 @@ function speak() {
   }
 }
 function quality(event: Event) {
-  state.screen.interval = Number((event.target as HTMLSelectElement).value);
+  state.screen.interval = Number((event.target as HTMLElement & { value: string }).value);
   if (state.screen.active) {
     stopScreen();
     startScreen();
@@ -193,11 +194,11 @@ function quality(event: Event) {
             </div>
             <nav class="device-navigation" aria-label="音箱系统导航">
               <button @click="key(4)" aria-label="音箱返回">
-                <AppIcon name="back" /><span>返回</span></button
+                <MaterialState /> <AppIcon name="back" /><span>返回</span></button
               ><button @click="key(3)" aria-label="音箱 Home">
-                <AppIcon name="home" /><span>Home</span></button
+                <MaterialState /> <AppIcon name="home" /><span>Home</span></button
               ><button @click="key(82)" aria-label="音箱菜单">
-                <AppIcon name="menu" /><span>菜单</span>
+                <MaterialState /> <AppIcon name="menu" /><span>菜单</span>
               </button>
             </nav>
           </div>
@@ -213,11 +214,22 @@ function quality(event: Event) {
               :disabled="!state.screen.image"
               @click="download"
               ><AppIcon name="download" /></md-icon-button
-            ><select aria-label="推流帧率" :value="state.screen.interval" @change="quality">
-              <option :value="1000">省流 · 1 FPS</option>
-              <option :value="333">均衡 · 3 FPS</option>
-              <option :value="100">流畅 · 10 FPS</option>
-            </select>
+            ><md-outlined-select
+              label="画面帧率"
+              aria-label="推流帧率"
+              :value="String(state.screen.interval)"
+              @change="quality"
+            >
+              <md-select-option value="1000"
+                ><div slot="headline">省流 · 1 FPS</div></md-select-option
+              >
+              <md-select-option value="333"
+                ><div slot="headline">均衡 · 3 FPS</div></md-select-option
+              >
+              <md-select-option value="100"
+                ><div slot="headline">流畅 · 10 FPS</div></md-select-option
+              >
+            </md-outlined-select>
           </div>
           <p class="hint screen-hint">
             {{ state.screen.width }} × {{ state.screen.height }} ·
@@ -233,13 +245,14 @@ function quality(event: Event) {
             <div class="remote-body">
               <div class="direction-pad">
                 <button class="direction up" @click="key(19)" aria-label="音箱向上">
-                  <AppIcon name="up" /></button
+                  <MaterialState /> <AppIcon name="up" /></button
                 ><button class="direction left" @click="key(21)" aria-label="音箱向左">
-                  <AppIcon name="left" /></button
-                ><button class="direction center" @click="key(23)">确定</button
+                  <MaterialState /> <AppIcon name="left" /></button
+                ><button class="direction center" @click="key(23)"><MaterialState />确定</button
                 ><button class="direction right" @click="key(22)" aria-label="音箱向右">
-                  <AppIcon name="right" /></button
+                  <MaterialState /> <AppIcon name="right" /></button
                 ><button class="direction down" @click="key(20)" aria-label="音箱向下">
+                  <MaterialState />
                   <AppIcon name="down" />
                 </button>
               </div>

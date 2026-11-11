@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MaterialState from "./components/MaterialState.vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "./components/AppIcon.vue";
 import ConnectionDialog from "./components/ConnectionDialog.vue";
@@ -70,7 +71,8 @@ onBeforeUnmount(() => {
   <a class="skip-link" href="#main-content" @click.prevent="focusMain">跳到内容</a>
   <aside class="sidebar">
     <a class="brand" href="#/music" aria-label="R1 Control 首页"
-      ><span class="brand-icon"><AppIcon name="speaker" /></span><strong>R1 Control</strong></a
+      ><MaterialState /><span class="brand-icon"><AppIcon name="speaker" /></span
+      ><strong>R1 Control</strong></a
     >
     <nav aria-label="主导航">
       <a
@@ -78,13 +80,15 @@ onBeforeUnmount(() => {
         :key="item.id"
         :href="`#/${item.id}`"
         :aria-current="page === item.id ? 'page' : undefined"
-        ><AppIcon :name="item.icon" /><span>{{ item.label }}</span></a
+        ><MaterialState /><span class="navigation-icon"><AppIcon :name="item.icon" /></span
+        ><span>{{ item.label }}</span></a
       >
     </nav>
     <div class="sidebar-footer">
-      <button @click="state.settingsDialog = true"><AppIcon name="settings" />设置</button
+      <button @click="state.settingsDialog = true">
+        <MaterialState /><AppIcon name="settings" />设置</button
       ><a :href="upstreamUrl"
-        ><AppIcon name="external" />原作者版本<AppIcon name="arrow" :size="16"
+        ><MaterialState /><AppIcon name="external" />原作者版本<AppIcon name="arrow" :size="16"
       /></a>
     </div>
   </aside>
@@ -92,7 +96,8 @@ onBeforeUnmount(() => {
     <header class="topbar">
       <strong class="topbar-title">{{ title }}</strong
       ><a href="#/music" class="mobile-brand"
-        ><span class="brand-icon"><AppIcon name="speaker" :size="20" /></span>R1 Control</a
+        ><MaterialState /><span class="brand-icon"><AppIcon name="speaker" :size="20" /></span>R1
+        Control</a
       >
       <div class="topbar-actions">
         <button
@@ -101,7 +106,8 @@ onBeforeUnmount(() => {
           @click="state.connectionDialog = true"
           aria-label="选择或连接音箱"
         >
-          <span class="status-dot"></span><span>{{ connected ? deviceName : connectionLabel }}</span
+          <MaterialState /> <span class="status-dot"></span
+          ><span class="connection-label">{{ connected ? deviceName : connectionLabel }}</span
           ><AppIcon name="down" :size="16" /></button
         ><md-icon-button @click="toggleTheme" :aria-label="dark ? '切换浅色模式' : '切换深色模式'"
           ><AppIcon :name="dark ? 'sun' : 'moon'" /></md-icon-button
@@ -132,13 +138,14 @@ onBeforeUnmount(() => {
       :key="item.id"
       :href="`#/${item.id}`"
       :aria-current="page === item.id ? 'page' : undefined"
-      ><span><AppIcon :name="item.icon" /></span>{{ item.label }}</a
+      ><MaterialState /><span><AppIcon :name="item.icon" /></span>{{ item.label }}</a
     >
   </nav>
   <ConnectionDialog /><SettingsDialog />
   <div v-if="state.toast" class="snackbar" role="status">
     {{ state.toast
     }}<button @click="state.toast = ''" aria-label="关闭提示">
+      <MaterialState />
       <AppIcon name="close" :size="18" />
     </button>
   </div>

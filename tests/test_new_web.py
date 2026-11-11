@@ -203,6 +203,23 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(self.context.request.get(self.base + 'upstream/').status, 200)
         self.assertEqual(self.context.request.get(self.base + 'upstream/newui/').status, 200)
 
+    def test_material_selects_preserve_search_source_and_stream_interval(self):
+        self.start(1887)
+        requests = []
+        self.page.on('request', lambda request: requests.append(request.url) if 'keyword=' in request.url else None)
+        self.page.get_by_role('button', name='搜索音乐', exact=True).click()
+        self.page.get_by_label('歌曲、歌手或专辑', exact=True).fill('夜航')
+        self.page.get_by_role('combobox', name='搜索来源', exact=True).click()
+        self.page.get_by_role('option', name='网易云音乐', exact=True).click()
+        self.page.locator('.search-dialog').get_by_role('button', name='搜索', exact=True).click()
+        self.page.locator('.search-results').get_by_text('搜索结果', exact=True).wait_for()
+        self.assertTrue(any('source=netease' in url for url in requests))
+        self.page.locator('.search-dialog').get_by_role('button', name='关闭', exact=True).click()
+        self.page.locator('.sidebar nav a[href="#/screen"]').click()
+        self.page.get_by_role('combobox', name='推流帧率', exact=True).click()
+        self.page.get_by_role('option', name='省流 · 1 FPS', exact=True).click()
+        self.page.wait_for_function('mockSockets.at(-1).sent.some(message=>message.type==="start_screencap" && message.interval===1000)')
+
 
 if __name__ == '__main__':
     unittest.main()

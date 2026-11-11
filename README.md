@@ -3,6 +3,8 @@
 为斐讯 R1 音箱独立实现的网页控制器，使用 Vue 3、TypeScript、Vite 与
 Google Material Web 组件。浅色采用 [DC1 网页](https://github.com/pexcn/phicomm-dc1-firmware/tree/master/web)
 的绿色配色，深色采用蓝色主题；桌面侧栏与手机底部导航分别适配。
+Roboto 字体与 Material Symbols 图标随网站本地打包，无需外部字体 CDN。
+字体层级、颜色角色、形状和交互动效集中在 `src/material.css`。
 
 需配合音箱上的 `new_EchoService`。新版独立实现，不加载原作者版的业务脚本，
 设备协议参考已有记录独立实现；不实现 QQ 音乐、网易云音乐等账号登录。
