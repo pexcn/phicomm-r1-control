@@ -10,7 +10,7 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `lib/theme.ts`：三态明暗模式、独立配色偏好、系统跟踪与浏览器存储。
 - `lib/color-schemes.ts`：内置配色列表，每项提供稳定 ID、名称和完整的深浅颜色角色。
 - `lib/custom-color.ts`：自定义主色校验与 Material Tonal Spot 深浅颜色生成。
-- `lib/theme-reveal.ts`：以点击位置为圆心的主题扩散；键盘操作以按钮中心为圆心。
+- `lib/theme-reveal.ts`：主题扩散；鼠标、触屏和键盘操作统一以触发控件的几何中心为圆心。
 - `material.css`：M3 字体层级、形状与交互动效。
 - `styles.css`：页面布局和响应式适配。
 - `components/MaterialState.vue`：复合控件的 Material Web 涟漪与键盘焦点状态。

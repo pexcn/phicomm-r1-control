@@ -57,8 +57,6 @@ watch(
 );
 
 export function themeOrigin(event: Event): ThemeOrigin {
-  if (event instanceof MouseEvent && event.detail !== 0)
-    return { x: event.clientX, y: event.clientY };
   const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect();
   return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
 }

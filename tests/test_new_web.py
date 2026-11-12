@@ -168,6 +168,41 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate('document.documentElement.dataset.theme'), 'light')
         self.assertEqual(self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:theme'))"), 'light')
 
+    def test_theme_reveal_uses_control_center_for_pointer_and_touch(self):
+        def assert_center(page, box):
+            page.wait_for_function("document.querySelector('style[data-theme-reveal]')")
+            origin = page.evaluate("getComputedStyle(document.documentElement, '::view-transition-group(theme-reveal)').transformOrigin.split(' ').slice(0, 2).map(parseFloat)")
+            self.assertAlmostEqual(origin[0], box['x'] + box['width'] / 2, delta=0.1)
+            self.assertAlmostEqual(origin[1], box['y'] + box['height'] / 2, delta=0.1)
+            page.wait_for_function("!document.documentElement.classList.contains('theme-transition')")
+
+        self.page.goto(self.base)
+        toggle = self.page.locator('#theme-toggle')
+        toggle.click()
+        box = toggle.bounding_box()
+        toggle.click(position={'x':8, 'y':5})
+        assert_center(self.page, box)
+        self.page.get_by_role('button', name='打开设置', exact=True).click()
+        light = self.page.locator('#settings-dialog').get_by_role('button', name='浅色模式', exact=True)
+        light.click(trial=True)
+        box = light.bounding_box()
+        light.click(position={'x':8, 'y':5})
+        assert_center(self.page, box)
+
+        context = self.browser.new_context(has_touch=True, color_scheme='light', viewport={'width':390, 'height':844})
+        try:
+            page = context.new_page()
+            page.set_default_timeout(6000)
+            page.on('pageerror', lambda error: self.errors.append(str(error)))
+            page.goto(self.base)
+            toggle = page.locator('#theme-toggle')
+            toggle.tap()
+            box = toggle.bounding_box()
+            page.touchscreen.tap(box['x'] + 8, box['y'] + 5)
+            assert_center(page, box)
+        finally:
+            context.close()
+
     def test_theme_fallbacks_for_reduced_motion_and_unavailable_transition(self):
         self.page.emulate_media(reduced_motion='reduce')
         self.page.goto(self.base)
