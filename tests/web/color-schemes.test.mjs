@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { colorSchemes } from "../../src/lib/color-schemes.ts";
+import { createCustomColorScheme, normalizeCustomColor } from "../../src/lib/custom-color.ts";
 
 function color(palette, name, seen = new Set()) {
   assert.ok(!seen.has(name), `Cyclic color reference: ${name}`);
@@ -23,8 +24,7 @@ function luminance(hex) {
   }, 0);
 }
 
-test("every preset provides valid colors and readable text in both appearance modes", () => {
-  assert.equal(new Set(colorSchemes.map((scheme) => scheme.id)).size, colorSchemes.length);
+function assertReadable(scheme) {
   const pairs = [
     ["--text", "--bg"],
     ["--muted", "--surface"],
@@ -34,18 +34,47 @@ test("every preset provides valid colors and readable text in both appearance mo
     ["--md-sys-color-on-secondary-container", "--soft"],
     ["--md-sys-color-on-error", "--danger"],
   ];
-  for (const scheme of colorSchemes) {
-    for (const mode of ["light", "dark"]) {
-      const palette = scheme[mode];
-      for (const key of Object.keys(palette)) color(palette, key);
-      for (const [foreground, background] of pairs) {
-        const levels = [foreground, background]
-          .map((key) => luminance(color(palette, key)))
-          .sort((a, b) => b - a);
-        assert.ok(
-          (levels[0] + 0.05) / (levels[1] + 0.05) >= 4.5,
-          `${scheme.id}/${mode}: ${foreground} on ${background}`,
-        );
+  for (const mode of ["light", "dark"]) {
+    const palette = scheme[mode];
+    for (const key of Object.keys(palette)) color(palette, key);
+    for (const [foreground, background] of pairs) {
+      const levels = [foreground, background]
+        .map((key) => luminance(color(palette, key)))
+        .sort((a, b) => b - a);
+      assert.ok(
+        (levels[0] + 0.05) / (levels[1] + 0.05) >= 4.5,
+        `${scheme.id}/${mode}: ${foreground} on ${background}`,
+      );
+    }
+  }
+}
+
+test("every preset provides valid colors and readable text in both appearance modes", () => {
+  assert.equal(new Set(colorSchemes.map((scheme) => scheme.id)).size, colorSchemes.length);
+  for (const scheme of colorSchemes) assertReadable(scheme);
+});
+
+test("custom colors reject malformed input before reaching the color algorithm", () => {
+  assert.equal(normalizeCustomColor("  #AABBcc "), "#aabbcc");
+  for (const value of [null, {}, 123, "#fff", "red", "#12345678", "#gggggg", "123456"]) {
+    assert.equal(normalizeCustomColor(value), null);
+    assert.throws(() => createCustomColorScheme(value));
+  }
+});
+
+test("custom palettes keep readable contrast for grayscale and saturated RGB colors", () => {
+  for (const red of [0, 128, 255]) {
+    for (const green of [0, 128, 255]) {
+      for (const blue of [0, 128, 255]) {
+        const seed = "#" + [red, green, blue].map((v) => v.toString(16).padStart(2, "0")).join("");
+        const scheme = createCustomColorScheme(seed);
+        for (const mode of ["light", "dark"]) {
+          assert.deepEqual(
+            Object.keys(scheme[mode]).sort(),
+            Object.keys(colorSchemes[0][mode]).sort(),
+          );
+        }
+        assertReadable(scheme);
       }
     }
   }

@@ -5,9 +5,30 @@ import { musicApi, state } from "../lib/speaker";
 import { save } from "../lib/storage";
 import AppIcon from "./AppIcon.vue";
 import { themeOrigin, themes, useTheme } from "../lib/theme";
-import { colorSchemes } from "../lib/color-schemes";
+import { defaultCustomColor, normalizeCustomColor } from "../lib/custom-color";
 
-const { mode, isDark, isTransitioning, colorScheme, setMode, setColorScheme } = useTheme();
+const {
+  mode,
+  isDark,
+  isTransitioning,
+  colorScheme,
+  availableColorSchemes,
+  customColor,
+  setMode,
+  setColorScheme,
+  setCustomColor,
+  resetColorScheme,
+} = useTheme();
+const customDraft = ref(customColor.value);
+const customError = ref("");
+const customChanged = computed(() => normalizeCustomColor(customDraft.value) !== customColor.value);
+const canResetColor = computed(
+  () => colorScheme.value.id !== "green" || customColor.value !== defaultCustomColor,
+);
+watch(customColor, (value) => {
+  customDraft.value = value;
+  customError.value = "";
+});
 const api = ref(state.musicApi);
 const validationError = ref("");
 const apiStatus = ref("");
@@ -16,12 +37,32 @@ watch(
   () => state.settingsDialog,
   (open) => {
     if (open) {
+      customDraft.value = customColor.value;
+      customError.value = "";
       api.value = state.musicApi;
       validationError.value = "";
       apiStatus.value = "";
     }
   },
 );
+function updateCustomColor(event: Event) {
+  customDraft.value = (event.target as HTMLInputElement).value;
+  customError.value = "";
+}
+function applyCustomColor(event: Event) {
+  const normalized = normalizeCustomColor(customDraft.value);
+  if (!normalized) {
+    customError.value = "请输入 #RRGGBB 格式的颜色代码，例如 #6750A4。";
+    return;
+  }
+  customDraft.value = normalized;
+  setCustomColor(normalized, themeOrigin(event));
+}
+function restoreDefaultColor(event: Event) {
+  customDraft.value = defaultCustomColor;
+  customError.value = "";
+  resetColorScheme(themeOrigin(event));
+}
 function updateApi(event: Event) {
   api.value = (event.target as HTMLInputElement).value;
   validationError.value = "";
@@ -70,7 +111,12 @@ function saveApi() {
         </div>
         <h3 id="theme-color-title" class="color-scheme-title">主题颜色</h3>
         <div class="color-schemes" role="radiogroup" aria-labelledby="theme-color-title">
-          <label v-for="scheme in colorSchemes" :key="scheme.id" class="color-scheme-option">
+          <label
+            v-for="scheme in availableColorSchemes"
+            :key="scheme.id"
+            class="color-scheme-option"
+            :class="{ 'custom-color-option': scheme.id === 'custom' }"
+          >
             <input
               :id="`theme-color-${scheme.id}`"
               type="radio"
@@ -93,7 +139,42 @@ function saveApi() {
             <md-focus-ring :for="`theme-color-${scheme.id}`" />
           </label>
         </div>
+        <div v-if="colorScheme.id === 'custom'" class="custom-color-editor">
+          <div class="custom-color-fields">
+            <label class="custom-color-picker">
+              <input
+                type="color"
+                aria-label="选取自定义主色"
+                :value="normalizeCustomColor(customDraft) ?? customColor"
+                :disabled="isTransitioning"
+                @input="updateCustomColor"
+              />
+            </label>
+            <md-outlined-text-field
+              label="主色代码"
+              :value="customDraft"
+              :error="!!customError"
+              :error-text="customError"
+              :disabled="isTransitioning"
+              @input="updateCustomColor"
+              @keydown.enter.prevent="applyCustomColor"
+            />
+          </div>
+          <p class="hint">自动生成适合深浅模式的配色，实际主题色可能与所选主色略有不同。</p>
+          <div class="custom-color-actions">
+            <md-filled-tonal-button
+              :disabled="isTransitioning || !customChanged"
+              @click="applyCustomColor"
+              >应用颜色</md-filled-tonal-button
+            >
+          </div>
+        </div>
         <p class="hint appearance-note">外观即时生效，自动保存在本浏览器。</p>
+        <div class="color-reset">
+          <md-text-button :disabled="isTransitioning || !canResetColor" @click="restoreDefaultColor"
+            >恢复默认配色</md-text-button
+          >
+        </div>
       </div>
       <md-outlined-text-field label="音乐接口地址" :value="api" @input="updateApi" />
       <p v-if="validationError" class="notice error" role="alert">{{ validationError }}</p>
@@ -187,6 +268,46 @@ function saveApi() {
 .appearance-note {
   margin-top: 12px;
 }
+.custom-color-editor {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.custom-color-fields {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.custom-color-fields md-outlined-text-field {
+  flex: 1;
+  min-width: 0;
+}
+.custom-color-picker {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+.custom-color-picker input {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.custom-color-actions,
+.color-reset {
+  display: flex;
+  justify-content: flex-end;
+}
+.color-reset {
+  margin-top: 4px;
+}
 .api-actions {
   display: flex;
   align-items: center;
@@ -207,6 +328,9 @@ function saveApi() {
     gap: 8px;
     min-height: 76px;
     padding: 12px;
+  }
+  .custom-color-option {
+    grid-column: 1 / -1;
   }
   .color-scheme-option:has(input:checked) {
     padding: 11px;

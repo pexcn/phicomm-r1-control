@@ -1,5 +1,5 @@
 // Each preset owns a complete light/dark palette. Shared aliases keep Material roles aligned.
-const commonTokens = {
+export const commonTokens = {
   "--md-sys-color-primary": "var(--accent)",
   "--md-sys-color-on-primary": "var(--on-accent)",
   "--md-sys-color-secondary-container": "var(--soft)",
