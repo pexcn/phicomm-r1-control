@@ -3,6 +3,7 @@ import MaterialState from "../components/MaterialState.vue";
 import { computed, ref } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
+import AutoRestartCard from "../components/AutoRestartCard.vue";
 import { action, endpoint, flag, formatVersion } from "../lib/protocol";
 import {
   connected,
@@ -10,12 +11,43 @@ import {
   deviceName,
   disconnect,
   notify,
+  requestDevice,
   refresh,
   send,
   state,
 } from "../lib/speaker";
 
 const newName = ref("");
+const restartingAdbd = ref(false);
+async function rebootAdbd() {
+  const session = state.session;
+  if (
+    restartingAdbd.value ||
+    !confirm("确定重启 adbd？正在使用的 ADB 连接将短暂中断。") ||
+    session !== state.session ||
+    !connected.value
+  )
+    return;
+  restartingAdbd.value = true;
+  try {
+    const reply = await requestDevice({
+      type: "shell",
+      shell: "stop adbd && start adbd && echo __R1_ADBD_OK__",
+    });
+    if (session !== state.session) return;
+    notify(
+      String(reply.data || "")
+        .split(/\r?\n/)
+        .includes("__R1_ADBD_OK__")
+        ? "设备已确认重启 adbd。"
+        : "设备未确认 adbd 重启，请检查服务状态。",
+    );
+  } catch (cause) {
+    if (session === state.session) notify((cause as Error).message);
+  } finally {
+    restartingAdbd.value = false;
+  }
+}
 const tools = [
   { name: "配网向导", path: "upstream/config_wifi/", icon: "wifi" },
   { name: "ADB 控制台", path: "upstream/adb/", icon: "terminal" },
@@ -191,6 +223,7 @@ function reboot(serviceOnly: boolean) {
           </article>
         </div>
       </div>
+      <AutoRestartCard />
       <details class="card advanced">
         <summary>高级操作<AppIcon name="down" /></summary>
         <div class="advanced-content">
@@ -211,6 +244,15 @@ function reboot(serviceOnly: boolean) {
               <p class="hint">重新启动音箱控制服务，当前连接会中断。</p>
             </div>
             <md-outlined-button @click="reboot(true)">重启服务</md-outlined-button>
+          </div>
+          <div class="danger-row">
+            <div>
+              <strong>重启 adbd</strong>
+              <p class="hint">重新启动 ADB 调试服务，不重启音箱。</p>
+            </div>
+            <md-outlined-button :disabled="restartingAdbd" @click="rebootAdbd"
+              >重启 adbd</md-outlined-button
+            >
           </div>
           <div class="danger-row">
             <div>

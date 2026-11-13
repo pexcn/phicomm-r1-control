@@ -7,6 +7,7 @@ window.WebSocket = class {
   static CLOSED = 3;
   readyState = 0;
   sent = [];
+  restart = { Auto_restart_device_open: false, Auto_restart_device_time: [3, 0] };
   light = {
     music_light_enable: true,
     music_light_mode: 0,
@@ -33,6 +34,31 @@ window.WebSocket = class {
   send(raw) {
     const message = JSON.parse(raw);
     this.sent.push(message);
+    if (message.type === "Auto_restart_device") {
+      this.reply({
+        type: message.type,
+        type_id: message.type_id,
+        code: 200,
+        data: window.mockRestartInvalid ? {} : this.restart,
+      });
+      return;
+    }
+    if (["set_Auto_restart_device_open", "set_Auto_restart_device_time"].includes(message.type)) {
+      const success = !window.mockRestartReject;
+      if (success) {
+        if (message.type === "set_Auto_restart_device_open")
+          this.restart.Auto_restart_device_open = message.open;
+        else this.restart.Auto_restart_device_time = JSON.parse(message.times);
+      }
+      if (window.mockHoldRestart) return;
+      this.reply({
+        type: message.type,
+        type_id: message.type_id,
+        code: 200,
+        data: { [message.type]: success },
+      });
+      return;
+    }
     if (message.type === "send_message" && message.what === 4) {
       const key = {
         64: "music_light_enable",
@@ -126,6 +152,10 @@ window.WebSocket = class {
       );
     }
     if (message.type === "shell") {
+      if (message.shell === "stop adbd && start adbd && echo __R1_ADBD_OK__") {
+        this.reply({ type: "shell", type_id: message.type_id, code: 200, data: "__R1_ADBD_OK__" });
+        return;
+      }
       if (message.shell.includes("__R1_LOCAL_BEGIN__")) {
         if (window.mockHoldLocal) return;
         this.reply({
