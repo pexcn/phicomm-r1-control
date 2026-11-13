@@ -4,6 +4,8 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
 import TurntablePlayer from "../components/TurntablePlayer.vue";
+import LocalMusicDialog from "../components/LocalMusicDialog.vue";
+import AtmosphereLightDialog from "../components/AtmosphereLightDialog.vue";
 import { action, array, flag, formatTime, numeric, object } from "../lib/protocol";
 import {
   canEditQueue,
@@ -50,6 +52,8 @@ let requestNumber = 0;
 const timerOpen = ref(false);
 const sleepMinutes = ref(30);
 const queueOpen = ref(false);
+const localOpen = ref(false);
+const lightOpen = ref(false);
 watch(
   () => state.session,
   () => {
@@ -308,6 +312,16 @@ function setTimer() {
         ><AppIcon :name="queueOpen ? 'up' : 'arrow'" />
       </button>
       <div class="quick-grid">
+        <button class="card quick-card" @click="localOpen = true">
+          <MaterialState /><AppIcon name="music" :size="28" /><span
+            ><strong>本地音乐</strong><small>扫描音箱存储与路径点播</small></span
+          ><AppIcon name="arrow" />
+        </button>
+        <button class="card quick-card" @click="lightOpen = true">
+          <MaterialState /><AppIcon name="sun" :size="28" /><span
+            ><strong>氛围灯</strong><small>亮度、效果与灯光颜色</small></span
+          ><AppIcon name="arrow" />
+        </button>
         <button class="card quick-card" @click="timerOpen = true">
           <MaterialState /> <AppIcon name="clock" :size="28" /><span
             ><strong>定时暂停</strong
@@ -397,6 +411,8 @@ function setTimer() {
       <md-text-button @click="searchOpen = false">关闭</md-text-button>
     </div></md-dialog
   >
+  <LocalMusicDialog :open="localOpen" @close="localOpen = false" />
+  <AtmosphereLightDialog :open="lightOpen" @close="lightOpen = false" />
   <md-dialog :open="timerOpen" @closed="timerOpen = false" aria-label="定时暂停"
     ><div slot="headline">定时暂停</div>
     <div slot="content" class="dialog-content">

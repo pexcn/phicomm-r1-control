@@ -7,6 +7,13 @@ window.WebSocket = class {
   static CLOSED = 3;
   readyState = 0;
   sent = [];
+  light = {
+    music_light_enable: true,
+    music_light_mode: 0,
+    music_light_luma: 100,
+    music_light_chroma: 4,
+    music_light_color: 0x336699,
+  };
   constructor(url) {
     this.url = url;
     mockSockets.push(this);
@@ -26,6 +33,16 @@ window.WebSocket = class {
   send(raw) {
     const message = JSON.parse(raw);
     this.sent.push(message);
+    if (message.type === "send_message" && message.what === 4) {
+      const key = {
+        64: "music_light_enable",
+        65: "music_light_luma",
+        66: "music_light_chroma",
+        68: "music_light_mode",
+        70: "music_light_color",
+      }[message.arg1];
+      if (key) this.light[key] = message.arg1 === 64 ? !!message.arg2 : message.arg2;
+    }
     const data = {
       get_info: {
         ver: mockVersion,
@@ -38,6 +55,8 @@ window.WebSocket = class {
         dlna_open: true,
         airplay_open: false,
         Service_Normally_Open: true,
+        Current_PlayerType: 2,
+        ...this.light,
         music_info: {
           id: "mock:track-1",
           title: "夜航",
@@ -107,6 +126,25 @@ window.WebSocket = class {
       );
     }
     if (message.type === "shell") {
+      if (message.shell.includes("__R1_LOCAL_BEGIN__")) {
+        if (window.mockHoldLocal) return;
+        this.reply({
+          type: "shell",
+          type_id: message.type_id,
+          code: 200,
+          data:
+            "__R1_LOCAL_BEGIN__\r\n" +
+            (
+              window.mockLocalFiles || [
+                "/sdcard/Music/夜航.mp3",
+                "/sdcard/Music/子目录/晚风.flac",
+                "/sdcard/Music/notes.txt",
+              ]
+            ).join("\r\n") +
+            "\r\n__R1_LOCAL_END__",
+        });
+        return;
+      }
       const shell = {
         "web-system": "3448\r\nPhicomm_R1_12CF\r\n14040.00 30000.00",
         "web-temperature": "60",

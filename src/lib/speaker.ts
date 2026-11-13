@@ -125,6 +125,15 @@ let metadataRequest: AbortController | null = null;
 let confirmed = false;
 let lastFrameAt = 0;
 let lastQueueAt = 0;
+let requestNumber = 0;
+const requests = new Map<
+  string,
+  {
+    resolve: (message: Message) => void;
+    reject: (error: Error) => void;
+    timer: ReturnType<typeof setTimeout>;
+  }
+>();
 
 export function notify(message: string): void {
   clearTimeout(noticeTimer);
@@ -142,6 +151,11 @@ function releaseFrame(): void {
 }
 
 function resetSession(): void {
+  for (const request of requests.values()) {
+    clearTimeout(request.timer);
+    request.reject(new Error("连接已变更，请重新操作。"));
+  }
+  requests.clear();
   ++state.session;
   state.version = null;
   state.info = {};
@@ -243,6 +257,24 @@ export function send(message: Message): boolean {
   return true;
 }
 
+// Replies are correlated per connection; delayed replies cannot complete a newer request.
+export function requestDevice(message: Message, timeout = 10000): Promise<Message> {
+  return new Promise((resolve, reject) => {
+    if (!connected.value) return reject(new Error("请先连接音箱。"));
+    const id = `web-request-${state.session}-${++requestNumber}`;
+    const timer = setTimeout(() => {
+      requests.delete(id);
+      reject(new Error("设备未及时响应，请重试。"));
+    }, timeout);
+    requests.set(id, { resolve, reject, timer });
+    if (!client.send({ ...message, type_id: id })) {
+      clearTimeout(timer);
+      requests.delete(id);
+      reject(new Error("连接已断开，请重新连接。"));
+    }
+  });
+}
+
 export function refresh(): void {
   if (!connected.value) return;
   client.send({ type: "get_info", type_id: "web-info" });
@@ -280,6 +312,16 @@ export function track(raw: unknown): Track {
 }
 
 function receive(message: Message): void {
+  const request = requests.get(String(message.type_id));
+  if (request) {
+    clearTimeout(request.timer);
+    requests.delete(String(message.type_id));
+    if (message.code !== undefined && ![0, 1, 200].includes(numeric(message.code))) {
+      request.reject(new Error(String(message.msg || message.message || "设备未能完成操作。")));
+      return;
+    }
+    request.resolve(message);
+  }
   if (message.code !== undefined && ![0, 1, 200].includes(numeric(message.code))) {
     notify(String(message.msg || message.message || "设备未能完成操作。"));
     return;
@@ -316,7 +358,7 @@ function receive(message: Message): void {
       if (song.title) state.music.title = String(song.title);
       if (song.artist || song.arist) state.music.artist = String(song.artist || song.arist);
       if (song.albumUrl || song.cover) state.music.cover = safeImage(song.albumUrl || song.cover);
-      if (changed && nextId) void metadata(nextId, song);
+      if (changed && nextId && !nextId.startsWith("local_")) void metadata(nextId, song);
       if (!confirmed && state.version !== null) {
         confirmed = true;
         refresh();
