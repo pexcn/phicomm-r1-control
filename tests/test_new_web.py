@@ -603,6 +603,43 @@ class NewWebTests(unittest.TestCase):
         self.page.evaluate('(command)=>mockSockets.at(-1).reply({type:command.type,type_id:command.type_id,code:200,data:{set_Auto_restart_device_time:true}})',command)
         self.assertFalse(any(m['type']=='set_Auto_restart_device_open' for m in self.sent()))
 
+    def test_advanced_audio_on_1873_and_mixer_version_gate(self):
+        self.start(1873)
+        self.page.locator('.sidebar a[href="#/sound"]').click()
+        panel=self.page.locator('.advanced-audio')
+        self.page.wait_for_function("!document.querySelector('.advanced-audio md-switch').disabled")
+        self.assertTrue(panel.locator('.mixer-card md-slider').first.evaluate('el=>el.disabled'))
+        panel.locator('.effect-card').nth(0).locator('md-slider').evaluate("el=>{el.value=650;el.dispatchEvent(new Event('change',{bubbles:true}));}")
+        self.page.wait_for_function('mockSockets.at(-1).audio.bass.Current_Strength===650')
+        panel.get_by_text('低音增强强度 · 65 %',exact=True).wait_for()
+        panel.locator('.effect-card').nth(1).locator('md-slider').evaluate("el=>{el.value=-1200;el.dispatchEvent(new Event('change',{bubbles:true}));}")
+        panel.get_by_text('响度增益 · -12.0 dB',exact=True).wait_for()
+        panel.get_by_label('启用低音增强',exact=True).click()
+        self.page.wait_for_function('!mockSockets.at(-1).audio.bass.sound_effects_bass_enable')
+        self.page.wait_for_function("!document.querySelector('.advanced-audio md-switch').disabled")
+        self.assertTrue(panel.locator('.effect-card').nth(0).locator('md-slider').evaluate('el=>el.disabled'))
+        panel.get_by_label('启用 DSP 低音增强',exact=True).click()
+        panel.get_by_text('DSP 固件报告增强生效中。',exact=True).wait_for()
+        self.assertIn({'type':'send_message','what':16384,'arg1':100,'arg2':0,'obj':1},self.sent())
+        self.assertFalse(any(m['type']=='setMixerValue' for m in self.sent()))
+
+    def test_advanced_audio_mixer_and_unsupported_state_in_mobile_layout(self):
+        self.page.set_viewport_size({'width':320,'height':844})
+        self.start(1887)
+        self.page.locator('.bottom-nav a[href="#/sound"]').click()
+        panel=self.page.locator('.advanced-audio')
+        self.page.wait_for_function("!document.querySelector('.mixer-card md-slider').disabled")
+        panel.locator('.mixer-card md-slider').nth(1).evaluate("el=>{el.value=237;el.dispatchEvent(new Event('change',{bubbles:true}));}")
+        self.page.wait_for_function("mockSockets.at(-1).audio.Mixer['DAC Digital Volume R']===237")
+        panel.get_by_text('高音分路 · 6 dB',exact=True).wait_for()
+        self.assertIn({'type':'setMixerValue','controlName':'DAC Digital Volume R','value':237},self.sent())
+        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),320)
+        self.page.evaluate('window.mockNoEffects=true;window.mockNoDsp=true')
+        panel.get_by_role('button',name='重新读取高级音效',exact=True).click()
+        panel.get_by_role('button',name='重新读取 DSP',exact=True).click()
+        self.page.wait_for_function("document.querySelector('.advanced-audio md-switch').disabled && document.querySelector('.dsp-card md-switch').disabled")
+        self.assertEqual(panel.get_by_text('设备未提供此音效配置。',exact=True).count(),2)
+
     def test_queue_long_titles_fit_without_horizontal_scroll(self):
         self.start(1887)
         self.page.evaluate('''() => mockSockets.at(-1).reply({type:'list',data:{playIndex:0,

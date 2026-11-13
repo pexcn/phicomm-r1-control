@@ -17,6 +17,13 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `components/MaterialState.vue`：复合控件的 Material Web 涟漪与键盘焦点状态。
 - `components/TurntablePlayer.vue`：黑胶旋转、暂停停靠、封面大图与键盘关闭。
 - `lib/turntable.ts`：以固定支点计算唱针圆弧，让针尖随进度从黑胶外圈向内圈移动。
+- `components/LocalMusicDialog.vue`、`lib/local-music.ts`：只读扫描音箱目录、过滤音频与本地路径点播。
+- `components/AtmosphereLightDialog.vue`：按设备版本提供氛围灯效果、亮度、渐变速度和颜色。
+- `components/AutoRestartCard.vue`：设备端每日自动重启配置、保存确认与回读。
+- `components/AdvancedAudioEffects.vue`、`lib/audio-effects.ts`：低音、响度、DSP 和 DAC 分路音量。
+
+新增设备能力及 APK 协议依据见 `../docs/device-controls.md`。请求由 `requestDevice` 的会话 ID
+关联；弹层关闭、换机或卸载后不应用旧扫描和配置结果，也不继续跨会话的后续写入。
 
 唱片与唱针图片由 `upstream/original/newui/images/` 中的原件直接打包为本站静态资源，
 不加载原版业务脚本、不修改原件。原图尺寸改变时需复核唱针支点和针尖标定。

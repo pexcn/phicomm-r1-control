@@ -36,6 +36,19 @@
 - 重启 adbd 沿用经典版的 `stop adbd && start adbd`，用户确认后发送，
   以固定输出标记判断命令是否执行；不采用 NewUI 未证实的 `what=1,arg1=3` 包装。
 
+## 高级音效
+
+- `get_eq_config` 分别读取 `bass`、`loudness` 和 `Mixer`；没有返回完整数值时禁用对应控件，
+  不用默认值冒充设备状态。读取失败后也禁用旧配置。
+- 低音增强沿用 `set_bass_enable`、`set_bass_strength`，强度设备值为 0–1000，显示为百分比。
+- 响度沿用 `set_loudness_enable`、`set_loudness_gain`，设备值为 -3000–3000，按百分之一 dB 显示。
+- DAC 分路音量要求确认 EchoService >=1.8.76，且 Mixer 已提供对应控制值；
+  使用 `setMixerValue` 设置 `DAC Digital Volume L/R`，原网页范围 211–251，参考值 231。
+- DSP 查询 `persist.route0feture` 与 `DSP Firmware PRAM`，分别显示开关与固件生效状态。
+  1.8.69 起沿用经典版的 `what=16384,arg1=100,arg2=0` 指令；旧版本沿用固定 property 写入。
+  没读到有效状态时不开放开关。设置后延迟回读，不将“已发送”当作“音效已生效”。
+- 断线、换机或离开音效页后取消后续查询，不让延迟结果覆盖新设备状态。
+
 ## 请求关联与会话隔离
 
 `requestDevice` 给请求分配当前会话内唯一的 `type_id`，拒绝错误码、超时和断线请求。

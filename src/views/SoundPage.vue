@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
+import AdvancedAudioEffects from "../components/AdvancedAudioEffects.vue";
 import { connected, notify, send, state, volume } from "../lib/speaker";
 import { load, save } from "../lib/storage";
 
@@ -196,6 +197,7 @@ onBeforeUnmount(() => clearTimeout(timer));
           <p class="hint">仅应用频段结构与增益范围匹配的预设。</p>
         </article>
       </div>
+      <AdvancedAudioEffects />
     </template>
   </section>
   <md-dialog id="eq-preset-dialog" :open="saving" @closed="saving = false" aria-label="保存 EQ 预设"

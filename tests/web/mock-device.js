@@ -7,6 +7,12 @@ window.WebSocket = class {
   static CLOSED = 3;
   readyState = 0;
   sent = [];
+  dspEnabled = false;
+  audio = {
+    bass: { sound_effects_bass_enable: true, Current_Strength: 300 },
+    loudness: { sound_effects_loudness_enable: true, Current_Gain: 0 },
+    Mixer: { "DAC Digital Volume L": 231, "DAC Digital Volume R": 231 },
+  };
   restart = { Auto_restart_device_open: false, Auto_restart_device_time: [3, 0] };
   light = {
     music_light_enable: true,
@@ -34,6 +40,16 @@ window.WebSocket = class {
   send(raw) {
     const message = JSON.parse(raw);
     this.sent.push(message);
+    if (message.type === "set_bass_enable")
+      this.audio.bass.sound_effects_bass_enable = message.enable;
+    if (message.type === "set_loudness_enable")
+      this.audio.loudness.sound_effects_loudness_enable = message.enable;
+    if (message.type === "set_bass_strength") this.audio.bass.Current_Strength = message.strength;
+    if (message.type === "set_loudness_gain") this.audio.loudness.Current_Gain = message.gain;
+    if (message.type === "setMixerValue" && mockVersion >= 1876)
+      this.audio.Mixer[message.controlName] = message.value;
+    if (message.type === "send_message" && message.what === 16384 && message.arg1 === 100)
+      this.dspEnabled = !!message.obj;
     if (message.type === "Auto_restart_device") {
       this.reply({
         type: message.type,
@@ -110,6 +126,8 @@ window.WebSocket = class {
         },
       },
       get_eq_config: {
+        ...(window.mockNoEffects ? {} : this.audio),
+        Mixer: mockVersion >= 1876 ? this.audio.Mixer : {},
         eq: {
           sound_effects_eq_enable: true,
           Current_Preset: 0,
@@ -152,6 +170,19 @@ window.WebSocket = class {
       );
     }
     if (message.type === "shell") {
+      if (message.shell.startsWith("setprop persist.route0feture "))
+        this.dspEnabled = message.shell.endsWith(" 1");
+      if (message.shell.startsWith("echo route0feture:")) {
+        this.reply({
+          type: "shell",
+          type_id: message.type_id,
+          code: 200,
+          data: window.mockNoDsp
+            ? "route0feture: \r\npram:"
+            : `route0feture: ${this.dspEnabled ? 1 : 0}\r\npram: >data${this.dspEnabled ? 3 : 2}`,
+        });
+        return;
+      }
       if (message.shell === "stop adbd && start adbd && echo __R1_ADBD_OK__") {
         this.reply({ type: "shell", type_id: message.type_id, code: 200, data: "__R1_ADBD_OK__" });
         return;
