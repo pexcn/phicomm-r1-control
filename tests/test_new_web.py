@@ -505,6 +505,28 @@ class NewWebTests(unittest.TestCase):
         self.page.wait_for_function('mockSockets.at(-1).sent.some(message=>message.type==="stop_screencap")')
         self.assertIn({'type': 'stop_screencap'}, self.sent())
 
+    def test_queue_long_titles_fit_without_horizontal_scroll(self):
+        self.start(1887)
+        self.page.evaluate('''() => mockSockets.at(-1).reply({type:'list',data:{playIndex:0,
+          playList:Array.from({length:60},(_,i)=>({id:'long-'+i,title:'Song of Wings -As One- '+ '长标题'.repeat(60),artist:'VeryLongArtistName'.repeat(20),duration:248000}))
+        }})''')
+        self.page.wait_for_function("document.querySelectorAll('.track-list li').length===60")
+        for width in [1600, 1024, 390, 320]:
+            with self.subTest(width=width):
+                self.page.set_viewport_size({'width':width,'height':844})
+                if width == 390:
+                    self.page.locator('.mobile-queue-toggle').click()
+                queue = self.page.locator('.track-list')
+                self.assertLessEqual(queue.evaluate('el=>el.scrollWidth'), queue.evaluate('el=>el.clientWidth'))
+                self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'), width)
+                queue.evaluate('el=>{el.scrollLeft=100;el.scrollTop=el.scrollHeight;}')
+                self.assertEqual(queue.evaluate('el=>el.scrollLeft'), 0)
+                self.assertGreater(queue.evaluate('el=>el.scrollTop'), 0)
+                self.page.locator('.track-main').last.click()
+                self.assertIn({'type':'play','index':59}, self.sent())
+                self.page.locator('.track-actions md-icon-button').last.focus()
+                self.assertLessEqual(queue.evaluate('el=>el.scrollWidth'), queue.evaluate('el=>el.clientWidth'))
+
     def test_mobile_layout_all_pages_and_green_light_palette(self):
         self.page.set_viewport_size({'width': 390, 'height': 844})
         self.start()

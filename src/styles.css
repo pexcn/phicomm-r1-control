@@ -592,8 +592,6 @@ body:has(.cover-viewer[open]) {
 .track-list {
   overflow-y: auto;
   min-height: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
 }
 .track-list li {
   display: flex;
@@ -646,7 +644,7 @@ body:has(.cover-viewer[open]) {
   flex-shrink: 0;
 }
 .track-actions md-icon-button {
-  width: 40px;
+  width: 48px;
   height: 48px;
 }
 .queue-note {

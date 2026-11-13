@@ -13,6 +13,7 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `lib/theme-reveal.ts`：主题扩散；鼠标、触屏和键盘操作统一以触发控件的几何中心为圆心。
 - `material.css`：M3 字体层级、形状与交互动效。
 - `styles.css`：页面布局和响应式适配。
+- `scrollbars.css`：全局细滚动条；`main.ts` 将同一份样式复用到 Material 弹窗、菜单和文本框内部。
 - `components/MaterialState.vue`：复合控件的 Material Web 涟漪与键盘焦点状态。
 - `components/TurntablePlayer.vue`：黑胶旋转、暂停停靠、封面大图与键盘关闭。
 - `lib/turntable.ts`：以固定支点计算唱针圆弧，让针尖随进度从黑胶外圈向内圈移动。
