@@ -6,6 +6,7 @@ import EmptyState from "../components/EmptyState.vue";
 import TurntablePlayer from "../components/TurntablePlayer.vue";
 import LocalMusicDialog from "../components/LocalMusicDialog.vue";
 import AtmosphereLightDialog from "../components/AtmosphereLightDialog.vue";
+import PlaybackSettingsCard from "../components/PlaybackSettingsCard.vue";
 import { action, array, flag, formatTime, numeric, object } from "../lib/protocol";
 import {
   canEditQueue,
@@ -345,6 +346,7 @@ function setTimer() {
           ><AppIcon name="arrow"
         /></a>
       </div>
+      <PlaybackSettingsCard />
     </template>
   </section>
   <md-dialog
