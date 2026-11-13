@@ -739,5 +739,113 @@ class NewWebTests(unittest.TestCase):
         self.page.wait_for_function('mockSockets.at(-1).sent.some(message=>message.type==="start_screencap" && message.interval===1000)')
 
 
+    def set_material_value(self, selector, value, event='change'):
+        self.page.locator(selector).evaluate('''(element, args) => {
+          element.value = args.value;
+          element.dispatchEvent(new Event(args.event, {bubbles: true}));
+        }''', {'value': value, 'event': event})
+
+    def test_device_music_source_and_quality_use_device_readback(self):
+        self.start(1887)
+        self.set_material_value('#device-music-source', 'netease')
+        self.page.get_by_text('已由音箱回读确认。', exact=True).wait_for()
+        self.page.wait_for_function('document.querySelector("#device-music-source").value === "netease"')
+        self.set_material_value('#playback-quality', '3')
+        self.page.wait_for_function('document.querySelector("#playback-quality").value === "3"')
+        self.assertTrue(any(m.get('what') == 65536 and m.get('arg2') == 4 and m.get('obj') == 'netease' for m in self.sent()))
+        self.assertTrue(any(m['type'] == 'switch_quality' and m['quality'] == 3 for m in self.sent()))
+        self.mock_music(Unisound=False, Support_Flac=False)
+        self.page.wait_for_function('document.querySelector("#device-music-source").disabled')
+        self.assertFalse(self.page.locator('#playback-engine').evaluate('(element)=>element.disabled'))
+        self.assertEqual(self.page.locator('#playback-quality md-select-option').count(), 2)
+
+    def test_source_relay_ack_does_not_claim_applied_setting(self):
+        self.start(1887)
+        self.page.evaluate('window.mockSourceUnchanged=true')
+        self.set_material_value('#device-music-source', 'kuwo')
+        self.page.get_by_role('alert').filter(has_text='设备尚未回报目标设置').wait_for()
+        self.assertEqual(self.page.locator('#device-music-source').evaluate('(element)=>element.value'), 'qq')
+
+    def test_engine_change_reboots_only_after_device_ack(self):
+        self.start(1887)
+        self.page.on('dialog', lambda dialog: dialog.accept())
+        self.page.evaluate('window.mockPlaybackReject=true')
+        self.set_material_value('#playback-engine', '1')
+        self.page.locator('.playback-settings [role="alert"]').wait_for()
+        self.assertFalse(any(m['type'] == 'reboot_echo' for m in self.sent()))
+        self.page.evaluate('window.mockPlaybackReject=false')
+        self.set_material_value('#playback-engine', '1')
+        self.page.wait_for_function('mockSockets.at(-1).sent.some(m=>m.type==="reboot_echo")')
+        types = [m['type'] for m in self.sent()]
+        self.assertLess(types.index('switch_player'), types.index('reboot_echo'))
+
+    def open_miplay(self):
+        self.page.locator('.sidebar nav a[href="#/device"]').click()
+        self.page.get_by_role('button', name='MiPlay 控制与诊断', exact=True).click()
+        self.page.locator('#miplay-queue').wait_for()
+
+    def test_miplay_local_and_remote_tuning_and_readback(self):
+        self.start(1887)
+        self.mock_music(Unisound=False)
+        self.open_miplay()
+        dialog = self.page.locator('#miplay-dialog')
+        dialog.get_by_role('button', name='左声道', exact=True).click()
+        dialog.get_by_text('已由目标音箱回读确认并保存。', exact=True).wait_for()
+        self.set_material_value('#miplay-delay', '-30', 'input')
+        dialog.get_by_role('button', name='保存同步延迟', exact=True).click()
+        self.page.wait_for_function('mockSockets.at(-1).miPlay.sync_delay_ms === -30')
+        self.page.wait_for_function('!document.querySelector("#miplay-target").disabled && !document.querySelector("#miplay-delay").disabled')
+        self.set_material_value('#miplay-target', 'remote')
+        self.set_material_value('#miplay-ip', '192.0.2.11', 'input')
+        dialog.get_by_role('button', name='重新读取诊断', exact=True).click()
+        self.page.wait_for_function('document.querySelector("#miplay-queue")?.value === "900"')
+        self.set_material_value('#miplay-queue', '1100', 'input')
+        dialog.get_by_role('button', name='保存队列目标', exact=True).click()
+        dialog.get_by_text('已由目标音箱回读确认并保存。', exact=True).wait_for()
+        message = next(m for m in self.sent() if m['type'] == 'Set_MiPlay_Remote_Tuning')
+        self.assertEqual((message['ip'], message['queue_target_ms']), ('192.0.2.11', 1100))
+
+    def test_miplay_missing_capability_and_unconfirmed_write(self):
+        self.start(1887)
+        self.page.evaluate('window.mockMiPlayMissingSync=true; window.mockMiPlayUnchanged=true')
+        self.open_miplay()
+        self.assertTrue(self.page.locator('#miplay-delay').evaluate('(element)=>element.disabled'))
+        self.page.locator('#miplay-dialog').get_by_role('button', name='左声道', exact=True).click()
+        self.page.get_by_role('alert').filter(has_text='目标音箱回读未确认设置').wait_for()
+        self.assertEqual(self.page.locator('#miplay-queue').count(), 0)
+
+    def test_miplay_target_change_discards_inflight_write(self):
+        self.start(1887)
+        self.open_miplay()
+        self.page.evaluate('window.mockHoldMiPlay=true')
+        self.page.locator('#miplay-dialog').get_by_role('button', name='左声道', exact=True).click()
+        self.set_material_value('#miplay-target', 'remote')
+        self.page.evaluate('''() => {
+          const socket = mockSockets.at(-1);
+          const message = socket.sent.find(m=>m.type==='Set_MiPlay_Channel');
+          socket.reply({type:message.type,type_id:message.type_id,code:200,data:{}});
+        }''')
+        self.page.wait_for_timeout(150)
+        sent = self.sent()
+        index = next(i for i, m in enumerate(sent) if m['type'] == 'Set_MiPlay_Channel')
+        self.assertFalse(any(m['type'] == 'Get_MiPlay_Diag' for m in sent[index+1:]))
+
+    def test_cast_mode_and_bluetooth_background_permission(self):
+        self.start(1887)
+        self.page.locator('.sidebar nav a[href="#/device"]').click()
+        self.page.get_by_role('switch', name='蓝牙后台服务', exact=True).click()
+        self.page.wait_for_function('mockSockets.at(-1).sent.some(m=>m.type==="Set_Bluetooth_Open" && m.open===false)')
+        self.page.get_by_role('switch', name='投放连接模式', exact=True).click()
+        self.page.wait_for_function('mockSockets.at(-1).sent.some(m=>m.what===64 && m.arg1===1)')
+        self.page.wait_for_function('document.querySelector("#cast-connection-mode").selected')
+
+    def test_old_device_does_not_offer_unreported_miplay_or_bluetooth_permission(self):
+        self.start(1873)
+        self.page.locator('.sidebar nav a[href="#/device"]').click()
+        self.assertTrue(self.page.get_by_role('button', name='MiPlay 控制与诊断', exact=True).is_disabled())
+        self.assertTrue(self.page.get_by_role('switch', name='蓝牙后台服务', exact=True).is_disabled())
+        self.assertFalse(any('MiPlay' in m['type'] for m in self.sent()))
+
+
 if __name__ == '__main__':
     unittest.main()

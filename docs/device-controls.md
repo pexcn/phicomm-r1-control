@@ -49,6 +49,61 @@
   没读到有效状态时不开放开关。设置后延迟回读，不将“已发送”当作“音效已生效”。
 - 断线、换机或离开音效页后取消后续查询，不让延迟结果覆盖新设备状态。
 
+## 默认音乐源与播放设置
+
+- 音箱默认音乐源使用经典版 `setMusicSource` 和 NewUI `setMusicSource` 的
+  `what=65536,arg1=0,arg2=4,obj=qq|netease|kuwo`，它修改设备点播偏好，
+  不改变本网页搜索来源。此指令发往设备语音服务；未确认 Unisound 存在时禁用。
+  网页不提供账号登录，也不能因此解锁平台付费曲目。
+- 引擎切换沿用经典版 `buildDeviceActions` / `handleSwitchPlayer`：
+  1.8.56 起发送 `switch_player`，`player=1/2` 是 MediaPlayer/ExoPlayer。
+  只有设置回包确认目标值后才发送 `reboot_echo`。重启会中断播放与连接；
+  `PlayerType` 是保存的选择，`Current_PlayerType` 才是当前实际引擎，不混用。
+- 1.8.63 起 ExoPlayer 使用 `switch_quality`，`quality=0/1/2/3` 对应高品、
+  超品、无损、Hi-Res。未上报 `Support_Flac` 时仅提供前两档。
+  设置回包后另外查询 `get_info`，以实际偏好回读确认，而非仅依据中转成功。
+- 格式来自 `music_info.Current_MusicData.Format`，音源质量及码率来自 `api_data`。
+  缺失项不填默认值，不凭高码率推断无损；PCM 编码显示为“解码位深”，
+  不承诺它就是源文件位深。首选音质不保证每首曲目都能达到。
+
+## MiPlay 与投放服务
+
+- 协议由经典版 `createMiPlayAdvDialog` 和 EchoService 1.8.87 `server` /
+  `MiPlayHost` / `MiPlayRuntime` 交叉核对，不经过 Unisound。仅设备上报 `miplay_open` 时开放入口。
+- 服务使用 `Set_MiPlay_Open`；蓝牙后台启动许可使用 `Set_Bluetooth_Open`，
+  后者沿用经典版 1.8.87 门槛，不等同于蓝牙适配器开关。
+- 投放连接模式使用 `what=64,arg1=1/2,arg2=-1` 进入／退出，1.8.20 起支持，
+  `get_info.device_state=3` 表示进入，其他已知状态表示退出。
+- 诊断使用 `Get_MiPlay_Diag`；远端使用 `Get_MiPlay_Remote_Diag` 加 `ip`，
+  解析回包 `data.diag` 内的 JSON，检查远端错误码和代理错误。仅接受有效 IPv4。
+- 声道使用 `Set_MiPlay_Channel` 的 `mode=0/1/2`，对应立体声、左、右；
+  远端使用 `Set_MiPlay_Remote_Channel`，同时发送 `mode` 与 `channel` 兼容字段。
+- 队列使用 `Set_MiPlay_Tuning` / `Set_MiPlay_Remote_Tuning` 的
+  `queue_target_ms`（400–1500 整数 ms）；同步延迟使用
+  `Set_MiPlay_Sync_Delay` / `Set_MiPlay_Remote_Sync_Delay` 的
+  `sync_delay_ms`（-500–500 整数 ms），正值晚播，负值早播。
+- 必须读到有效字段才开放该参数；写入后查询同一目标并核对，不以代理 ACK 代替实际生效。
+  目标变化、关闭弹层、换机后停止后续操作。诊断为手动刷新的带读取时间快照，
+  展示设备提供的数据年龄与有效标记；不作声学同步保证，不自动校准。
+
+## 暂未移植的 Unisound 功能
+
+以下判断来自保存的原作者网页，而不是把“无需网页登录”当成“无设备依赖”：
+
+| 功能 | 原版源码依据 | 本轮处理 |
+| --- | --- | --- |
+| 休眠、麦克风、唤醒 | NewUI `ws.js` 的 `setDormancy` / `stopWakeup` / `enterWakeup` 发往 Unisound；经典版 `updateUnisoundInfo` 提供休眠与拾音状态 | 不移植完整模块；原生 `what=256` 唤醒/休眠消息不能证明脱离语音服务后完整可用 |
+| 收藏、平台歌单 | 经典版 `collect` / `cancel_collect` / `get_song_list` 经 `sendToUnisound` 的 `api` 请求 | 不移植；还涉及设备端账户与曲目权限 |
+| 闹钟、提醒、备忘 | NewUI `ws.js` 的 memo 查询与增删经 `send_to_unisound` | 不移植 |
+| 热榜 | NewUI `panel-music.js` 的 `HotTab` 经 HTTP 取列表，点播、追加与整榜播放经 `musicPlay` / `web_添加` | 列表本身独立，但原版完整播放功能依赖 Unisound；列表只有名称等信息，没有精确播放 ID，本轮不加入只能浏览的入口 |
+| 高级语音 | NewUI `ws.js` 的唤醒词、灵敏度、IOT_API 等 `arg2=10` 消息，广播、歌单与个性电台指令发往语音服务 | 不移植 |
+
+可复核的网页原件位于 [`upstream/original/newui/js/ws.js`](../upstream/original/newui/js/ws.js)、
+[`panel-music.js`](../upstream/original/newui/js/panel-music.js) 和
+[`r1_control.min.js`](../upstream/original/js/r1_control.min.js)。
+“依赖 Unisound”指设备端语音服务及对应扩展接口，不代表所有功能都必须登录音乐平台，
+也不保证任意原厂版本都支持修改版扩展。EchoService 自身不能替代这些处理程序。
+
 ## 请求关联与会话隔离
 
 `requestDevice` 给请求分配当前会话内唯一的 `type_id`，拒绝错误码、超时和断线请求。

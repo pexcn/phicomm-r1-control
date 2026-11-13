@@ -21,6 +21,25 @@ window.WebSocket = class {
     music_light_chroma: 4,
     music_light_color: 0x336699,
   };
+  preferences = {
+    PlayerType: 2,
+    Current_PlayerType: 2,
+    ExoPlayer_Quality: 1,
+    Support_Flac: true,
+    music_source: "qq",
+    miplay_open: true,
+    bluetooth_open: true,
+    device_state: 0,
+  };
+  miPlay = {
+    channel: 0,
+    queue_target_ms: 800,
+    sync_delay_ms: 0,
+    running: true,
+    diag_valid: true,
+    diag_age_ms: 12,
+  };
+  remoteMiPlay = { channel: 2, queue_target_ms: 900, sync_delay_ms: 20, running: true };
   constructor(url) {
     this.url = url;
     mockSockets.push(this);
@@ -40,6 +59,76 @@ window.WebSocket = class {
   send(raw) {
     const message = JSON.parse(raw);
     this.sent.push(message);
+    if (message.type === "switch_player" || message.type === "switch_quality") {
+      const key = message.type === "switch_player" ? "player" : "quality";
+      if (!window.mockPlaybackReject)
+        this.preferences[key === "player" ? "PlayerType" : "ExoPlayer_Quality"] = message[key];
+      this.reply({
+        type: message.type,
+        type_id: message.type_id,
+        code: window.mockPlaybackReject ? 500 : 200,
+        data: { [key]: message[key] },
+      });
+      return;
+    }
+    if (message.type === "send_message" && message.what === 65536 && message.arg2 === 4) {
+      if (!window.mockSourceUnchanged) this.preferences.music_source = message.obj;
+      this.reply({ type: message.type, type_id: message.type_id, code: 200 });
+      return;
+    }
+    if (
+      [
+        "Set_MiPlay_Open",
+        "Set_Bluetooth_Open",
+        "Set_DLNA_Open",
+        "Set_AirPlay_Open",
+        "Set_Service_Normally_Open",
+      ].includes(message.type)
+    ) {
+      const key = {
+        Set_MiPlay_Open: "miplay_open",
+        Set_Bluetooth_Open: "bluetooth_open",
+        Set_DLNA_Open: "dlna_open",
+        Set_AirPlay_Open: "airplay_open",
+        Set_Service_Normally_Open: "Service_Normally_Open",
+      }[message.type];
+      this.preferences[key] = message.open;
+      this.reply({
+        type: message.type,
+        type_id: message.type_id,
+        code: 200,
+        data: { [message.type]: message.open },
+      });
+      return;
+    }
+    if (message.type === "send_message" && message.what === 64)
+      this.preferences.device_state = message.arg1 === 1 ? 3 : 0;
+    if (/^(Get|Set)_MiPlay_(Remote_)?(Diag|Channel|Tuning|Sync_Delay)$/.test(message.type)) {
+      const remote = message.type.includes("Remote_");
+      const diag = remote ? this.remoteMiPlay : this.miPlay;
+      if (message.type.startsWith("Set_") && !window.mockMiPlayUnchanged) {
+        const key = message.type.endsWith("Channel")
+          ? "channel"
+          : message.type.endsWith("Tuning")
+            ? "queue_target_ms"
+            : "sync_delay_ms";
+        diag[key] = key === "channel" ? message.mode : message[key];
+      }
+      if (window.mockHoldMiPlay && message.type.startsWith("Set_")) return;
+      const value = { ...diag };
+      if (window.mockMiPlayMissingSync) delete value.sync_delay_ms;
+      this.reply({
+        type: message.type,
+        type_id: message.type_id,
+        code: 200,
+        data: message.type.startsWith("Get_")
+          ? remote
+            ? { ip: message.ip, diag: JSON.stringify({ code: 200, data: value }) }
+            : value
+          : {},
+      });
+      return;
+    }
     if (message.type === "set_bass_enable")
       this.audio.bass.sound_effects_bass_enable = message.enable;
     if (message.type === "set_loudness_enable")
@@ -98,6 +187,8 @@ window.WebSocket = class {
         airplay_open: false,
         Service_Normally_Open: true,
         Current_PlayerType: 2,
+        ...this.preferences,
+        ...(mockVersion < 1887 ? { miplay_open: undefined, bluetooth_open: undefined } : {}),
         ...this.light,
         music_info: {
           id: "mock:track-1",

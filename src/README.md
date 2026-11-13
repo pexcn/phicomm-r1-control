@@ -21,6 +21,8 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `components/AtmosphereLightDialog.vue`：按设备版本提供氛围灯效果、亮度、渐变速度和颜色。
 - `components/AutoRestartCard.vue`：设备端每日自动重启配置、保存确认与回读。
 - `components/AdvancedAudioEffects.vue`、`lib/audio-effects.ts`：低音、响度、DSP 和 DAC 分路音量。
+- `components/PlaybackSettingsCard.vue`、`lib/playback-settings.ts`：音箱默认音乐源、引擎、首选音质和实际音频格式；音乐源与网页搜索独立。
+- `components/MiPlayDialog.vue`、`lib/miplay.ts`：当前／远端音箱的声道、同步延迟、队列目标和诊断快照；目标变化后丢弃旧回包。
 
 新增设备能力及 APK 协议依据见 `../docs/device-controls.md`。请求由 `requestDevice` 的会话 ID
 关联；弹层关闭、换机或卸载后不应用旧扫描和配置结果，也不继续跨会话的后续写入。

@@ -4,7 +4,8 @@ import { computed, ref } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
 import AutoRestartCard from "../components/AutoRestartCard.vue";
-import { action, endpoint, flag, formatVersion } from "../lib/protocol";
+import MiPlayDialog from "../components/MiPlayDialog.vue";
+import { action, endpoint, flag, formatVersion, object } from "../lib/protocol";
 import {
   connected,
   connectionLabel,
@@ -18,6 +19,8 @@ import {
 } from "../lib/speaker";
 
 const newName = ref("");
+const miPlayOpen = ref(false);
+const serviceBusy = ref(false);
 const restartingAdbd = ref(false);
 async function rebootAdbd() {
   const session = state.session;
@@ -55,6 +58,19 @@ const tools = [
   { name: "原作者经典版", path: "upstream/", icon: "external" },
 ];
 const serviceOptions = [
+  {
+    label: "MiPlay",
+    key: "miplay_open",
+    type: "Set_MiPlay_Open",
+    description: "接收 MiPlay 音频投放",
+  },
+  {
+    label: "蓝牙后台服务",
+    key: "bluetooth_open",
+    type: "Set_Bluetooth_Open",
+    description: "允许蓝牙服务启动，与蓝牙适配器开关分别控制",
+    minVersion: 1887,
+  },
   { label: "DLNA", key: "dlna_open", type: "Set_DLNA_Open", description: "从局域网设备投放媒体" },
   {
     label: "AirPlay",
@@ -80,12 +96,43 @@ const addressLabel = computed(() => {
 function resource(path: string) {
   return new URL(path, document.baseURI).href;
 }
-function service(event: Event, key: string, type: string) {
+async function service(event: Event, key: string, type: string) {
   const control = event.target as HTMLElement & { selected: boolean };
   const next = control.selected;
   control.selected = flag(state.info[key]);
-  if (send({ type, open: next, type_id: type })) {
-    send({ type: "get_info", type_id: "web-info" });
+  if (serviceBusy.value || state.info[key] === undefined) return;
+  const session = state.session;
+  serviceBusy.value = true;
+  try {
+    await requestDevice({ type, open: next });
+    if (session !== state.session || !connected.value) return;
+    const info = object((await requestDevice({ type: "get_info" })).data);
+    if (session !== state.session) return;
+    notify(
+      info[key] !== undefined && flag(info[key]) === next
+        ? "服务设置已由音箱回读确认。"
+        : "音箱尚未确认服务状态，请刷新后核对。",
+    );
+  } catch (cause) {
+    if (session === state.session) notify((cause as Error).message);
+  } finally {
+    serviceBusy.value = false;
+  }
+}
+function castMode(event: Event) {
+  const control = event.target as HTMLElement & { selected: boolean };
+  const next = control.selected;
+  control.selected = Number(state.info.device_state) === 3;
+  if (
+    !connected.value ||
+    state.info.device_state == null ||
+    ![0, 1, 2, 3, 5].includes(Number(state.info.device_state)) ||
+    (state.version ?? 0) < 1820
+  )
+    return;
+  if (send(action(64, next ? 1 : 2, -1))) {
+    notify("已发送投放连接模式指令，等待设备状态回报。");
+    send({ type: "get_info" });
   }
 }
 function rename() {
@@ -172,11 +219,37 @@ function reboot(serviceOnly: boolean) {
             </div>
             <md-switch
               :aria-label="option.label"
-              :disabled="state.info[option.key] === undefined"
+              :disabled="
+                serviceBusy ||
+                state.info[option.key] === undefined ||
+                (state.version ?? 0) < (option.minVersion ?? 0)
+              "
               :selected="flag(state.info[option.key])"
               @change="service($event, option.key, option.type)"
             />
           </div>
+          <div class="service-row">
+            <div>
+              <strong>投放连接模式</strong>
+              <p class="hint">进入或退出设备的投放连接模式，服务开关另行控制</p>
+            </div>
+            <md-switch
+              id="cast-connection-mode"
+              aria-label="投放连接模式"
+              :selected="Number(state.info.device_state) === 3"
+              :disabled="
+                state.info.device_state == null ||
+                ![0, 1, 2, 3, 5].includes(Number(state.info.device_state)) ||
+                (state.version ?? 0) < 1820
+              "
+              @change="castMode"
+            />
+          </div>
+          <md-outlined-button
+            :disabled="state.info.miplay_open === undefined"
+            @click="miPlayOpen = true"
+            >MiPlay 控制与诊断</md-outlined-button
+          >
           <p class="hint">开关状态以设备回报为准；未上报的服务不可操作。</p>
         </article>
         <div class="device-side">
@@ -224,6 +297,7 @@ function reboot(serviceOnly: boolean) {
         </div>
       </div>
       <AutoRestartCard />
+      <MiPlayDialog :open="miPlayOpen" @close="miPlayOpen = false" />
       <details class="card advanced">
         <summary>高级操作<AppIcon name="down" /></summary>
         <div class="advanced-content">
