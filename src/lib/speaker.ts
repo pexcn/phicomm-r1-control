@@ -14,6 +14,7 @@ import {
   type Message,
 } from "./protocol.ts";
 import { load, save } from "./storage.ts";
+import { editDeviceProfile, readDeviceProfiles, type DeviceDraft } from "./device-profiles.ts";
 
 export type Page = "music" | "screen" | "sound" | "bluetooth" | "device";
 export type Track = {
@@ -34,11 +35,20 @@ export const pages: { id: Page; label: string; icon: string }[] = [
 ];
 
 const savedAddress = load("address", "");
+const savedDevices = load<unknown>("devices", null);
+const devices = readDeviceProfiles(savedDevices, savedAddress);
+const restoredAddress = readDeviceProfiles(null, savedAddress)[0]?.address || "";
+if (!Array.isArray(savedDevices) && devices.length) save("devices", devices);
 const savedApi = load("music-api", "https://r1.wxfsq.com/music");
 export const state = reactive({
   status: "disconnected" as ConnectionStatus,
   session: 0,
-  address: typeof savedAddress === "string" ? savedAddress : "",
+  address: devices.find((device) => device.address === restoredAddress)?.address || "",
+  devices,
+  devicePickerOpen: false,
+  deviceManagerDialog: false,
+  connectionDeviceId: null as string | null,
+  connectionPendingAddress: "",
   musicApi: typeof savedApi === "string" ? savedApi : "https://r1.wxfsq.com/music",
   connectionDialog: false,
   settingsDialog: false,
@@ -103,6 +113,9 @@ export const state = reactive({
 });
 
 export const connected = computed(() => state.status === "connected");
+export const activeDevice = computed(() =>
+  state.devices.find((device) => device.address === state.address),
+);
 export const canEditQueue = computed(
   () => connected.value && state.version !== null && state.version >= 1887,
 );
@@ -211,7 +224,10 @@ const client = new SpeakerClient((event) => {
     if (event.error) state.error = event.error;
     if (event.status === "connected") {
       state.error = "";
-      state.connectionDialog = false;
+      if (state.connectionPendingAddress === state.address) {
+        state.connectionDialog = false;
+        state.connectionPendingAddress = "";
+      }
       save("address", state.address);
       save("auto-connect", true);
     }
@@ -222,6 +238,9 @@ const client = new SpeakerClient((event) => {
 export function connect(address: string): boolean {
   try {
     const url = endpoint(address);
+    if (!state.devices.some((device) => device.address === url.href))
+      saveDevice({ name: "", address: url.href });
+    stopScreen();
     state.address = url.href;
     state.error = "";
     client.connect(url.href);
@@ -230,6 +249,61 @@ export function connect(address: string): boolean {
     state.error = (error as Error).message;
     return false;
   }
+}
+
+export function openConnectionDialog(id?: string): void {
+  state.connectionDeviceId = id || null;
+  state.connectionPendingAddress = "";
+  state.error = "";
+  state.connectionDialog = true;
+}
+
+export function saveDevice(draft: DeviceDraft) {
+  const device = editDeviceProfile(
+    state.devices,
+    draft,
+    crypto.randomUUID?.() || `device-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
+  const index = state.devices.findIndex((item) => item.id === device.id);
+  if (index < 0) state.devices.push(device);
+  else state.devices[index] = device;
+  if (!save("devices", state.devices)) notify("浏览器无法保存设备，本次会话仍可使用。");
+  else notify("音箱已保存到此浏览器。");
+  return device;
+}
+
+export function connectDevice(id: string): boolean {
+  const device = state.devices.find((item) => item.id === id);
+  if (!device) return false;
+  if (state.address === device.address && state.status !== "disconnected") return true;
+  return connect(device.address);
+}
+
+export function forgetDevice(id: string): void {
+  const device = state.devices.find((item) => item.id === id);
+  if (!device) return;
+  const current = device.address === state.address;
+  const session = state.session;
+  if (
+    !confirm(
+      `从此浏览器移除“${device.name || device.reportedName || "音箱"}”？${current && state.status !== "disconnected" ? "当前控制连接会断开，音箱播放不会停止。" : "不会修改音箱本身。"}`,
+    )
+  )
+    return;
+  if (
+    session !== state.session ||
+    !state.devices.some((item) => item.id === id && item.address === device.address)
+  )
+    return;
+  if (current) {
+    disconnect();
+    state.address = "";
+  }
+  state.devices = state.devices.filter((item) => item.id !== id);
+  if (readDeviceProfiles(null, load("address", ""))[0]?.address === device.address)
+    save("address", "");
+  if (!save("devices", state.devices))
+    notify("浏览器无法保存移除结果，重新打开后该设备可能仍会出现。");
 }
 
 export function disconnect(): void {
@@ -330,6 +404,12 @@ function receive(message: Message): void {
   switch (message.type) {
     case "get_info": {
       state.info = { ...state.info, ...payload };
+      const reportedName =
+        typeof payload.device_name === "string" ? payload.device_name.slice(0, 80) : "";
+      if (reportedName && activeDevice.value && activeDevice.value.reportedName !== reportedName) {
+        activeDevice.value.reportedName = reportedName;
+        save("devices", state.devices);
+      }
       if (numeric(payload.ver) >= 1000) state.version = numeric(payload.ver);
       const song = object(payload.music_info);
       const nextId = payload.music_info === undefined ? state.music.id : String(song.id ?? "");

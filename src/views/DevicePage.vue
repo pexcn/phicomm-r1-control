@@ -8,10 +8,12 @@ import MiPlayDialog from "../components/MiPlayDialog.vue";
 import { action, endpoint, flag, formatVersion, object } from "../lib/protocol";
 import {
   connected,
+  activeDevice,
   connectionLabel,
   deviceName,
   disconnect,
   notify,
+  openConnectionDialog,
   requestDevice,
   refresh,
   send,
@@ -179,7 +181,7 @@ function reboot(serviceOnly: boolean) {
         </div>
         <span class="status-badge"><span class="status-dot"></span>{{ connectionLabel }}</span>
         <div class="hero-actions">
-          <md-filled-tonal-button @click="state.connectionDialog = true"
+          <md-filled-tonal-button @click="state.devicePickerOpen = true"
             ><AppIcon slot="icon" name="link" :size="18" />切换连接</md-filled-tonal-button
           ><md-outlined-button @click="disconnect"
             ><AppIcon slot="icon" name="unlink" :size="18" />断开连接</md-outlined-button
@@ -256,7 +258,9 @@ function reboot(serviceOnly: boolean) {
           <article class="card">
             <div class="section-heading">
               <h2>连接信息</h2>
-              <md-text-button @click="state.connectionDialog = true">编辑连接</md-text-button>
+              <md-text-button @click="openConnectionDialog(activeDevice?.id)"
+                >编辑连接</md-text-button
+              >
             </div>
             <dl class="data-list">
               <div>

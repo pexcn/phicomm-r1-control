@@ -7,6 +7,9 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `lib/client.ts`：WebSocket 生命周期、轮询、重连和旧连接消息隔离。
 - `lib/protocol.ts`：协议数据与地址校验。
 - `lib/speaker.ts`：设备状态和操作；不实现音乐账号登录。
+- `lib/device-profiles.ts`：已保存设备的迁移、校验、地址去重与本地别名。
+- `components/DeviceSwitcher.vue`：桌面锚定菜单、手机底部面板及真实连接标记。
+- `components/DeviceManagerDialog.vue`、`ConnectionDialog.vue`：设备记录的添加、编辑和移除。
 - `lib/theme.ts`：三态明暗模式、独立配色偏好、系统跟踪与浏览器存储。
 - `lib/color-schemes.ts`：内置配色列表，每项提供稳定 ID、名称和完整的深浅颜色角色。
 - `lib/custom-color.ts`：自定义主色校验与 Material Tonal Spot 深浅颜色生成。

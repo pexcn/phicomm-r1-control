@@ -3,6 +3,8 @@ import MaterialState from "./components/MaterialState.vue";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import AppIcon from "./components/AppIcon.vue";
 import ConnectionDialog from "./components/ConnectionDialog.vue";
+import DeviceSwitcher from "./components/DeviceSwitcher.vue";
+import DeviceManagerDialog from "./components/DeviceManagerDialog.vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
 import MusicPage from "./views/MusicPage.vue";
@@ -13,8 +15,8 @@ import DevicePage from "./views/DevicePage.vue";
 import { applyPwaUpdate, pwa } from "./lib/pwa";
 import {
   connected,
-  connectionLabel,
-  deviceName,
+  activeDevice,
+  openConnectionDialog,
   dispose,
   pages,
   readPanel,
@@ -79,16 +81,9 @@ onBeforeUnmount(() => {
         Control</a
       >
       <div class="topbar-actions">
-        <button
-          class="connection-chip"
-          :class="{ online: connected }"
-          @click="state.connectionDialog = true"
-          aria-label="选择或连接音箱"
-        >
-          <MaterialState /> <span class="status-dot"></span
-          ><span class="connection-label">{{ connected ? deviceName : connectionLabel }}</span
-          ><AppIcon name="down" :size="16" /></button
-        ><ThemeToggle /><md-icon-button @click="state.settingsDialog = true" aria-label="打开设置"
+        <DeviceSwitcher /><ThemeToggle /><md-icon-button
+          @click="state.settingsDialog = true"
+          aria-label="打开设置"
           ><AppIcon name="settings"
         /></md-icon-button>
       </div>
@@ -104,7 +99,7 @@ onBeforeUnmount(() => {
         class="notice error error-banner"
       >
         <AppIcon name="info" /><span>{{ state.error }}</span
-        ><md-text-button @click="state.connectionDialog = true">检查连接</md-text-button>
+        ><md-text-button @click="openConnectionDialog(activeDevice?.id)">检查连接</md-text-button>
       </div>
       <MusicPage v-if="page === 'music'" />
       <ScreenPage v-else-if="page === 'screen'" />
@@ -122,7 +117,7 @@ onBeforeUnmount(() => {
       ><MaterialState /><span><AppIcon :name="item.icon" /></span>{{ item.label }}</a
     >
   </nav>
-  <ConnectionDialog /><SettingsDialog />
+  <ConnectionDialog /><DeviceManagerDialog /><SettingsDialog />
   <div v-if="state.toast" class="snackbar" role="status">
     {{ state.toast
     }}<button @click="state.toast = ''" aria-label="关闭提示">

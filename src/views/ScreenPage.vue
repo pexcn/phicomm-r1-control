@@ -35,7 +35,14 @@ function visibility() {
   if (document.hidden) stopScreen();
 }
 function keyboard(event: KeyboardEvent) {
-  if (!connected.value || state.connectionDialog || state.settingsDialog) return;
+  if (
+    !connected.value ||
+    state.connectionDialog ||
+    state.settingsDialog ||
+    state.devicePickerOpen ||
+    state.deviceManagerDialog
+  )
+    return;
   if (
     event
       .composedPath()
@@ -89,7 +96,14 @@ function imageLoaded() {
   }
 }
 function down(event: PointerEvent) {
-  if (!connected.value || !image.value || !event.isPrimary) return;
+  if (
+    !connected.value ||
+    !image.value ||
+    !event.isPrimary ||
+    state.devicePickerOpen ||
+    state.deviceManagerDialog
+  )
+    return;
   const p = point(event);
   gesture = { ...p, time: Date.now(), session: state.session, pointer: event.pointerId };
   image.value.setPointerCapture(event.pointerId);

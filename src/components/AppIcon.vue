@@ -41,6 +41,7 @@ import info from "@material-symbols/svg-400/outlined/info.svg?raw";
 import power from "@material-symbols/svg-400/outlined/power_settings_new.svg?raw";
 import trash from "@material-symbols/svg-400/outlined/delete.svg?raw";
 import check from "@material-symbols/svg-400/outlined/check.svg?raw";
+import edit from "@material-symbols/svg-400/outlined/edit.svg?raw";
 import phone from "@material-symbols/svg-400/outlined/mobile_2.svg?raw";
 import download from "@material-symbols/svg-400/outlined/download.svg?raw";
 
@@ -90,6 +91,7 @@ const icons: Record<string, string> = Object.fromEntries(
     power,
     trash,
     check,
+    edit,
     phone,
     download,
   }).map(([name, svg]) => [name, svg.replace(/<svg\b[^>]*>/, "").replace(/<\/svg>\s*$/, "")]),

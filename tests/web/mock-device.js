@@ -44,7 +44,7 @@ window.WebSocket = class {
     this.url = url;
     mockSockets.push(this);
     setTimeout(() => {
-      if (this.readyState !== 0) return;
+      if (this.readyState !== 0 || window.mockHoldConnect) return;
       this.readyState = 1;
       this.onopen?.();
     }, 0);
