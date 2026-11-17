@@ -887,6 +887,19 @@ class NewWebTests(unittest.TestCase):
         self.page.get_by_role('dialog', name='编辑音箱', exact=True).wait_for()
         self.assertEqual(self.page.get_by_label('音箱地址', exact=True).input_value(),'ws://192.0.2.20:8080/')
 
+    def test_device_profile_retry_reuses_the_newly_saved_record(self):
+        self.start()
+        self.page.evaluate('window.mockHoldConnect=true')
+        self.add_saved_device(connect=True)
+        self.page.wait_for_function('mockSockets.length===2')
+        saved = self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:devices'))")
+        self.page.locator('#connection-dialog').get_by_role('button', name='取消连接', exact=True).click()
+        self.page.evaluate('window.mockHoldConnect=false')
+        self.page.locator('#connection-dialog').get_by_role('button', name='连接', exact=True).click()
+        self.page.wait_for_function('mockSockets.length===3 && mockSockets.at(-1).readyState===1')
+        self.assertEqual(self.page.locator('.connection-label').inner_text(),'卧室音箱')
+        self.assertEqual(self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:devices')).map(d=>d.id)"), [device['id'] for device in saved])
+
     def test_pwa_install_action_uses_browser_prompt(self):
         self.page.goto(self.base)
         self.page.evaluate('''() => {

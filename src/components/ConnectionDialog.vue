@@ -18,9 +18,7 @@ const validationError = ref("");
 const profile = computed(() =>
   state.devices.find((device) => device.id === state.connectionDeviceId),
 );
-const title = computed(() =>
-  profile.value ? "编辑音箱" : state.devices.length ? "添加音箱" : "连接音箱",
-);
+const title = ref("连接音箱");
 const error = computed(() => validationError.value || state.error);
 const busy = computed(
   () =>
@@ -42,6 +40,7 @@ watch(
   () => state.connectionDialog,
   (open) => {
     if (open) {
+      title.value = profile.value ? "编辑音箱" : state.devices.length ? "添加音箱" : "连接音箱";
       address.value = profile.value?.address || "";
       name.value = profile.value?.name || "";
       validationError.value = "";
@@ -53,6 +52,7 @@ function submit(connectAfter = true) {
   validationError.value = "";
   try {
     const device = saveDevice({ id: profile.value?.id, name: name.value, address: address.value });
+    state.connectionDeviceId = device.id;
     if (!connectAfter) {
       state.connectionDialog = false;
       return;
