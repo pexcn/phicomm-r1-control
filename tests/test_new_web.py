@@ -713,7 +713,7 @@ class NewWebTests(unittest.TestCase):
     def test_published_routes_only_keep_new_web_and_upstream(self):
         self.page.goto(self.base)
         self.page.locator('.sidebar').get_by_role('link', name='原作者版本', exact=True).wait_for()
-        for retired in ['legacy.html', 'pages', 'assets', 'site.webmanifest', 'service-worker.js']:
+        for retired in ['legacy.html', 'pages', 'assets']:
             with self.subTest(path=retired):
                 self.assertFalse((ROOT / 'dist' / retired).exists())
                 response = self.context.request.get(self.base + retired)
@@ -744,6 +744,19 @@ class NewWebTests(unittest.TestCase):
           element.value = args.value;
           element.dispatchEvent(new Event(args.event, {bubbles: true}));
         }''', {'value': value, 'event': event})
+
+    def test_pwa_install_action_uses_browser_prompt(self):
+        self.page.goto(self.base)
+        self.page.evaluate('''() => {
+          const event = new Event('beforeinstallprompt', {cancelable:true});
+          event.prompt = async () => { window.installRequested = true; };
+          event.userChoice = Promise.resolve({outcome:'accepted'});
+          window.dispatchEvent(event);
+        }''')
+        self.page.get_by_role('button', name='打开设置', exact=True).click()
+        self.page.get_by_role('button', name='安装应用', exact=True).click()
+        self.assertTrue(self.page.evaluate('window.installRequested'))
+        self.page.get_by_text('已接受安装，请按浏览器提示完成。', exact=True).wait_for()
 
     def test_device_music_source_and_quality_use_device_readback(self):
         self.start(1887)

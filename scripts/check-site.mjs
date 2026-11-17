@@ -82,6 +82,9 @@ try {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   for (const icon of manifest.icons) checkReference(icon.src, manifestPath);
   checkReference(manifest.start_url, manifestPath);
+  const appManifestPath = path.join(root, "public/site.webmanifest");
+  const appManifest = JSON.parse(readFileSync(appManifestPath, "utf8"));
+  for (const icon of appManifest.icons) checkReference(icon.src, appManifestPath);
   for (const directory of ["newui", "config_wifi", "adb"])
     assert.ok(statSync(path.join(upstream, directory, "index.html")).isFile());
   assert.deepEqual(missing, [], `Missing local resources:\n${missing.join("\n")}`);

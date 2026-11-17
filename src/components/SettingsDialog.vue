@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import MaterialState from "./MaterialState.vue";
+import PwaSettings from "./PwaSettings.vue";
 import { computed, watch, ref } from "vue";
 import { musicApi, state } from "../lib/speaker";
 import { save } from "../lib/storage";
@@ -186,6 +187,7 @@ function saveApi() {
         用于匿名搜歌、封面和歌词。可更换为兼容原作者 /music
         协议且允许跨域的服务；播放控制不依赖此接口。不提供音乐账号登录。
       </p>
+      <PwaSettings />
       <p class="hint">设备地址、外观偏好与 EQ 仅保存在本浏览器。</p>
     </div>
     <div slot="actions">

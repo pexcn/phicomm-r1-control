@@ -22,6 +22,7 @@ import App from "./App.vue";
 import "./styles.css";
 import "./scrollbars.css";
 import scrollbarStyles from "./scrollbars.css?inline";
+import { initPwa } from "./lib/pwa";
 
 // Share the same scrollbar rules with Material's scrolling shadow roots.
 const scrollbarSheet = new CSSStyleSheet();
@@ -30,4 +31,5 @@ for (const component of [MdDialog, MdMenu, MdOutlinedTextField]) {
   component.elementStyles = [...component.elementStyles, scrollbarSheet];
 }
 
+void initPwa();
 createApp(App).mount("#app");

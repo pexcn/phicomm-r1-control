@@ -10,6 +10,7 @@ import ScreenPage from "./views/ScreenPage.vue";
 import SoundPage from "./views/SoundPage.vue";
 import BluetoothPage from "./views/BluetoothPage.vue";
 import DevicePage from "./views/DevicePage.vue";
+import { applyPwaUpdate, pwa } from "./lib/pwa";
 import {
   connected,
   connectionLabel,
@@ -93,6 +94,10 @@ onBeforeUnmount(() => {
       </div>
     </header>
     <main id="main-content" tabindex="-1">
+      <div v-if="pwa.updateAvailable" class="notice pwa-update" role="status">
+        <span>新版本已准备好，可在完成当前操作后更新。</span>
+        <md-text-button @click="applyPwaUpdate">更新并重新加载</md-text-button>
+      </div>
       <div
         v-if="state.error && !state.connectionDialog"
         role="alert"
@@ -126,3 +131,14 @@ onBeforeUnmount(() => {
     </button>
   </div>
 </template>
+
+<style scoped>
+.pwa-update {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 16px clamp(16px, 3vw, 40px) 0;
+}
+</style>

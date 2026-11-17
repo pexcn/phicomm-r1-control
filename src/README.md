@@ -23,6 +23,12 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `components/AdvancedAudioEffects.vue`、`lib/audio-effects.ts`：低音、响度、DSP 和 DAC 分路音量。
 - `components/PlaybackSettingsCard.vue`、`lib/playback-settings.ts`：音箱默认音乐源、引擎、首选音质和实际音频格式；音乐源与网页搜索独立。
 - `components/MiPlayDialog.vue`、`lib/miplay.ts`：当前／远端音箱的声道、同步延迟、队列目标和诊断快照；目标变化后丢弃旧回包。
+- `lib/pwa.ts`、`components/PwaSettings.vue`：浏览器安装事件、离线就绪状态与手动更新。
+
+PWA 清单和图标在 `public/`。`scripts/build-pwa.mjs` 在正式构建后根据界面资源内容
+生成带版本号的 Service Worker；缓存策略模板在 `scripts/service-worker.js`。
+只缓存独立新版的静态界面，不缓存设备、音乐接口或原作者版。安装、缓存和更新说明见
+[`docs/pwa.md`](../docs/pwa.md)；修改策略后运行真实 Service Worker 的浏览器回归。
 
 新增设备能力及 APK 协议依据见 `../docs/device-controls.md`。请求由 `requestDevice` 的会话 ID
 关联；弹层关闭、换机或卸载后不应用旧扫描和配置结果，也不继续跨会话的后续写入。
