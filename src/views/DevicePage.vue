@@ -195,13 +195,11 @@ function reboot(serviceOnly: boolean) {
         <article class="card stat">
           <span>EchoService</span><strong>{{ formatVersion(state.version) }}</strong>
         </article>
-        <article class="card stat">
-          <span>CPU</span
-          ><strong
-            >{{ state.system.cpu === null ? "—" : state.system.cpu + "%"
-            }}<small v-if="state.system.temperature">
-              · {{ state.system.temperature }}</small
-            ></strong
+        <article class="card stat cpu-stat">
+          <span>CPU 使用率</span>
+          <strong>{{ state.system.cpu === null ? "—" : state.system.cpu.toFixed(1) + "%" }}</strong>
+          <small v-if="state.system.temperature" class="cpu-temperature"
+            >温度 {{ state.system.temperature }}</small
           >
         </article>
         <article class="card stat">

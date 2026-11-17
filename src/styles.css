@@ -1025,13 +1025,17 @@ body:has(.cover-viewer[open]) {
 .stat strong {
   display: block;
   margin-top: 12px;
-  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
   font: var(--type-headline-small);
+  font-variant-numeric: tabular-nums;
 }
 .stat small {
   color: var(--muted);
   font: var(--type-body-medium);
+}
+.cpu-temperature {
+  display: block;
+  margin-top: 8px;
 }
 .device-grid {
   display: grid;
@@ -1661,6 +1665,7 @@ body:has(.cover-viewer[open]) {
   .stat strong {
     margin-top: 8px;
     font: var(--type-headline-small);
+    font-variant-numeric: tabular-nums;
   }
   .stat small {
     font: var(--type-body-medium);
