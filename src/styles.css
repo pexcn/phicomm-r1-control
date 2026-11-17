@@ -5,6 +5,10 @@
 *::after {
   box-sizing: border-box;
 }
+html {
+  /* Preserve native scrolling while excluding pinch and double-tap page zoom. */
+  touch-action: pan-x pan-y;
+}
 body {
   margin: 0;
   background: var(--bg, #f4f7f5);
