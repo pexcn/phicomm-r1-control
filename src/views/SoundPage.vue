@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AppSlider from "../components/AppSlider.vue";
+import { sliderPercent, sliderDecibels } from "../lib/slider-values";
 import { computed, onBeforeUnmount, ref } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -93,8 +95,9 @@ onBeforeUnmount(() => clearTimeout(timer));
           <p class="hint">设备音量 {{ state.music.volume }} / {{ state.music.maxVolume }}</p>
         </div>
         <div class="volume-row">
-          <AppIcon name="volume" /><md-slider
+          <AppIcon name="volume" /><AppSlider
             aria-label="播放音量"
+            :format-value="(value) => sliderPercent(value, state.music.maxVolume)"
             :min="0"
             :max="state.music.maxVolume"
             :value="state.music.volume"
@@ -139,8 +142,10 @@ onBeforeUnmount(() => clearTimeout(timer));
                     ? (band.frequency / 1000000).toFixed(1) + " kHz"
                     : Math.round(band.frequency / 1000) + " Hz"
                 }}</label
-                ><md-slider
+                ><AppSlider
                   :id="`eq-band-${band.id}`"
+                  variant="compact"
+                  :format-value="(value) => sliderDecibels(value / 100)"
                   :aria-label="`EQ 频段 ${band.id}`"
                   :min="state.eq.min"
                   :max="state.eq.max"

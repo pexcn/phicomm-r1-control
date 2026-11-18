@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AppSlider from "./AppSlider.vue";
+import { sliderPercent, sliderDecibels } from "../lib/slider-values";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { action, flag, object, type Data, type Message } from "../lib/protocol";
 import {
@@ -174,8 +176,14 @@ onBeforeUnmount(() => {
           {{ (effect.value / effect.divisor).toFixed(effect.id === "loudness" ? 1 : 0) }}
           {{ effect.unit }}</label
         >
-        <md-slider
+        <AppSlider
           :aria-label="effect.valueLabel"
+          :format-value="
+            (value) =>
+              effect.id === 'loudness'
+                ? sliderDecibels(value / effect.divisor)
+                : sliderPercent(value / effect.divisor)
+          "
           :min="effect.min"
           :max="effect.max"
           :step="effect.step"
@@ -224,8 +232,10 @@ onBeforeUnmount(() => {
           >{{ channel.label }} ·
           {{ mixerAvailable(channel.id) ? `${mixerValue(channel.id) - 231} dB` : "未上报" }}</label
         >
-        <md-slider
+        <AppSlider
           :aria-label="channel.label"
+          variant="compact"
+          :format-value="(value) => sliderDecibels(value - 231)"
           :min="211"
           :max="251"
           :step="1"

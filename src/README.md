@@ -17,6 +17,8 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `material.css`：M3 字体层级、形状与交互动效。
 - `styles.css`：页面布局和响应式适配。
 - `scrollbars.css`：全局细滚动条；`main.ts` 将同一份样式复用到 Material 弹窗、菜单和文本框内部。
+- `components/AppSlider.vue`、`slider.css`：共享竖条手柄、轨道间隙和交互数值气泡。
+- `lib/slider-values.ts`：百分比、分贝格式及跨 Shadow DOM 的气泡可见区域计算。
 - `components/MaterialState.vue`：复合控件的 Material Web 涟漪与键盘焦点状态。
 - `components/TurntablePlayer.vue`：黑胶旋转、暂停停靠、封面大图与键盘关闭。
 - `lib/turntable.ts`：以固定支点计算唱针圆弧，让针尖随进度从黑胶外圈向内圈移动。
@@ -44,6 +46,14 @@ PWA 清单和图标在 `public/`。`scripts/build-pwa.mjs` 在正式构建后根
 Roboto 400/500/700 字重本地打包，中文使用系统字体回退；图标使用官方 Material Symbols。
 常规操作使用 Material Web 组件；导航、队列和遥控等复合控件复用其状态层，
 避免自行覆盖组件内部的悬停、按下和禁用颜色。减少动态效果偏好会关闭形状过渡和主题扩散。
+
+滑块保留 Material Web 的原生范围输入、触屏和键盘操作，只在原有 `change` 时提交设备值。
+常规控制使用标准轨道，EQ／DAC 使用紧凑轨道，播放进度使用更细轨道并保留两侧时间。
+按住或键盘调节时显示气泡，释放或失焦后隐藏；拖动期间不使用轮询值覆盖草稿。
+音量按设备最大音量换算百分比，氛围灯亮度本身就是百分比（最高 200%），
+播放进度显示时间，EQ／响度／DAC 显示带符号的分贝；渐变速度保留设备数值。
+`main.ts` 将 `slider.css` 追加到滑块 Shadow DOM；其中轨道和气泡选择器依赖
+Material Web 内部结构，升级依赖时须验证鼠标、触屏、键盘、禁用态和弹窗边缘的气泡位置。
 
 主题切换参照 VoHive：跟随系统 → 浅色 → 深色 → 跟随系统，默认跟随系统。
 工具栏与设置复用同一个主题状态；实际明暗或配色发生变化时才播放 650ms 扩散，

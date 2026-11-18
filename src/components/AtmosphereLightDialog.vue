@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AppSlider from "./AppSlider.vue";
+import { sliderPercent } from "../lib/slider-values";
 import { computed, ref, watch } from "vue";
 import { action, flag, numeric } from "../lib/protocol";
 import { connected, send, state } from "../lib/speaker";
@@ -104,8 +106,9 @@ function applyColor() {
       </md-outlined-select>
       <div>
         <label>亮度 · {{ numeric(state.info.music_light_luma, 100) }}%</label
-        ><md-slider
+        ><AppSlider
           aria-label="氛围灯亮度"
+          :format-value="sliderPercent"
           :min="1"
           :max="200"
           :step="1"
@@ -116,7 +119,7 @@ function applyColor() {
       </div>
       <div v-if="[0, 1, 3].includes(mode)">
         <label>颜色渐变速度 · {{ numeric(state.info.music_light_chroma, 4) }}</label
-        ><md-slider
+        ><AppSlider
           aria-label="氛围灯渐变速度"
           :min="0"
           :max="100"

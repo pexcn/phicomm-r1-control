@@ -1,0 +1,115 @@
+/* Applied inside MdSlider's shadow root; keep native inputs and semantics. */
+:host(.app-slider) {
+  position: relative;
+  z-index: 0;
+  --md-slider-active-track-height: 16px;
+  --md-slider-inactive-track-height: 16px;
+  --md-slider-handle-width: 4px;
+  --md-slider-handle-height: 44px;
+  --md-slider-handle-shape: 2px;
+  --md-slider-handle-elevation: 0;
+  --md-slider-state-layer-size: 48px;
+  --md-slider-hover-state-layer-opacity: 0;
+  --md-slider-pressed-state-layer-opacity: 0;
+  --md-slider-label-container-height: 32px;
+  --md-slider-label-text-size: 14px;
+  --md-slider-label-text-line-height: 20px;
+  --app-slider-gap: 6px;
+  --app-slider-label-shift: 0px;
+}
+:host(.slider-compact) {
+  --md-slider-active-track-height: 8px;
+  --md-slider-inactive-track-height: 8px;
+  --md-slider-handle-height: 32px;
+}
+:host(.slider-progress) {
+  --md-slider-active-track-height: 6px;
+  --md-slider-inactive-track-height: 6px;
+  --md-slider-handle-height: 28px;
+  --app-slider-gap: 5px;
+}
+:host(.app-slider) .track::before,
+:host(.app-slider) .track::after {
+  inset-inline: 24px;
+}
+:host(.app-slider) .track::before {
+  clip-path: inset(0 0 0 calc(100% * var(--_end-fraction) + var(--app-slider-gap)));
+}
+:host(.app-slider) .track::after {
+  clip-path: inset(0 calc(100% * (1 - var(--_end-fraction)) + var(--app-slider-gap)) 0 0);
+}
+:host(.app-slider) .track:dir(rtl)::before {
+  clip-path: inset(0 calc(100% * var(--_end-fraction) + var(--app-slider-gap)) 0 0);
+}
+:host(.app-slider) .track:dir(rtl)::after {
+  clip-path: inset(0 0 0 calc(100% * (1 - var(--_end-fraction)) + var(--app-slider-gap)));
+}
+:host(.app-slider) .container::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  inline-size: 4px;
+  block-size: 4px;
+  inset-inline-end: 30px;
+  border-radius: 50%;
+  background: var(--md-sys-color-on-secondary-container);
+  opacity: clamp(0, (0.97 - var(--_end-fraction)) * 100, 1);
+}
+:host(.app-slider[disabled]) .container::after {
+  background: var(--md-sys-color-on-surface);
+}
+:host(.app-slider) .handleNub {
+  transition:
+    width 120ms,
+    background-color 120ms;
+}
+/* Keep native hit geometry aligned with the visual handle's 24px end inset. */
+:host(.app-slider) input.end::-webkit-slider-thumb {
+  inline-size: 48px;
+  block-size: 48px;
+  transform: none;
+}
+:host(.app-slider[data-active]) .handleNub {
+  width: 2px;
+}
+:host(.app-slider) md-focus-ring {
+  width: 16px;
+  height: calc(var(--_handle-height) + 12px);
+  --md-focus-ring-shape: 8px;
+}
+:host(.app-slider) .label {
+  padding: 6px 10px;
+  white-space: nowrap;
+  margin-block-end: 12px;
+  font-variant-numeric: tabular-nums;
+  transform: translateX(var(--app-slider-label-shift)) scale(0);
+}
+:host(.app-slider[data-active]) {
+  z-index: 1;
+}
+:host(.app-slider[data-active]) .label {
+  transform: translateX(var(--app-slider-label-shift)) scale(1);
+}
+:host(.app-slider) .label::before {
+  width: 8px;
+  height: 8px;
+  bottom: -3px;
+  left: calc(50% - 4px - var(--app-slider-label-shift));
+}
+:host(.app-slider[data-below]) .label {
+  inset-block-end: auto;
+  inset-block-start: 100%;
+  margin-block-start: 12px;
+  margin-block-end: 0;
+  transform-origin: center top;
+}
+:host(.app-slider[data-below]) .label::before {
+  bottom: auto;
+  top: -3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  :host(.app-slider) .handleNub,
+  :host(.app-slider) .label {
+    transition: none;
+  }
+}

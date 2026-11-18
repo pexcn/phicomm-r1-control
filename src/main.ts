@@ -16,7 +16,7 @@ import { MdDialog } from "@material/web/dialog/dialog.js";
 import { MdMenu } from "@material/web/menu/menu.js";
 import "@material/web/menu/menu-item.js";
 import "@material/web/switch/switch.js";
-import "@material/web/slider/slider.js";
+import { MdSlider } from "@material/web/slider/slider.js";
 import { MdOutlinedTextField } from "@material/web/textfield/outlined-text-field.js";
 import "@material/web/progress/circular-progress.js";
 import App from "./App.vue";
@@ -24,6 +24,7 @@ import "./styles.css";
 import "./scrollbars.css";
 import scrollbarStyles from "./scrollbars.css?inline";
 import { initPwa } from "./lib/pwa";
+import sliderStyles from "./slider.css?inline";
 
 // Share the same scrollbar rules with Material's scrolling shadow roots.
 const scrollbarSheet = new CSSStyleSheet();
@@ -31,6 +32,9 @@ scrollbarSheet.replaceSync(scrollbarStyles);
 for (const component of [MdDialog, MdMenu, MdOutlinedTextField]) {
   component.elementStyles = [...component.elementStyles, scrollbarSheet];
 }
+const sliderSheet = new CSSStyleSheet();
+sliderSheet.replaceSync(sliderStyles);
+MdSlider.elementStyles = [...MdSlider.elementStyles, sliderSheet];
 
 void initPwa();
 createApp(App).mount("#app");

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AppSlider from "../components/AppSlider.vue";
+import { sliderPercent } from "../lib/slider-values";
 import MaterialState from "../components/MaterialState.vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
@@ -214,8 +216,10 @@ function setTimer() {
           </div>
           <div class="seek-row">
             <span>{{ formatTime(state.music.position) }}</span
-            ><md-slider
+            ><AppSlider
               id="music-progress"
+              variant="progress"
+              :format-value="formatTime"
               aria-label="播放进度"
               :min="0"
               :max="Math.max(1, state.music.duration)"
@@ -249,8 +253,9 @@ function setTimer() {
           </div>
           <div class="volume-row">
             <AppIcon name="volume" /><label>音量</label
-            ><md-slider
+            ><AppSlider
               id="music-volume"
+              :format-value="(value) => sliderPercent(value, state.music.maxVolume)"
               aria-label="音量"
               :min="0"
               :max="state.music.maxVolume"
