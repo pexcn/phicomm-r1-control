@@ -803,6 +803,25 @@ class NewWebTests(unittest.TestCase):
         self.page.get_by_role('button', name='完成', exact=True).wait_for()
         self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'), 320)
 
+    def test_material_mobile_identity_touch_targets_and_modal_layers(self):
+        self.page.set_viewport_size({'width':320,'height':844})
+        self.start(1887)
+        self.page.get_by_role('button',name='关闭提示',exact=True).click()
+        self.page.locator('.bottom-nav a[href="#/device"]').click()
+        identity = self.page.locator('.device-identity')
+        self.assertGreaterEqual(identity.bounding_box()['width'],140)
+        self.assertLessEqual(identity.locator('h2').bounding_box()['height'],33)
+        self.assertGreaterEqual(self.page.locator('.page-footnote button').bounding_box()['height'],48)
+        self.page.locator('.bottom-nav a[href="#/music"]').click()
+        self.page.locator('.quick-card').filter(has_text='氛围灯').click()
+        dialog = self.page.locator('#atmosphere-light-dialog')
+        self.page.wait_for_function("document.querySelector('#atmosphere-light-dialog').open")
+        self.assertTrue(dialog.evaluate('el=>el.parentElement===document.body'))
+        self.assertTrue(dialog.evaluate('el=>Number(getComputedStyle(el.shadowRoot.querySelector(".scrim")).zIndex)>Number(getComputedStyle(document.querySelector(".topbar")).zIndex)'))
+        self.assertGreaterEqual(self.page.locator('.topbar').evaluate('el=>Number(getComputedStyle(el).zIndex)'),10)
+        self.assertNotIn('user-scalable=no',self.page.locator('meta[name="viewport"]').get_attribute('content'))
+        self.assertEqual(self.page.evaluate('getComputedStyle(document.documentElement).touchAction'),'auto')
+
     def test_eq_preset_uses_device_band_ids_and_scoped_browser_storage(self):
         self.start()
         self.page.locator('.sidebar a[href="#/sound"]').click()

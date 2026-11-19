@@ -25,6 +25,7 @@ import "./scrollbars.css";
 import scrollbarStyles from "./scrollbars.css?inline";
 import { initPwa } from "./lib/pwa";
 import sliderStyles from "./slider.css?inline";
+import dialogStyles from "./dialog.css?inline";
 
 // Share the same scrollbar rules with Material's scrolling shadow roots.
 const scrollbarSheet = new CSSStyleSheet();
@@ -35,6 +36,10 @@ for (const component of [MdDialog, MdMenu, MdOutlinedTextField]) {
 const sliderSheet = new CSSStyleSheet();
 sliderSheet.replaceSync(sliderStyles);
 MdSlider.elementStyles = [...MdSlider.elementStyles, sliderSheet];
+
+const dialogSheet = new CSSStyleSheet();
+dialogSheet.replaceSync(dialogStyles);
+MdDialog.elementStyles = [...MdDialog.elementStyles, dialogSheet];
 
 void initPwa();
 createApp(App).mount("#app");

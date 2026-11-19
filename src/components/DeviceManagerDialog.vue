@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "./AppDialog.vue";
 import { profileAddress, profileName } from "../lib/device-profiles";
 import { activeDevice, connected, forgetDevice, openConnectionDialog, state } from "../lib/speaker";
 import AppIcon from "./AppIcon.vue";
@@ -17,7 +18,7 @@ function closed() {
 </script>
 
 <template>
-  <md-dialog
+  <AppDialog
     id="device-manager-dialog"
     :open="state.deviceManagerDialog"
     @closed="closed"
@@ -53,11 +54,11 @@ function closed() {
         ><AppIcon slot="icon" name="plus" :size="18" />添加音箱</md-filled-tonal-button
       >
     </div>
-  </md-dialog>
+  </AppDialog>
 </template>
 
 <style scoped>
-#device-manager-dialog {
+:global(#device-manager-dialog) {
   min-width: min(560px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
   max-height: calc(100dvh - 24px);

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "./AppDialog.vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { connected, notify, requestDevice, send, state } from "../lib/speaker";
 import {
@@ -80,7 +81,7 @@ function play(value: string) {
 </script>
 
 <template>
-  <md-dialog
+  <AppDialog
     id="local-music-dialog"
     :open="open"
     @closed="emit('close')"
@@ -136,11 +137,11 @@ function play(value: string) {
       </ul>
     </div>
     <div slot="actions"><md-text-button @click="emit('close')">关闭</md-text-button></div>
-  </md-dialog>
+  </AppDialog>
 </template>
 
 <style scoped>
-.local-music-dialog {
+:global(.local-music-dialog) {
   width: min(680px, calc(100vw - 24px));
 }
 .local-actions {

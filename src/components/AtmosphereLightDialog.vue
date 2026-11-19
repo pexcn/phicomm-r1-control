@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "./AppDialog.vue";
 import AppSlider from "./AppSlider.vue";
 import { sliderPercent } from "../lib/slider-values";
 import { computed, ref, watch } from "vue";
@@ -78,7 +79,7 @@ function applyColor() {
 </script>
 
 <template>
-  <md-dialog id="atmosphere-light-dialog" :open="open" @closed="emit('close')" aria-label="氛围灯">
+  <AppDialog id="atmosphere-light-dialog" :open="open" @closed="emit('close')" aria-label="氛围灯">
     <div slot="headline">氛围灯</div>
     <div slot="content" class="dialog-content">
       <div class="service-row">
@@ -143,7 +144,7 @@ function applyColor() {
       <p v-if="error" class="notice error" role="alert">{{ error }}</p>
     </div>
     <div slot="actions"><md-text-button @click="emit('close')">关闭</md-text-button></div>
-  </md-dialog>
+  </AppDialog>
 </template>
 
 <style scoped>

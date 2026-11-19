@@ -18,6 +18,7 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `styles.css`：页面布局和响应式适配。
 - `scrollbars.css`：全局细滚动条；`main.ts` 将同一份样式复用到 Material 弹窗、菜单和文本框内部。
 - `components/AppSlider.vue`、`slider.css`：共享竖条手柄、轨道间隙和交互数值气泡。
+- `components/AppDialog.vue`、`dialog.css`：弹窗统一挂载到 `body`，遮罩高于应用导航和提示条；不降低背景控件的层级。
 - `lib/slider-values.ts`：百分比、分贝格式及跨 Shadow DOM 的气泡可见区域计算。
 - `components/MaterialState.vue`：复合控件的 Material Web 涟漪与键盘焦点状态。
 - `components/TurntablePlayer.vue`：黑胶旋转、暂停停靠、封面大图与键盘关闭。

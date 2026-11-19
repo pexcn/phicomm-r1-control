@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "../components/AppDialog.vue";
 import AppSlider from "../components/AppSlider.vue";
 import { sliderPercent, sliderDecibels } from "../lib/slider-values";
 import { computed, onBeforeUnmount, ref } from "vue";
@@ -205,7 +206,7 @@ onBeforeUnmount(() => clearTimeout(timer));
       <AdvancedAudioEffects />
     </template>
   </section>
-  <md-dialog id="eq-preset-dialog" :open="saving" @closed="saving = false" aria-label="保存 EQ 预设"
+  <AppDialog id="eq-preset-dialog" :open="saving" @closed="saving = false" aria-label="保存 EQ 预设"
     ><div slot="headline">保存 EQ 预设</div>
     <div slot="content" class="dialog-content">
       <md-outlined-text-field
@@ -220,6 +221,6 @@ onBeforeUnmount(() => clearTimeout(timer));
     <div slot="actions">
       <md-text-button @click="saving = false">取消</md-text-button
       ><md-filled-button :disabled="!presetName.trim()" @click="savePreset">保存</md-filled-button>
-    </div></md-dialog
+    </div></AppDialog
   >
 </template>

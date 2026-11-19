@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "./AppDialog.vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { connected, requestDevice, state } from "../lib/speaker";
 import { miPlayDiag, miPlayIp, miPlayValue, miPlayWrite, type MiPlaySetting } from "../lib/miplay";
@@ -112,7 +113,7 @@ const fields = [
 </script>
 
 <template>
-  <md-dialog id="miplay-dialog" :open="open" aria-label="MiPlay 控制与诊断" @closed="emit('close')">
+  <AppDialog id="miplay-dialog" :open="open" aria-label="MiPlay 控制与诊断" @closed="emit('close')">
     <div slot="headline">MiPlay 控制与诊断</div>
     <div slot="content" class="dialog-content miplay-content">
       <p class="hint">
@@ -214,7 +215,7 @@ const fields = [
       </template>
     </div>
     <div slot="actions"><md-text-button @click="emit('close')">关闭</md-text-button></div>
-  </md-dialog>
+  </AppDialog>
 </template>
 
 <style scoped>

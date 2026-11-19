@@ -5,10 +5,6 @@
 *::after {
   box-sizing: border-box;
 }
-html {
-  /* Preserve native scrolling while excluding pinch and double-tap page zoom. */
-  touch-action: pan-x pan-y;
-}
 body {
   margin: 0;
   background: var(--bg, #f4f7f5);
@@ -416,6 +412,8 @@ md-dialog {
 }
 .connection-help summary {
   cursor: pointer;
+  min-height: 48px;
+  padding-block: 16px;
 }
 .connection-help p {
   padding-top: 12px;
@@ -494,10 +492,6 @@ md-dialog {
   min-height: 48px;
   border-radius: 24px;
   color: inherit;
-}
-/* Material Web's scrim sits outside its native top-layer dialog at z-index 1. */
-body:has(md-dialog[open]) :is(.sidebar, .topbar, .bottom-nav, .snackbar, .skip-link) {
-  z-index: 0;
 }
 
 /* Music */
@@ -1158,7 +1152,14 @@ body:has(.cover-viewer[open]) {
   margin-top: 8px;
   font: var(--type-body-small);
 }
+.page-footnote a,
 .page-footnote button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 24px;
   background: none;
   border: 0;
   color: var(--accent);
@@ -1599,7 +1600,9 @@ body:has(.cover-viewer[open]) {
     gap: 8px;
   }
   .eq-band label {
-    width: 52px;
+    width: 64px;
+    flex-shrink: 0;
+    white-space: nowrap;
     font: var(--type-body-medium);
   }
   .eq-band span {
@@ -1630,6 +1633,8 @@ body:has(.cover-viewer[open]) {
     gap: 4px;
   }
   .device-hero {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
     gap: 14px;
     padding: 20px;
   }
@@ -1648,10 +1653,11 @@ body:has(.cover-viewer[open]) {
     font: var(--type-body-medium);
   }
   .device-hero .status-badge {
-    margin-left: 70px;
-    margin-top: -4px;
+    grid-column: 2;
+    justify-self: start;
   }
   .hero-actions {
+    grid-column: 1 / -1;
     margin: 4px 0 0;
     gap: 10px;
   }

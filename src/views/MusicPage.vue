@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "../components/AppDialog.vue";
 import AppSlider from "../components/AppSlider.vue";
 import { sliderPercent } from "../lib/slider-values";
 import MaterialState from "../components/MaterialState.vue";
@@ -354,7 +355,7 @@ function setTimer() {
       <PlaybackSettingsCard />
     </template>
   </section>
-  <md-dialog
+  <AppDialog
     :open="searchOpen"
     @closed="searchOpen = false"
     class="search-dialog"
@@ -416,11 +417,11 @@ function setTimer() {
     </div>
     <div slot="actions">
       <md-text-button @click="searchOpen = false">关闭</md-text-button>
-    </div></md-dialog
+    </div></AppDialog
   >
   <LocalMusicDialog :open="localOpen" @close="localOpen = false" />
   <AtmosphereLightDialog :open="lightOpen" @close="lightOpen = false" />
-  <md-dialog :open="timerOpen" @closed="timerOpen = false" aria-label="定时暂停"
+  <AppDialog :open="timerOpen" @closed="timerOpen = false" aria-label="定时暂停"
     ><div slot="headline">定时暂停</div>
     <div slot="content" class="dialog-content">
       <p class="muted">在指定时间后发送暂停播放指令。</p>
@@ -446,6 +447,6 @@ function setTimer() {
         >取消定时</md-text-button
       ><md-text-button @click="timerOpen = false">关闭</md-text-button
       ><md-filled-button @click="setTimer">开始计时</md-filled-button>
-    </div></md-dialog
+    </div></AppDialog
   >
 </template>

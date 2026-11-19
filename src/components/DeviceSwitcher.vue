@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "./AppDialog.vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import MaterialState from "./MaterialState.vue";
@@ -148,7 +149,7 @@ watch(
         <div slot="headline">断开连接</div></md-menu-item
       >
     </md-menu>
-    <md-dialog
+    <AppDialog
       v-else
       id="device-sheet"
       :open="state.devicePickerOpen"
@@ -195,7 +196,7 @@ watch(
           >
         </footer>
       </div>
-    </md-dialog>
+    </AppDialog>
   </div>
 </template>
 
@@ -268,7 +269,7 @@ watch(
   --md-menu-item-label-text-color: var(--accent);
   --md-menu-item-leading-icon-color: var(--accent);
 }
-#device-sheet {
+:global(#device-sheet) {
   margin: auto 0 0;
   width: 100%;
   max-width: 100%;

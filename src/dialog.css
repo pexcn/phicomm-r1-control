@@ -1,0 +1,4 @@
+/* Dialog hosts are teleported to body so their scrims share one overlay layer. */
+.scrim {
+  z-index: 1000;
+}

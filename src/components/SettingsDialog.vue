@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "./AppDialog.vue";
 import MaterialState from "./MaterialState.vue";
 import PwaSettings from "./PwaSettings.vue";
 import { computed, watch, ref } from "vue";
@@ -88,7 +89,7 @@ function saveApi() {
 </script>
 
 <template>
-  <md-dialog
+  <AppDialog
     id="settings-dialog"
     :open="state.settingsDialog"
     @closed="state.settingsDialog = false"
@@ -193,11 +194,11 @@ function saveApi() {
     <div slot="actions">
       <md-filled-button @click="state.settingsDialog = false">完成</md-filled-button>
     </div>
-  </md-dialog>
+  </AppDialog>
 </template>
 
 <style scoped>
-#settings-dialog {
+:global(#settings-dialog) {
   min-width: min(560px, calc(100vw - 48px));
   max-width: min(600px, calc(100vw - 48px));
   max-height: calc(100dvh - 48px);
@@ -321,7 +322,7 @@ function saveApi() {
   margin-right: auto;
 }
 @media (max-width: 500px) {
-  #settings-dialog {
+  :global(#settings-dialog) {
     min-width: calc(100vw - 24px);
     max-width: calc(100vw - 24px);
     max-height: calc(100dvh - 24px);

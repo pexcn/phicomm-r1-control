@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDialog from "./AppDialog.vue";
 import { computed, ref, watch } from "vue";
 import {
   activeDevice,
@@ -71,7 +72,7 @@ function closed() {
 </script>
 
 <template>
-  <md-dialog
+  <AppDialog
     id="connection-dialog"
     :open="state.connectionDialog"
     @closed="closed"
@@ -130,5 +131,5 @@ function closed() {
         busy ? connectionLabel : requiresReconnect ? "保存并重新连接" : "连接"
       }}</md-filled-button>
     </div>
-  </md-dialog>
+  </AppDialog>
 </template>
