@@ -32,6 +32,14 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `components/MiPlayDialog.vue`、`lib/miplay.ts`：当前／远端音箱的声道、同步延迟、队列目标和诊断快照；目标变化后丢弃旧回包。
 - `lib/pwa.ts`、`components/PwaSettings.vue`：浏览器安装事件、离线就绪状态与手动更新。
 
+弹窗使用 `AppDialog` 的 `#headline` 插槽；内容和操作区保留原生 `slot="content"`、
+`slot="actions"`，仍由 Material Web 管理滚动、焦点、Escape 和遮罩关闭。
+`mode="adaptive"` 的设置、搜索、本地音乐、设备管理和 MiPlay 在 760px 以下全屏显示，
+桌面保留普通弹窗；`mode="sheet"` 使用从底部进出的动画。减少动态效果时跳过弹窗动画。
+设备面板手柄支持点按、键盘关闭和向下拖动；短拖动回弹，取消手势不关闭，关闭后恢复触发控件焦点。
+仅手柄和设备屏幕遥控区域接管触摸手势，其余界面允许浏览器缩放。
+提示条使用 inverse surface 颜色角色；关闭图标周围的透明触控区保持 48px，不撑高单行提示。
+
 PWA 清单和图标在 `public/`。`scripts/build-pwa.mjs` 在正式构建后根据界面资源内容
 生成带版本号的 Service Worker；缓存策略模板在 `scripts/service-worker.js`。
 只缓存独立新版的静态界面，不缓存设备、音乐接口或原作者版。安装、缓存和更新说明见

@@ -80,7 +80,7 @@ function applyColor() {
 
 <template>
   <AppDialog id="atmosphere-light-dialog" :open="open" @closed="emit('close')" aria-label="氛围灯">
-    <div slot="headline">氛围灯</div>
+    <template #headline><div>氛围灯</div></template>
     <div slot="content" class="dialog-content">
       <div class="service-row">
         <div>

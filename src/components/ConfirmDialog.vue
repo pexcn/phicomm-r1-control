@@ -16,7 +16,9 @@ import {
     :open="confirmationOpen"
     @closed="confirmationClosed"
   >
-    <div slot="headline">{{ confirmation?.title }}</div>
+    <template #headline
+      ><div>{{ confirmation?.title }}</div></template
+    >
     <p slot="content">{{ confirmation?.message }}</p>
     <div slot="actions">
       <md-text-button @click="respondToConfirmation()">取消</md-text-button>

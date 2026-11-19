@@ -90,12 +90,15 @@ function saveApi() {
 
 <template>
   <AppDialog
+    mode="adaptive"
     id="settings-dialog"
     :open="state.settingsDialog"
     @closed="state.settingsDialog = false"
     aria-label="设置"
   >
-    <div slot="headline" class="dialog-title"><AppIcon name="settings" />设置</div>
+    <template #headline
+      ><div class="dialog-title"><AppIcon name="settings" />设置</div></template
+    >
     <div slot="content" class="dialog-content">
       <div>
         <h3>明暗模式</h3>

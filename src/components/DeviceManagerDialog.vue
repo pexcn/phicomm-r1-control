@@ -37,12 +37,13 @@ function closed() {
 
 <template>
   <AppDialog
+    mode="adaptive"
     id="device-manager-dialog"
     :open="state.deviceManagerDialog"
     @closed="closed"
     aria-label="管理设备"
   >
-    <div slot="headline">管理设备</div>
+    <template #headline><div>管理设备</div></template>
     <div slot="content" class="dialog-content">
       <p class="hint">设备名称和地址仅保存在此浏览器，不会修改音箱本身。</p>
       <div v-if="!state.devices.length" class="hint">还没有保存的音箱。</div>

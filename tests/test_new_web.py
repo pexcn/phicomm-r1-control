@@ -1108,6 +1108,59 @@ class NewWebTests(unittest.TestCase):
         self.confirm_material('删除歌曲')
         self.assertTrue(any(m['type']=='send_message' and m.get('what')==4 and m.get('arg1')==29 for m in self.sent()))
 
+    def test_material_fullscreen_dialog_sheet_gestures_and_snackbar(self):
+        self.page.set_viewport_size({'width':390,'height':844})
+        self.start(1887)
+        self.assertLessEqual(self.page.locator('.snackbar').bounding_box()['height'],49)
+        self.assertGreaterEqual(self.page.get_by_role('button',name='关闭提示',exact=True).bounding_box()['height'],48)
+        self.page.get_by_role('button',name='关闭提示',exact=True).click()
+        self.page.get_by_role('button',name='打开设置',exact=True).click()
+        settings = self.page.locator('#settings-dialog')
+        self.page.wait_for_function("Math.abs(document.querySelector('#settings-dialog').shadowRoot.querySelector('dialog').getBoundingClientRect().y)<0.1")
+        box = settings.get_by_role('dialog').bounding_box()
+        self.assertAlmostEqual(box['width'],390,delta=1)
+        self.assertAlmostEqual(box['height'],844,delta=1)
+        self.page.emulate_media(reduced_motion='reduce')
+        self.page.wait_for_function("document.querySelector('#settings-dialog').quick")
+        settings.get_by_role('button',name='关闭设置',exact=True).click()
+        self.page.wait_for_function("!document.querySelector('#settings-dialog').open")
+        self.page.emulate_media(reduced_motion='no-preference')
+        anchor = self.page.get_by_role('button',name='选择或连接音箱',exact=True)
+        anchor.click()
+        sheet = self.page.locator('#device-sheet')
+        handle = sheet.get_by_role('button',name='点按或向下拖动关闭设备列表',exact=True)
+        handle.click(trial=True)
+        self.page.wait_for_timeout(350)
+        self.assertGreaterEqual(handle.bounding_box()['height'],48)
+        cdp = self.context.new_cdp_session(self.page)
+        try:
+            cdp.send('Emulation.setTouchEmulationEnabled', {'enabled':True})
+            for distance, cancel in [(35,False),(35,True),(120,False)]:
+                box = handle.bounding_box()
+                x,y = box['x']+box['width']/2,box['y']+box['height']/2
+                cdp.send('Input.dispatchTouchEvent', {'type':'touchStart','touchPoints':[{'x':x,'y':y}]})
+                initial = sheet.get_by_role('dialog').bounding_box()['y']
+                cdp.send('Input.dispatchTouchEvent', {'type':'touchMove','touchPoints':[{'x':x,'y':y+distance}]})
+                self.page.wait_for_timeout(80)
+                self.assertAlmostEqual(sheet.get_by_role('dialog').bounding_box()['y']-initial,distance,delta=2)
+                cdp.send('Input.dispatchTouchEvent', {'type':'touchCancel' if cancel else 'touchEnd','touchPoints':[]})
+                if distance<80:
+                    self.page.wait_for_function("!document.querySelector('#device-sheet').style.getPropertyValue('--app-sheet-offset')")
+                    self.assertTrue(sheet.evaluate('el=>el.open'))
+                else:
+                    self.page.wait_for_function("!document.querySelector('#device-sheet').open")
+            self.page.wait_for_timeout(250)
+            self.assertTrue(self.page.locator('#device-switcher-anchor').evaluate('el=>el.matches(":focus")'))
+            anchor.click()
+            handle.click(trial=True)
+            handle.focus()
+            self.page.keyboard.press('Enter')
+            self.page.wait_for_function("!document.querySelector('#device-sheet').open")
+            self.assertEqual(self.page.evaluate('mockSockets.length'),1)
+            self.assertFalse(any(m['type'] in ['play','set_vol','input'] for m in self.sent()))
+        finally:
+            cdp.detach()
+
     def test_material_address_validation_is_exposed_on_the_field(self):
         self.page.goto(self.base)
         self.page.get_by_role('main').get_by_role('button',name='连接音箱',exact=True).click()

@@ -220,7 +220,7 @@ onBeforeUnmount(() => clearTimeout(timer));
     </template>
   </section>
   <AppDialog id="eq-preset-dialog" :open="saving" @closed="saving = false" aria-label="保存 EQ 预设"
-    ><div slot="headline">保存 EQ 预设</div>
+    ><template #headline><div>保存 EQ 预设</div></template>
     <div slot="content" class="dialog-content">
       <md-outlined-text-field
         label="预设名称"

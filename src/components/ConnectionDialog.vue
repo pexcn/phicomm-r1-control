@@ -103,7 +103,9 @@ function closed() {
     @closed="closed"
     :aria-label="title"
   >
-    <div slot="headline" class="dialog-title"><AppIcon name="speaker" />{{ title }}</div>
+    <template #headline
+      ><div class="dialog-title"><AppIcon name="speaker" />{{ title }}</div></template
+    >
     <form id="connection-form" slot="content" class="dialog-content" @submit.prevent="submit()">
       <p class="muted">与音箱连接同一网络，填写设备地址即可开始。</p>
       <md-outlined-text-field

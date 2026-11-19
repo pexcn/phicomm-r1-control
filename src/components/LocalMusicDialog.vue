@@ -82,13 +82,14 @@ function play(value: string) {
 
 <template>
   <AppDialog
+    mode="adaptive"
     id="local-music-dialog"
     :open="open"
     @closed="emit('close')"
     aria-label="本地音乐"
     class="local-music-dialog"
   >
-    <div slot="headline">本地音乐</div>
+    <template #headline><div>本地音乐</div></template>
     <div slot="content" class="dialog-content">
       <p class="hint">扫描音箱存储中的音频文件，不会上传文件或自动开始播放。</p>
       <md-outlined-text-field

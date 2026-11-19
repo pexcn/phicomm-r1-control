@@ -18,13 +18,66 @@ import {
 const media = window.matchMedia("(max-width: 760px)");
 const mobile = ref(media.matches);
 let afterClose: (() => void) | undefined;
+let drag: {
+  id: number;
+  start: number;
+  distance: number;
+  handle: HTMLElement;
+  surface: HTMLElement;
+} | null = null;
+let ignoreHandleClick = false;
+function resetDrag() {
+  const current = drag;
+  drag = null;
+  if (!current) return;
+  current.surface.removeAttribute("data-sheet-dragging");
+  current.surface.style.removeProperty("--app-sheet-offset");
+  if (current.handle.hasPointerCapture(current.id))
+    current.handle.releasePointerCapture(current.id);
+}
+function dragStart(event: PointerEvent) {
+  if (!event.isPrimary || event.button !== 0) return;
+  const handle = event.currentTarget as HTMLElement;
+  const surface = handle.closest("md-dialog");
+  if (!surface) return;
+  for (const element of surface.shadowRoot?.querySelectorAll("*") ?? []) {
+    for (const animation of element.getAnimations()) animation.finish();
+  }
+  ignoreHandleClick = false;
+  drag = { id: event.pointerId, start: event.clientY, distance: 0, handle, surface };
+  surface.setAttribute("data-sheet-dragging", "");
+  handle.setPointerCapture(event.pointerId);
+}
+function dragMove(event: PointerEvent) {
+  if (!drag || event.pointerId !== drag.id) return;
+  event.preventDefault();
+  drag.distance = Math.max(0, event.clientY - drag.start);
+  drag.surface.style.setProperty("--app-sheet-offset", `${drag.distance}px`);
+}
+function dragEnd(event: PointerEvent) {
+  if (!drag || event.pointerId !== drag.id) return;
+  ignoreHandleClick = drag.distance > 6;
+  if (drag.distance >= 80) {
+    // Keep the dragged offset until the close animation has sampled it.
+    drag.surface.removeAttribute("data-sheet-dragging");
+    state.devicePickerOpen = false;
+  } else resetDrag();
+}
+window.addEventListener("blur", resetDrag);
+function handleClick(event: MouseEvent) {
+  if (event.detail === 0 || !ignoreHandleClick) state.devicePickerOpen = false;
+  ignoreHandleClick = false;
+}
 function mediaChanged() {
+  resetDrag();
   afterClose = undefined;
   state.devicePickerOpen = false;
   mobile.value = media.matches;
 }
 media.addEventListener("change", mediaChanged);
 onBeforeUnmount(() => {
+  window.removeEventListener("blur", resetDrag);
+  resetDrag();
   afterClose = undefined;
   media.removeEventListener("change", mediaChanged);
   state.devicePickerOpen = false;
@@ -56,6 +109,8 @@ function closed(event: Event) {
   const surface = event.currentTarget as HTMLElement & { open: boolean };
   if (!surface.isConnected || surface.open) return;
   state.devicePickerOpen = false;
+  resetDrag();
+  ignoreHandleClick = false;
   const action = afterClose;
   afterClose = undefined;
   action?.();
@@ -152,18 +207,33 @@ watch(
     <AppDialog
       v-else
       id="device-sheet"
+      mode="sheet"
       :open="state.devicePickerOpen"
       @closing="state.devicePickerOpen = false"
       @closed="closed"
       aria-label="选择音箱"
     >
-      <div slot="headline" class="sheet-heading">
-        <span class="sheet-handle" aria-hidden="true"></span><span>选择音箱</span
-        ><small>{{ state.devices.length }} 台已保存</small
-        ><md-icon-button aria-label="关闭设备列表" @click="state.devicePickerOpen = false"
-          ><AppIcon name="close" :size="20"
-        /></md-icon-button>
-      </div>
+      <template #headline
+        ><div class="sheet-header">
+          <button
+            class="sheet-drag-handle"
+            type="button"
+            aria-label="点按或向下拖动关闭设备列表"
+            @pointerdown="dragStart"
+            @pointermove="dragMove"
+            @pointerup="dragEnd"
+            @pointercancel="resetDrag"
+            @click="handleClick"
+          >
+            <span aria-hidden="true"></span><MaterialState />
+          </button>
+          <div class="sheet-heading">
+            <span>选择音箱</span><small>{{ state.devices.length }} 台已保存</small
+            ><md-icon-button aria-label="关闭设备列表" @click="state.devicePickerOpen = false"
+              ><AppIcon name="close" :size="20"
+            /></md-icon-button>
+          </div></div
+      ></template>
       <div slot="content" class="sheet-devices">
         <button
           v-for="device in state.devices"
@@ -284,20 +354,34 @@ watch(
   gap: 12px;
   position: relative;
   width: 100%;
-  padding-top: 12px;
+  min-height: 48px;
+  padding: 0 24px;
 }
 .sheet-heading small {
   margin-left: auto;
 }
-.sheet-handle {
-  position: absolute;
+.sheet-header {
+  width: 100%;
+}
+.sheet-drag-handle {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 28px 28px 0 0;
+  background: transparent;
+  touch-action: none;
+  cursor: grab;
+}
+.sheet-drag-handle:active {
+  cursor: grabbing;
+}
+.sheet-drag-handle > span {
   width: 32px;
   height: 4px;
   border-radius: 2px;
-  background: var(--muted);
-  opacity: 0.65;
-  top: 0;
-  left: calc(50% - 16px);
+  background: var(--md-sys-color-on-surface-variant);
 }
 .sheet-devices {
   display: grid;

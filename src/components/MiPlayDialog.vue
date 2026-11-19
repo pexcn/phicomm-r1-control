@@ -115,8 +115,14 @@ const fields = [
 </script>
 
 <template>
-  <AppDialog id="miplay-dialog" :open="open" aria-label="MiPlay 控制与诊断" @closed="emit('close')">
-    <div slot="headline">MiPlay 控制与诊断</div>
+  <AppDialog
+    mode="adaptive"
+    id="miplay-dialog"
+    :open="open"
+    aria-label="MiPlay 控制与诊断"
+    @closed="emit('close')"
+  >
+    <template #headline><div>MiPlay 控制与诊断</div></template>
     <div slot="content" class="dialog-content miplay-content">
       <p class="hint">
         设置通过当前音箱发送，独立于 Unisound。远端音箱需在同一局域网并支持对应接口。

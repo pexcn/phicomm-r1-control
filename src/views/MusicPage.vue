@@ -370,8 +370,9 @@ function setTimer() {
     :open="searchOpen"
     @closed="searchOpen = false"
     class="search-dialog"
+    mode="adaptive"
     aria-label="搜索音乐"
-    ><div slot="headline">搜索音乐</div>
+    ><template #headline><div>搜索音乐</div></template>
     <div slot="content" class="dialog-content">
       <form @submit.prevent="search" class="search-form">
         <md-outlined-text-field
@@ -433,7 +434,7 @@ function setTimer() {
   <LocalMusicDialog :open="localOpen" @close="localOpen = false" />
   <AtmosphereLightDialog :open="lightOpen" @close="lightOpen = false" />
   <AppDialog :open="timerOpen" @closed="timerOpen = false" aria-label="定时暂停"
-    ><div slot="headline">定时暂停</div>
+    ><template #headline><div>定时暂停</div></template>
     <div slot="content" class="dialog-content">
       <p class="muted">在指定时间后发送暂停播放指令。</p>
       <div class="segmented" role="group" aria-label="定时暂停时长">
