@@ -130,6 +130,16 @@ onBeforeUnmount(closeCover);
   width: 89%;
   aspect-ratio: 1;
 }
+/* The texture's translucent white rim needs a backing on light surfaces. */
+[data-theme="light"] .turntable-disc::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #55585a, #292c2e);
+  mask-image: radial-gradient(closest-side, transparent 90%, #000 91%);
+  pointer-events: none;
+}
 .turntable-cover {
   position: absolute;
   z-index: 1;
