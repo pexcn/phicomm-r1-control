@@ -8,6 +8,8 @@ const props = withDefaults(defineProps<{ mode?: "basic" | "adaptive" | "sheet" }
   mode: "basic",
 });
 const dialog = ref<MdDialog>();
+// Keep the background locked until the closing animation finishes.
+const modalActive = ref(false);
 const mobileQuery = window.matchMedia("(max-width: 760px)");
 const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const mobile = ref(mobileQuery.matches);
@@ -68,8 +70,11 @@ onMounted(() => {
     <md-dialog
       ref="dialog"
       v-bind="$attrs"
+      :data-modal-active="modalActive ? '' : undefined"
       :quick="reducedMotion || $attrs.quick === true"
       :class="{ 'dialog-fullscreen': fullscreen, 'dialog-sheet': mode === 'sheet' }"
+      @open="modalActive = true"
+      @closed="modalActive = false"
     >
       <div slot="headline" class="app-dialog-heading">
         <md-icon-button

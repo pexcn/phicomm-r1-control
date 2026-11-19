@@ -2,6 +2,9 @@
 .scrim {
   z-index: 1000;
 }
+.scroller {
+  overscroll-behavior: contain;
+}
 :host(.dialog-fullscreen) slot[name="headline"]::slotted(*) {
   min-height: 64px;
   padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 8px

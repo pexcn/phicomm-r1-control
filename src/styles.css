@@ -5,6 +5,15 @@
 *::after {
   box-sizing: border-box;
 }
+html {
+  scrollbar-gutter: stable;
+}
+/* Include teleported dialogs, nested confirmations and the native cover viewer. */
+html:has(md-dialog[data-modal-active], .cover-viewer[open]),
+body:has(md-dialog[data-modal-active], .cover-viewer[open]) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
 body {
   margin: 0;
   background: var(--bg, #f4f7f5);
@@ -521,9 +530,6 @@ md-dialog {
   width: 100%;
   max-width: 360px;
   justify-self: center;
-}
-body:has(.cover-viewer[open]) {
-  overflow: hidden;
 }
 .song-details {
   min-width: 0;
