@@ -1,23 +1,90 @@
 <script setup lang="ts">
 import { useConfirmation } from "../lib/confirmation";
-import { computed, onBeforeUnmount } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
-import { connected, notify, send, state } from "../lib/speaker";
-import type { Data } from "../lib/protocol";
+import { connected, notify, requestDevice, send, state } from "../lib/speaker";
+import { array, flag, object, type Data } from "../lib/protocol";
 
 const confirmAction = useConfirmation();
+const scanState = ref<"idle" | "starting" | "scanning" | "finished">("idle");
+const scanResults = ref<Data[]>([]);
+const scanError = ref("");
+const searching = computed(() => ["starting", "scanning"].includes(scanState.value));
+let generation = 0;
+let readingGeneration: number | null = null;
+let active = true;
+function clearSearch() {
+  ++generation;
+  scanState.value = "idle";
+  scanResults.value = [];
+  scanError.value = "";
+}
 const seen = computed(() =>
-  state.bluetooth.scanned.filter(
+  scanResults.value.filter(
     (row, index, list) =>
       !state.bluetooth.bonded.some((item) => item.Address === row.Address) &&
       list.findIndex((item) => item.Address === row.Address) === index,
   ),
 );
+async function readBluetooth() {
+  if (
+    !active ||
+    !connected.value ||
+    scanState.value === "starting" ||
+    readingGeneration === generation
+  )
+    return;
+  const current = generation;
+  const collectResults = scanState.value === "scanning";
+  readingGeneration = current;
+  try {
+    const reply = await requestDevice({ type: "BT_Device" }, 5000);
+    if (!active || current !== generation) return;
+    scanError.value = "";
+    // Only a fresh read after this search's acknowledgement can supply its results.
+    if (collectResults) {
+      const data = object(reply.data);
+      if (data.Scanning == null) throw new Error("音箱未返回搜索状态，正在重试读取。");
+      scanResults.value = array(data.Scan_Devices).map(object);
+      if (!flag(data.Scanning)) scanState.value = "finished";
+    }
+  } catch (cause) {
+    if (active && current === generation) scanError.value = (cause as Error).message;
+  } finally {
+    if (readingGeneration === current) readingGeneration = null;
+  }
+}
+async function search() {
+  if (!connected.value || !state.bluetooth.enabled || state.bluetooth.scanning || searching.value)
+    return;
+  clearSearch();
+  const current = generation;
+  scanState.value = "starting";
+  try {
+    const reply = await requestDevice({ type: "BT_StartScan" }, 5000);
+    if (!active || current !== generation) return;
+    if (!flag(reply.data)) throw new Error("音箱未能启动搜索，请稍后重试。");
+    scanState.value = "scanning";
+    await readBluetooth();
+  } catch (cause) {
+    if (active && current === generation) {
+      scanState.value = "idle";
+      scanError.value = (cause as Error).message;
+    }
+  }
+}
+watch([() => state.session, connected, () => state.bluetooth.enabled], clearSearch, {
+  flush: "sync",
+});
 const poll = setInterval(() => {
-  if (connected.value) send({ type: "BT_Device" });
+  void readBluetooth();
 }, 2500);
-onBeforeUnmount(() => clearInterval(poll));
+onBeforeUnmount(() => {
+  active = false;
+  clearSearch();
+  clearInterval(poll);
+});
 function enable(event: Event) {
   const control = event.target as HTMLElement & { selected: boolean };
   const next = control.selected;
@@ -59,7 +126,7 @@ async function remove(row: Data) {
         <h1>蓝牙</h1>
         <p class="muted">连接手机，或让声音传到另一台设备。</p>
       </div>
-      <md-outlined-button v-if="connected" @click="send({ type: 'BT_Device' })"
+      <md-outlined-button v-if="connected" @click="readBluetooth"
         ><AppIcon slot="icon" name="refresh" :size="18" />刷新</md-outlined-button
       >
     </div>
@@ -138,16 +205,32 @@ async function remove(row: Data) {
           <div class="section-heading">
             <h2>附近设备</h2>
             <md-filled-tonal-button
-              :disabled="state.bluetooth.scanning"
-              @click="send({ type: 'BT_StartScan' })"
+              :disabled="state.bluetooth.scanning || searching"
+              @click="search"
               ><AppIcon slot="icon" name="search" :size="18" />{{
-                state.bluetooth.scanning ? "正在搜索" : "搜索设备"
+                searching || state.bluetooth.scanning ? "正在搜索" : "搜索设备"
               }}</md-filled-tonal-button
             >
           </div>
+          <p class="hint" role="status">
+            {{
+              scanState === "finished"
+                ? "搜索已结束 · 结果仅保留在本次页面，设备不一定仍在附近。"
+                : scanState === "starting"
+                  ? "正在请求音箱开始搜索…"
+                  : scanState === "scanning"
+                    ? scanError
+                      ? "搜索状态暂未确认，正在重试读取。"
+                      : "正在发现附近的设备…"
+                    : state.bluetooth.scanning
+                      ? "音箱正在搜索，完成后可重新搜索本轮设备。"
+                      : "点击“搜索设备”查看本轮发现的设备。"
+            }}
+          </p>
+          <p v-if="scanError" class="notice error" role="alert">{{ scanError }}</p>
           <div v-if="!seen.length" class="small-empty">
             <AppIcon name="search" :size="36" />
-            <p>{{ state.bluetooth.scanning ? "正在发现附近的设备…" : "发现更多连接" }}</p>
+            <p>{{ scanState === "finished" ? "本轮未发现可配对设备" : "发现更多连接" }}</p>
             <p class="hint">请让目标设备进入蓝牙配对模式。</p>
           </div>
           <ul class="simple-list">

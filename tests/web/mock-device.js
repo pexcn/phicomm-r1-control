@@ -8,6 +8,14 @@ window.WebSocket = class {
   readyState = 0;
   sent = [];
   dspEnabled = false;
+  bluetooth = {
+    Enabled: true,
+    Scanning: false,
+    Bonded_Devices: [{ Name: "书房音箱", Address: "AA:BB:CC:DD:EE:01" }],
+    Scan_Devices: [{ Name: "无线耳机", Address: "AA:BB:CC:DD:EE:02" }],
+    A2dp_ConnectedDevices: [],
+    A2dpSink_ConnectedDevices: [],
+  };
   audio = {
     bass: { sound_effects_bass_enable: true, Current_Strength: 300 },
     loudness: { sound_effects_loudness_enable: true, Current_Gain: 0 },
@@ -67,6 +75,23 @@ window.WebSocket = class {
   send(raw) {
     const message = JSON.parse(raw);
     this.sent.push(message);
+    if (["BT_StartScan", "BT_enable", "BT_disable"].includes(message.type)) {
+      const accepted = message.type !== "BT_StartScan" || !window.mockRejectBluetoothScan;
+      if (message.type === "BT_StartScan" && accepted) {
+        this.bluetooth.Scan_Devices = [];
+        this.bluetooth.Scanning = true;
+      } else if (message.type === "BT_disable") {
+        this.bluetooth.Enabled = false;
+        this.bluetooth.Scanning = false;
+      } else if (message.type === "BT_enable") this.bluetooth.Enabled = true;
+      if (message.type !== "BT_StartScan" || !window.mockHoldBluetoothScanStart)
+        setTimeout(
+          () =>
+            this.reply({ type: message.type, type_id: message.type_id, code: 200, data: accepted }),
+          0,
+        );
+      return;
+    }
     if (message.type === "send_message" && message.what === 4 && message.arg1 === 29) {
       const { index } = JSON.parse(message.obj);
       const remove = () => {
@@ -259,14 +284,7 @@ window.WebSocket = class {
           },
         },
       },
-      BT_Device: {
-        Enabled: true,
-        Scanning: false,
-        Bonded_Devices: [{ Name: "书房音箱", Address: "AA:BB:CC:DD:EE:01" }],
-        Scan_Devices: [{ Name: "无线耳机", Address: "AA:BB:CC:DD:EE:02" }],
-        A2dp_ConnectedDevices: [],
-        A2dpSink_ConnectedDevices: [],
-      },
+      BT_Device: this.bluetooth,
     };
     if (message.type in data) {
       setTimeout(

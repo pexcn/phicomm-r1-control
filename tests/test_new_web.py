@@ -1443,6 +1443,120 @@ class NewWebTests(unittest.TestCase):
         index = next(i for i, m in enumerate(sent) if m['type'] == 'Set_MiPlay_Channel')
         self.assertFalse(any(m['type'] == 'Get_MiPlay_Diag' for m in sent[index+1:]))
 
+    def test_bluetooth_search_results_belong_to_the_current_page_visit(self):
+        self.start(1873)
+        self.page.locator('.sidebar a[href="#/bluetooth"]').click()
+        self.page.get_by_text('书房音箱',exact=True).wait_for()
+        nearby = self.page.locator('.bluetooth-grid > article').last
+        self.assertEqual(nearby.locator('.simple-list li').count(),0)
+        self.assertFalse(any(m['type']=='BT_StartScan' for m in self.sent()))
+        nearby.get_by_role('button',name='搜索设备',exact=True).click()
+        nearby.get_by_role('status').filter(has_text='正在发现附近的设备').wait_for()
+        self.assertTrue(nearby.get_by_role('button',name='正在搜索',exact=True).is_disabled())
+        self.assertEqual(nearby.get_by_text('无线耳机',exact=True).count(),0)
+        self.page.evaluate('''()=>Object.assign(mockSockets.at(-1).bluetooth,{
+          Scanning:false,Scan_Devices:[
+            {Name:'本轮耳机',Address:'AA:BB:CC:DD:EE:03'},
+            {Name:'本轮耳机',Address:'AA:BB:CC:DD:EE:03'},
+            {Name:'书房音箱',Address:'AA:BB:CC:DD:EE:01'},
+          ]})''')
+        self.page.get_by_role('button',name='刷新',exact=True).click()
+        nearby.get_by_role('status').filter(has_text='搜索已结束').wait_for()
+        self.assertEqual(nearby.locator('.simple-list li').count(),1)
+        nearby.get_by_role('button',name='配对',exact=True).click()
+        self.assertIn({'type':'BT_createBond','mac':'AA:BB:CC:DD:EE:03'},self.sent())
+        self.page.evaluate("mockSockets.at(-1).bluetooth.Scan_Devices=[{Name:'其他控制端缓存',Address:'AA:BB:CC:DD:EE:04'}]")
+        self.page.get_by_role('button',name='刷新',exact=True).click()
+        self.page.wait_for_timeout(100)
+        self.assertEqual(nearby.get_by_text('本轮耳机',exact=True).count(),1)
+        self.assertEqual(nearby.get_by_text('其他控制端缓存',exact=True).count(),0)
+        self.page.locator('.sidebar nav a[href="#/music"]').click()
+        self.page.locator('.sidebar a[href="#/bluetooth"]').click()
+        self.page.get_by_text('书房音箱',exact=True).wait_for()
+        self.assertEqual(nearby.locator('.simple-list li').count(),0)
+        self.assertEqual(len([m for m in self.sent() if m['type']=='BT_StartScan']),1)
+        nearby.get_by_role('button',name='搜索设备',exact=True).click()
+        nearby.get_by_role('status').filter(has_text='正在发现附近的设备').wait_for()
+        self.page.evaluate('mockSockets.at(-1).bluetooth.Scanning=false')
+        self.page.get_by_role('button',name='刷新',exact=True).click()
+        nearby.get_by_text('本轮未发现可配对设备',exact=True).wait_for()
+        self.assertEqual(nearby.locator('.simple-list li').count(),0)
+
+    def test_bluetooth_old_reads_and_failed_search_do_not_repopulate_results(self):
+        self.start(1887)
+        self.page.locator('.sidebar a[href="#/bluetooth"]').click()
+        self.page.get_by_text('书房音箱',exact=True).wait_for()
+        nearby = self.page.locator('.bluetooth-grid > article').last
+        self.page.evaluate('''()=>{
+          const socket=mockSockets.at(-1),reply=socket.reply.bind(socket);
+          socket.reply=message=>{
+            if(message.type==='BT_Device' && message.type_id && !window.heldBluetoothRead){
+              window.heldBluetoothRead=structuredClone(message);return;
+            }
+            reply(message);
+          };
+        }''')
+        self.page.get_by_role('button',name='刷新',exact=True).click()
+        self.page.wait_for_function('window.heldBluetoothRead')
+        nearby.get_by_role('button',name='搜索设备',exact=True).click()
+        nearby.get_by_role('status').filter(has_text='正在发现附近的设备').wait_for()
+        self.page.evaluate('mockSockets.at(-1).reply(heldBluetoothRead)')
+        self.page.wait_for_timeout(100)
+        self.assertEqual(nearby.locator('.simple-list li').count(),0)
+        self.page.evaluate("Object.assign(mockSockets.at(-1).bluetooth,{Scanning:false,Scan_Devices:[{Name:'新结果',Address:'AA:BB:CC:DD:EE:05'}]})")
+        self.page.get_by_role('button',name='刷新',exact=True).click()
+        nearby.get_by_text('新结果',exact=True).wait_for()
+        self.page.evaluate('window.mockRejectBluetoothScan=true')
+        nearby.get_by_role('button',name='搜索设备',exact=True).click()
+        nearby.get_by_role('alert').filter(has_text='音箱未能启动搜索').wait_for()
+        self.assertEqual(nearby.locator('.simple-list li').count(),0)
+        self.assertEqual(nearby.get_by_role('status').filter(has_text='搜索已结束').count(),0)
+        self.page.evaluate('window.mockRejectBluetoothScan=false;window.mockHoldBluetoothScanStart=true')
+        nearby.get_by_role('button',name='搜索设备',exact=True).click()
+        nearby.get_by_role('status').filter(has_text='正在请求音箱开始搜索').wait_for()
+        self.page.locator('.sidebar nav a[href="#/music"]').click()
+        self.page.evaluate("Object.assign(mockSockets.at(-1).bluetooth,{Scanning:false,Scan_Devices:[{Name:'离开后发现的设备',Address:'AA:BB:CC:DD:EE:07'}]})")
+        self.page.locator('.sidebar a[href="#/bluetooth"]').click()
+        self.page.get_by_text('书房音箱',exact=True).wait_for()
+        self.page.evaluate('''()=>{
+          const socket=mockSockets.at(-1),request=socket.sent.findLast(m=>m.type==='BT_StartScan');
+          socket.reply({type:'BT_StartScan',type_id:request.type_id,code:200,data:true});
+        }''')
+        self.page.wait_for_timeout(100)
+        self.assertEqual(nearby.locator('.simple-list li').count(),0)
+        self.assertEqual(nearby.get_by_role('status').filter(has_text='搜索已结束').count(),0)
+
+    def test_bluetooth_pending_search_is_discarded_on_switch_and_adapter_off(self):
+        self.start(1887)
+        self.add_saved_device()
+        self.page.locator('.sidebar a[href="#/bluetooth"]').click()
+        self.page.get_by_text('书房音箱',exact=True).wait_for()
+        nearby = self.page.locator('.bluetooth-grid > article').last
+        self.page.evaluate('window.mockHoldBluetoothScanStart=true')
+        nearby.get_by_role('button',name='搜索设备',exact=True).click()
+        nearby.get_by_role('status').filter(has_text='正在请求音箱开始搜索').wait_for()
+        self.page.get_by_role('button',name='选择或连接音箱',exact=True).click()
+        self.page.locator('#device-menu md-menu-item').filter(has_text='卧室音箱').click()
+        self.page.wait_for_function('mockSockets.length===2 && mockSockets.at(-1).readyState===1')
+        self.page.get_by_text('书房音箱',exact=True).wait_for()
+        self.page.evaluate('''()=>{
+          const old=mockSockets[0],request=old.sent.find(m=>m.type==='BT_StartScan');
+          old.reply({type:'BT_StartScan',type_id:request.type_id,code:200,data:true});
+          window.mockHoldBluetoothScanStart=false;
+        }''')
+        self.assertEqual(nearby.locator('.simple-list li').count(),0)
+        self.assertFalse(any(m['type']=='BT_StartScan' for m in self.sent()))
+        nearby.get_by_role('button',name='搜索设备',exact=True).click()
+        nearby.get_by_role('status').filter(has_text='正在发现附近的设备').wait_for()
+        self.page.evaluate("Object.assign(mockSockets.at(-1).bluetooth,{Scanning:false,Scan_Devices:[{Name:'新音箱结果',Address:'AA:BB:CC:DD:EE:06'}]})")
+        self.page.get_by_role('button',name='刷新',exact=True).click()
+        nearby.get_by_text('新音箱结果',exact=True).wait_for()
+        self.page.get_by_role('switch',name='开启蓝牙',exact=True).click()
+        self.page.get_by_text('开启蓝牙后管理配对与连接。',exact=True).wait_for()
+        self.page.get_by_role('switch',name='开启蓝牙',exact=True).click()
+        self.page.get_by_text('书房音箱',exact=True).wait_for()
+        self.assertEqual(nearby.locator('.simple-list li').count(),0)
+
     def test_cast_mode_and_bluetooth_background_permission(self):
         self.start(1887)
         self.page.locator('.sidebar nav a[href="#/device"]').click()

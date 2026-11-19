@@ -97,7 +97,6 @@ export const state = reactive({
     enabled: false,
     scanning: false,
     bonded: [] as Data[],
-    scanned: [] as Data[],
     outputs: [] as string[],
     inputs: [] as string[],
   },
@@ -208,7 +207,6 @@ function resetSession(): void {
     enabled: false,
     scanning: false,
     bonded: [],
-    scanned: [],
     outputs: [],
     inputs: [],
   };
@@ -511,7 +509,6 @@ function receive(message: Message): void {
         enabled: flag(payload.Enabled),
         scanning: flag(payload.Scanning),
         bonded: array(payload.Bonded_Devices).map(object),
-        scanned: array(payload.Scan_Devices).map(object),
         outputs: array(payload.A2dp_ConnectedDevices).map(String),
         inputs: array(payload.A2dpSink_ConnectedDevices).map(String),
       };
