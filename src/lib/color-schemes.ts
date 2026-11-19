@@ -180,7 +180,7 @@ const blueDark: ColorPalette = {
 
 export const colorSchemes = [
   { id: "green", label: "翡翠绿", light: greenLight, dark: greenDark },
-  { id: "blue", label: "蓝色", light: blueLight, dark: blueDark },
+  { id: "blue", label: "晴空蓝", light: blueLight, dark: blueDark },
 ] as const;
 
 export type ColorSchemeId = (typeof colorSchemes)[number]["id"];

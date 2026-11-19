@@ -253,12 +253,14 @@ strong {
   background: var(--muted);
   flex-shrink: 0;
 }
-.online .status-dot,
 .status-badge .status-dot {
   background: var(--success);
 }
 .connection-chip.online {
-  color: var(--success);
+  color: var(--accent);
+}
+.connection-chip.online .status-dot {
+  background: currentColor;
 }
 .mobile-brand,
 .bottom-nav {

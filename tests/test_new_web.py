@@ -230,10 +230,19 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(self.page.locator('style[data-theme-reveal]').count(), 0)
 
     def test_color_scheme_is_independent_of_mode_and_persists_with_favicon(self):
-        self.page.goto(self.base)
+        self.start(1887)
+        def assert_connection_color(expected):
+            chip = self.page.locator('.connection-chip.online')
+            chip.wait_for()
+            colors = chip.evaluate('''el=>[
+              getComputedStyle(el).color,
+              getComputedStyle(el.querySelector('.status-dot')).backgroundColor,
+              getComputedStyle(el.querySelector('.app-icon')).color,
+            ]''')
+            self.assertEqual(colors,[expected]*3)
         self.page.get_by_role('button', name='打开设置', exact=True).click()
         green = self.page.get_by_role('radio', name='翡翠绿', exact=True)
-        blue = self.page.get_by_role('radio', name='蓝色', exact=True)
+        blue = self.page.get_by_role('radio', name='晴空蓝', exact=True)
         self.assertTrue(green.is_checked())
         green.focus()
         self.page.keyboard.press('ArrowRight')
@@ -241,12 +250,14 @@ class NewWebTests(unittest.TestCase):
         self.assertTrue(blue.is_checked())
         self.assertEqual(self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:theme'))"), 'system')
         self.assertEqual(self.page.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()"), '#415f91')
+        assert_connection_color('rgb(65, 95, 145)')
         self.assertIn('fill="#415f91"', self.page.locator('link[rel="icon"]').evaluate("el=>decodeURIComponent(el.href.split(',')[1])"))
         self.page.get_by_role('button', name='完成', exact=True).click()
         self.page.reload()
         self.assertEqual(self.page.evaluate('document.documentElement.dataset.colorScheme'), 'blue')
         self.page.emulate_media(color_scheme='dark')
         self.page.wait_for_function("getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() === '#aac7ff'")
+        assert_connection_color('rgb(170, 199, 255)')
         self.assertEqual(self.page.locator('#theme-toggle').get_by_role('button').get_attribute('aria-label'), '跟随系统')
         self.page.locator('#theme-toggle').click()
         self.page.wait_for_function("document.querySelector('#theme-toggle').getAttribute('aria-busy') !== 'true'")
@@ -288,7 +299,7 @@ class NewWebTests(unittest.TestCase):
         self.page.wait_for_function("!document.documentElement.classList.contains('theme-transition') && document.documentElement.dataset.theme === 'light'")
         light_accent = self.page.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()")
         self.assertNotEqual(light_accent, dark_accent)
-        self.page.get_by_role('radio', name='蓝色', exact=True).check()
+        self.page.get_by_role('radio', name='晴空蓝', exact=True).check()
         self.page.wait_for_function("!document.documentElement.classList.contains('theme-transition') && document.documentElement.dataset.colorScheme === 'blue'")
         self.page.get_by_role('radio', name='自定义', exact=True).check()
         self.page.wait_for_function("!document.documentElement.classList.contains('theme-transition') && document.documentElement.dataset.colorScheme === 'custom'")
@@ -337,7 +348,7 @@ class NewWebTests(unittest.TestCase):
         self.page.get_by_role('button', name='打开设置', exact=True).click()
         settings = self.page.locator('#settings-dialog')
         self.assertTrue(settings.get_by_role('button', name='保存接口', exact=True).is_disabled())
-        settings.get_by_role('radio', name='蓝色', exact=True).check()
+        settings.get_by_role('radio', name='晴空蓝', exact=True).check()
         self.page.wait_for_function("!document.documentElement.classList.contains('theme-transition') && document.documentElement.dataset.colorScheme === 'blue'")
         self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'), 390)
         api = self.page.get_by_label('音乐接口地址', exact=True)
@@ -353,7 +364,7 @@ class NewWebTests(unittest.TestCase):
         settings.get_by_role('button', name='完成', exact=True).click()
         self.page.get_by_role('button', name='打开设置', exact=True).click()
         self.assertEqual(api.input_value(), 'https://music.example/api')
-        self.assertTrue(settings.get_by_role('radio', name='蓝色', exact=True).is_checked())
+        self.assertTrue(settings.get_by_role('radio', name='晴空蓝', exact=True).is_checked())
         self.page.keyboard.press('Escape')
         self.page.reload()
         self.assertEqual(self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:music-api'))"), 'https://music.example/api')

@@ -1,7 +1,7 @@
 # Phicomm R1 Control
 
 为斐讯 R1 音箱独立实现的网页控制器，使用 Vue 3、TypeScript、Vite 与
-Google Material Web 组件。内置翡翠绿和蓝色两套深浅配色，桌面侧栏与手机底部导航分别适配。
+Google Material Web 组件。内置翡翠绿和晴空蓝两套深浅配色，桌面侧栏与手机底部导航分别适配。
 Roboto 字体与 Material Symbols 图标随网站本地打包，无需外部字体 CDN。
 配色集中在 `src/lib/color-schemes.ts`；字体层级、形状和交互动效集中在 `src/material.css`。
 主题按钮按“跟随系统 → 浅色 → 深色”循环，首次访问跟随系统，并记住本浏览器的选择。
