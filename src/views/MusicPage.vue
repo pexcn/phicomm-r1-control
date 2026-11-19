@@ -38,6 +38,9 @@ const modeLabel = computed(
   () =>
     ({ 1: "随机播放", 2: "顺序播放", 3: "单曲循环" })[state.music.mode as 1 | 2 | 3] || "顺序播放",
 );
+const modeIcon = computed(
+  () => ({ 1: "shuffle", 2: "repeat", 3: "repeatOne" })[state.music.mode as 1 | 2 | 3] || "repeat",
+);
 const activeLyric = computed(() => {
   let index = -1;
   state.lyrics.forEach((line, i) => {
@@ -255,11 +258,7 @@ function setTimer() {
           </div>
           <div class="player-controls">
             <md-icon-button @click="changeMode" :aria-label="modeLabel"
-              ><AppIcon :name="state.music.mode === 1 ? 'shuffle' : 'repeat'" /><span
-                v-if="state.music.mode === 3"
-                class="repeat-one"
-                >1</span
-              ></md-icon-button
+              ><AppIcon :name="modeIcon" /></md-icon-button
             ><md-icon-button aria-label="上一首" @click="send({ type: 'prev' })"
               ><AppIcon name="prev" :size="28" /></md-icon-button
             ><md-filled-icon-button
@@ -385,7 +384,7 @@ function setTimer() {
           ><AppIcon name="arrow" /></button
         ><button class="card quick-card" @click="changeMode">
           <MaterialState />
-          <AppIcon :name="state.music.mode === 1 ? 'shuffle' : 'repeat'" :size="28" /><span
+          <AppIcon :name="modeIcon" :size="28" /><span
             ><strong>播放模式</strong><small>{{ modeLabel }}</small></span
           ><AppIcon name="arrow" /></button
         ><a class="card quick-card" href="#/sound"

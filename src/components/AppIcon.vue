@@ -17,6 +17,7 @@ import prev from "@material-symbols/svg-400/outlined/skip_previous.svg?raw";
 import next from "@material-symbols/svg-400/outlined/skip_next.svg?raw";
 import volume from "@material-symbols/svg-400/outlined/volume_up.svg?raw";
 import repeat from "@material-symbols/svg-400/outlined/repeat.svg?raw";
+import repeatOne from "@material-symbols/svg-400/outlined/repeat_one.svg?raw";
 import shuffle from "@material-symbols/svg-400/outlined/shuffle.svg?raw";
 import queue from "@material-symbols/svg-400/outlined/queue_music.svg?raw";
 import clock from "@material-symbols/svg-400/outlined/timer.svg?raw";
@@ -67,6 +68,7 @@ const icons: Record<string, string> = Object.fromEntries(
     next,
     volume,
     repeat,
+    repeatOne,
     shuffle,
     queue,
     clock,

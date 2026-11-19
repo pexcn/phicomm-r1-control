@@ -566,14 +566,6 @@ body:has(.cover-viewer[open]) {
   gap: clamp(16px, 3vw, 44px);
   padding: 8px 0 16px;
 }
-.repeat-one {
-  position: absolute;
-  font-size: 10px;
-  top: 14px;
-  left: 17px;
-  background: var(--surface);
-  line-height: 12px;
-}
 .volume-row {
   display: flex;
   align-items: center;
