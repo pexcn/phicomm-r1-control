@@ -126,15 +126,28 @@ onBeforeUnmount(() => clearTimeout(timer));
             <md-text-button @click="send({ type: 'get_eq_config' })">重新读取</md-text-button>
           </div>
           <template v-else
-            ><div v-if="state.eq.presets.length" class="preset-buttons">
-              <md-outlined-button
+            ><div
+              v-if="state.eq.presets.length"
+              class="preset-buttons"
+              role="group"
+              aria-label="设备 EQ 预设"
+            >
+              <button
+                class="preset-option"
+                type="button"
                 v-for="preset in state.eq.presets"
                 :key="preset.id"
                 :disabled="!state.eq.enabled"
                 :class="{ active: state.eq.current === preset.id }"
+                :aria-pressed="state.eq.current === preset.id"
                 @click="command({ type: 'set_eq_preset', preset: preset.id })"
-                >{{ preset.name }}</md-outlined-button
               >
+                <MaterialState :disabled="!state.eq.enabled" /><AppIcon
+                  v-if="state.eq.current === preset.id"
+                  name="check"
+                  :size="18"
+                />{{ preset.name }}
+              </button>
             </div>
             <div class="eq-bands">
               <div v-for="band in state.eq.bands" :key="band.id" class="eq-band">

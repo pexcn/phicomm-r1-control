@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useConfirmation } from "../lib/confirmation";
 import AppDialog from "../components/AppDialog.vue";
 import AppSlider from "../components/AppSlider.vue";
 import { sliderPercent } from "../lib/slider-values";
@@ -29,6 +30,7 @@ import {
   type Track,
 } from "../lib/speaker";
 
+const confirmAction = useConfirmation();
 const modeLabel = computed(
   () =>
     ({ 1: "随机播放", 2: "顺序播放", 3: "单曲循环" })[state.music.mode as 1 | 2 | 3] || "顺序播放",
@@ -146,11 +148,20 @@ function voicePlay() {
     notify("已发送语音点播指令，需设备语音服务支持。");
   }
 }
-function remove(index: number) {
+async function remove(index: number) {
   const session = state.session;
+  const song = state.queue[index];
+  if (!song) return;
   if (
-    confirm(`从队列删除“${state.queue[index]?.title || "这首歌曲"}”？`) &&
-    state.session === session
+    (await confirmAction({
+      title: "删除队列歌曲？",
+      message: `从队列删除“${song.title || "这首歌曲"}”？`,
+      action: "删除歌曲",
+      danger: true,
+    })) &&
+    state.session === session &&
+    connected.value &&
+    state.queue[index]?.id === song.id
   )
     editQueue("remove", index);
 }
@@ -425,14 +436,15 @@ function setTimer() {
     ><div slot="headline">定时暂停</div>
     <div slot="content" class="dialog-content">
       <p class="muted">在指定时间后发送暂停播放指令。</p>
-      <div class="segmented">
+      <div class="segmented" role="group" aria-label="定时暂停时长">
         <button
           v-for="minutes in [15, 30, 60]"
           :key="minutes"
           :aria-pressed="sleepMinutes === minutes"
           @click="sleepMinutes = minutes"
         >
-          <MaterialState /> {{ minutes }} 分钟
+          <MaterialState /><AppIcon v-if="sleepMinutes === minutes" name="check" :size="18" />
+          {{ minutes }} 分钟
         </button>
       </div>
       <p class="hint">需保持本页打开并连接音箱。浏览器休眠可能延迟执行；断线或换机后自动取消。</p>

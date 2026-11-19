@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ConfirmDialog from "./components/ConfirmDialog.vue";
+import { respondToConfirmation } from "./lib/confirmation";
 import MaterialState from "./components/MaterialState.vue";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import AppIcon from "./components/AppIcon.vue";
@@ -37,6 +39,7 @@ function hashChange() {
   page.value = currentPage();
 }
 window.addEventListener("hashchange", hashChange);
+watch([page, () => state.session], () => respondToConfirmation());
 watch([page, connected], () => readPanel(page.value));
 onMounted(restoreConnection);
 function focusMain() {
@@ -117,7 +120,7 @@ onBeforeUnmount(() => {
       ><MaterialState /><span><AppIcon :name="item.icon" /></span>{{ item.label }}</a
     >
   </nav>
-  <ConnectionDialog /><DeviceManagerDialog /><SettingsDialog />
+  <ConnectionDialog /><DeviceManagerDialog /><SettingsDialog /><ConfirmDialog />
   <div v-if="state.toast" class="snackbar" role="status">
     {{ state.toast
     }}<button @click="state.toast = ''" aria-label="关闭提示">

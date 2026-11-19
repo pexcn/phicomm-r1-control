@@ -16,6 +16,10 @@ import AppIcon from "./AppIcon.vue";
 const address = ref(state.address);
 const name = ref("");
 const validationError = ref("");
+const addressError = ref("");
+const nameError = ref("");
+watch(address, () => (addressError.value = ""));
+watch(name, () => (nameError.value = ""));
 const profile = computed(() =>
   state.devices.find((device) => device.id === state.connectionDeviceId),
 );
@@ -45,12 +49,33 @@ watch(
       address.value = profile.value?.address || "";
       name.value = profile.value?.name || "";
       validationError.value = "";
+      addressError.value = "";
+      nameError.value = "";
     }
   },
 );
 function submit(connectAfter = true) {
   if (busy.value || (!connectAfter && requiresReconnect.value)) return;
   validationError.value = "";
+  addressError.value = "";
+  nameError.value = "";
+  let normalized: string;
+  try {
+    normalized = endpoint(address.value).href;
+  } catch (cause) {
+    addressError.value = (cause as Error).message;
+    return;
+  }
+  if (name.value.trim().length > 40) {
+    nameError.value = "设备名称不能超过 40 个字符。";
+    return;
+  }
+  if (
+    state.devices.some((device) => device.address === normalized && device.id !== profile.value?.id)
+  ) {
+    addressError.value = "该地址已保存在设备列表中，请直接选择或编辑已有设备。";
+    return;
+  }
   try {
     const device = saveDevice({ id: profile.value?.id, name: name.value, address: address.value });
     state.connectionDeviceId = device.id;
@@ -85,6 +110,8 @@ function closed() {
         label="设备名称（可选）"
         placeholder="例如：客厅音箱"
         :value="name"
+        :error="!!nameError"
+        :error-text="nameError"
         :disabled="busy"
         maxlength="40"
         @input="name = ($event.target as HTMLInputElement).value"
@@ -93,6 +120,8 @@ function closed() {
         label="音箱地址"
         placeholder="192.168.1.40 或 wss://代理地址/"
         :value="address"
+        :error="!!addressError"
+        :error-text="addressError"
         :disabled="busy"
         @input="address = ($event.target as HTMLInputElement).value"
         @keydown.enter.prevent="submit()"

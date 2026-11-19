@@ -283,18 +283,6 @@ export function forgetDevice(id: string): void {
   const device = state.devices.find((item) => item.id === id);
   if (!device) return;
   const current = device.address === state.address;
-  const session = state.session;
-  if (
-    !confirm(
-      `从此浏览器移除“${device.name || device.reportedName || "音箱"}”？${current && state.status !== "disconnected" ? "当前控制连接会断开，音箱播放不会停止。" : "不会修改音箱本身。"}`,
-    )
-  )
-    return;
-  if (
-    session !== state.session ||
-    !state.devices.some((item) => item.id === id && item.address === device.address)
-  )
-    return;
   if (current) {
     disconnect();
     state.address = "";

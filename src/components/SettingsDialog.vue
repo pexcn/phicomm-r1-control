@@ -99,7 +99,7 @@ function saveApi() {
     <div slot="content" class="dialog-content">
       <div>
         <h3>明暗模式</h3>
-        <div class="segmented" aria-label="外观模式">
+        <div class="segmented" role="group" aria-label="外观模式">
           <button
             v-for="option in themes"
             :key="option.id"
@@ -107,7 +107,11 @@ function saveApi() {
             :disabled="isTransitioning"
             @click="setMode(option.id, themeOrigin($event))"
           >
-            <MaterialState />
+            <MaterialState :disabled="isTransitioning" /><AppIcon
+              v-if="mode === option.id"
+              name="check"
+              :size="18"
+            />
             {{ option.label }}
           </button>
         </div>

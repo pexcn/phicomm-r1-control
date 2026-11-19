@@ -426,6 +426,10 @@ md-dialog {
   overflow: hidden;
 }
 .segmented button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   flex: 1;
   border: 0;
   border-right: 1px solid var(--border);
@@ -439,7 +443,7 @@ md-dialog {
   border-right: 0;
 }
 .segmented button[aria-pressed="true"] {
-  color: var(--accent);
+  color: var(--md-sys-color-on-secondary-container);
   background: var(--soft);
   font-weight: 500;
 }
@@ -883,11 +887,24 @@ body:has(.cover-viewer[open]) {
   flex-wrap: wrap;
   margin-bottom: 20px;
 }
+.preset-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 24px;
+  background: transparent;
+  color: var(--accent);
+  font: var(--type-label-large);
+}
 .preset-buttons .active {
   background: var(--soft);
   border-radius: 24px;
-  --md-outlined-button-outline-color: transparent;
-  --md-outlined-button-label-text-color: var(--md-sys-color-on-secondary-container);
+  border-color: transparent;
+  color: var(--md-sys-color-on-secondary-container);
 }
 .eq-band {
   display: flex;

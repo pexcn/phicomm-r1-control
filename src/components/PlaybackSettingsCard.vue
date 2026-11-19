@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { useConfirmation } from "../lib/confirmation";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { action, flag, numeric, object } from "../lib/protocol";
 import { audioDetails } from "../lib/playback-settings";
 import { connected, notify, requestDevice, send, state } from "../lib/speaker";
 
+const confirmAction = useConfirmation();
 const sources = [
   { value: "qq", label: "QQ 音乐" },
   { value: "netease", label: "网易云音乐" },
@@ -56,7 +58,11 @@ async function change(event: Event, setting: "source" | "engine" | "quality") {
   const session = state.session;
   if (
     setting === "engine" &&
-    !confirm("切换播放引擎需要重启 EchoService，将中断播放与连接。继续吗？")
+    !(await confirmAction({
+      title: "切换播放引擎？",
+      message: "需要重启 EchoService，将中断播放与连接。",
+      action: "切换并重启",
+    }))
   )
     return;
   if (session !== state.session || !connected.value) return;

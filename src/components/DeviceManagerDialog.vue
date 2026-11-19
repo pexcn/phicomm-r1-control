@@ -1,9 +1,27 @@
 <script setup lang="ts">
+import { useConfirmation } from "../lib/confirmation";
 import AppDialog from "./AppDialog.vue";
 import { profileAddress, profileName } from "../lib/device-profiles";
 import { activeDevice, connected, forgetDevice, openConnectionDialog, state } from "../lib/speaker";
 import AppIcon from "./AppIcon.vue";
 
+const confirmAction = useConfirmation();
+async function remove(id: string) {
+  const device = state.devices.find((item) => item.id === id);
+  if (!device) return;
+  const session = state.session;
+  if (
+    (await confirmAction({
+      title: "移除已保存的音箱？",
+      message: `从此浏览器移除“${profileName(device)}”？${connected.value && activeDevice.value?.id === id ? "当前控制连接会断开，音箱播放不会停止。" : "不会修改音箱本身。"}`,
+      action: "移除音箱",
+      danger: true,
+    })) &&
+    session === state.session &&
+    state.devices.some((item) => item.id === id && item.address === device.address)
+  )
+    forgetDevice(id);
+}
 let pendingEditor: { id?: string } | null = null;
 function edit(id?: string) {
   pendingEditor = { id };
@@ -40,9 +58,7 @@ function closed() {
           </div>
           <md-icon-button :aria-label="`编辑 ${profileName(device)}`" @click="edit(device.id)"
             ><AppIcon name="edit" :size="20" /></md-icon-button
-          ><md-icon-button
-            :aria-label="`移除 ${profileName(device)}`"
-            @click="forgetDevice(device.id)"
+          ><md-icon-button :aria-label="`移除 ${profileName(device)}`" @click="remove(device.id)"
             ><AppIcon name="trash" :size="20"
           /></md-icon-button>
         </li>

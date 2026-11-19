@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useConfirmation } from "../lib/confirmation";
 import MaterialState from "../components/MaterialState.vue";
 import { computed, ref } from "vue";
 import AppIcon from "../components/AppIcon.vue";
@@ -20,6 +21,7 @@ import {
   state,
 } from "../lib/speaker";
 
+const confirmAction = useConfirmation();
 const newName = ref("");
 const miPlayOpen = ref(false);
 const serviceBusy = ref(false);
@@ -28,7 +30,11 @@ async function rebootAdbd() {
   const session = state.session;
   if (
     restartingAdbd.value ||
-    !confirm("确定重启 adbd？正在使用的 ADB 连接将短暂中断。") ||
+    !(await confirmAction({
+      title: "重启 adbd？",
+      message: "正在使用的 ADB 连接将短暂中断。",
+      action: "重启 adbd",
+    })) ||
     session !== state.session ||
     !connected.value
   )
@@ -145,11 +151,16 @@ function rename() {
     send({ type: "get_info", type_id: "web-info" });
   }
 }
-function reboot(serviceOnly: boolean) {
+async function reboot(serviceOnly: boolean) {
   const session = state.session;
   const label = serviceOnly ? "EchoService" : "音箱";
   if (
-    confirm(`确定重启${label}？当前连接会中断。`) &&
+    (await confirmAction({
+      title: `重启${label}？`,
+      message: "当前控制连接会中断。",
+      action: `重启${label}`,
+      danger: !serviceOnly,
+    })) &&
     session === state.session &&
     connected.value
   ) {

@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { connected, requestDevice, state } from "../lib/speaker";
 import { miPlayDiag, miPlayIp, miPlayValue, miPlayWrite, type MiPlaySetting } from "../lib/miplay";
 import { type Data } from "../lib/protocol";
+import AppIcon from "./AppIcon.vue";
 import MaterialState from "./MaterialState.vue";
 
 const props = defineProps<{ open: boolean }>();
@@ -66,6 +67,7 @@ async function query() {
 }
 async function save(key: MiPlaySetting, input: string | number) {
   if (busy.value || !supported.value || !diag.value || !has(key)) return;
+  if (key === "channel" && Number(input) === channel.value) return;
   const current = ++generation;
   const session = state.session;
   const valid = () =>
@@ -145,15 +147,19 @@ const fields = [
       <template v-if="diag">
         <div>
           <h3>输出声道</h3>
-          <div class="segmented">
+          <div class="segmented" role="group" aria-label="输出声道">
             <button
               v-for="(label, mode) in ['立体声', '左声道', '右声道']"
               :key="mode"
               :aria-pressed="channel === mode"
-              :disabled="busy || channel === null || channel === mode"
+              :disabled="busy || channel === null"
               @click="save('channel', mode)"
             >
-              <MaterialState />{{ label }}
+              <MaterialState :disabled="busy || channel === null" /><AppIcon
+                v-if="channel === mode"
+                name="check"
+                :size="18"
+              />{{ label }}
             </button>
           </div>
         </div>

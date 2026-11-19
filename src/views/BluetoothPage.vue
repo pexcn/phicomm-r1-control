@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { useConfirmation } from "../lib/confirmation";
 import { computed, onBeforeUnmount } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { connected, notify, send, state } from "../lib/speaker";
 import type { Data } from "../lib/protocol";
 
+const confirmAction = useConfirmation();
 const seen = computed(() =>
   state.bluetooth.scanned.filter(
     (row, index, list) =>
@@ -31,9 +33,20 @@ function command(type: string, row: Data) {
     notify("已发送指令，等待设备确认。");
   }
 }
-function remove(row: Data) {
+async function remove(row: Data) {
   const session = state.session;
-  if (confirm(`取消与“${String(row.Name || row.Address)}”的配对？`) && session === state.session)
+  const address = row.Address;
+  if (
+    (await confirmAction({
+      title: "取消蓝牙配对？",
+      message: `取消与“${String(row.Name || address)}”的配对？`,
+      action: "取消配对",
+      danger: true,
+    })) &&
+    session === state.session &&
+    connected.value &&
+    state.bluetooth.bonded.some((device) => device.Address === address)
+  )
     command("BT_removeBond", row);
 }
 </script>
