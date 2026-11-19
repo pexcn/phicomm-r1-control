@@ -11,7 +11,8 @@ import TurntablePlayer from "../components/TurntablePlayer.vue";
 import LocalMusicDialog from "../components/LocalMusicDialog.vue";
 import AtmosphereLightDialog from "../components/AtmosphereLightDialog.vue";
 import PlaybackSettingsCard from "../components/PlaybackSettingsCard.vue";
-import { action, array, flag, formatTime, numeric, object } from "../lib/protocol";
+import { searchPlayback, playbackPresentation, audioSourceError } from "../lib/music-playback";
+import { action, array, formatTime, numeric, object } from "../lib/protocol";
 import {
   canEditQueue,
   cancelSleep,
@@ -31,6 +32,8 @@ import {
 } from "../lib/speaker";
 
 const confirmAction = useConfirmation();
+const playbackView = computed(() => playbackPresentation(state.music));
+const sourceError = computed(() => audioSourceError(state.info));
 const modeLabel = computed(
   () =>
     ({ 1: "随机播放", 2: "顺序播放", 3: "单曲循环" })[state.music.mode as 1 | 2 | 3] || "顺序播放",
@@ -120,25 +123,13 @@ function playResult(song: Track, append: boolean) {
     notify("精确点播和队列追加需要 EchoService ≥ 1.8.87；旧设备可使用语音点播。");
     return;
   }
-  const item: Record<string, unknown> = {
-    itemId: song.id,
-    title: song.title,
-    artist: song.artist,
-    album: "",
-    albumUrl: song.cover,
-    itemType: 0,
-  };
-  if (!flag(state.info.Unisound)) {
-    const url = musicApi();
-    url.searchParams.set("url", song.id);
-    item.url = url.href;
-  }
-  const payload = append
-    ? { curItemId: song.id, pageIndex: 1, itemList: [item] }
-    : { curItemId: song.id, index: 0, itemList: [item] };
-  if (send(action(4, append ? 19 : 15, -1, JSON.stringify(payload)))) {
-    notify(append ? "已发送追加指令。" : "已发送播放指令。");
-    send({ type: "list" });
+  try {
+    if (send(searchPlayback(song, append, musicApi()))) {
+      notify(append ? "已发送追加请求，等待音箱确认。" : "已发送播放请求，等待音箱加载音频。");
+      send({ type: "list" });
+    }
+  } catch (cause) {
+    searchError.value = (cause as Error).message;
   }
 }
 function voicePlay() {
@@ -186,7 +177,7 @@ function setTimer() {
     <div class="page-heading">
       <div>
         <p class="eyebrow">你的音乐空间</p>
-        <h1>{{ connected && state.music.title ? "正在播放" : "音乐" }}</h1>
+        <h1>{{ connected && state.music.title ? playbackView.label : "音乐" }}</h1>
         <p class="muted">
           {{ connected ? "此刻的声音，由你掌控。" : "连接音箱，开启一段好时光。" }}
         </p>
@@ -206,17 +197,27 @@ function setTimer() {
                 :title="state.music.title"
                 :artist="state.music.artist"
                 :track-id="state.music.id"
-                :playing="state.music.playing"
+                :playing="playbackView.spinning"
                 :position="state.music.position"
                 :duration="state.music.duration"
               />
             </div>
             <div class="song-details">
-              <span class="tonal-label">{{ state.music.playing ? "正在播放" : "已暂停" }}</span>
+              <span class="tonal-label" :class="{ error: playbackView.error }">{{
+                playbackView.label
+              }}</span>
               <h2>{{ state.music.title || "还没有播放音乐" }}</h2>
               <p class="muted">
                 {{ state.music.artist || "从搜索或设备开始播放"
                 }}<template v-if="state.music.album"> · {{ state.music.album }}</template>
+              </p>
+              <p
+                v-if="playbackView.hint"
+                class="notice playback-notice"
+                :class="{ error: playbackView.error }"
+                :role="playbackView.error ? 'alert' : 'status'"
+              >
+                {{ playbackView.hint }}<template v-if="sourceError"> {{ sourceError }}</template>
               </p>
               <div class="lyrics" aria-label="歌词">
                 <template v-if="visibleLyrics.length"
@@ -248,7 +249,9 @@ function setTimer() {
               :value="state.music.position"
               :disabled="!state.music.duration"
               @change="seek(Number(($event.target as HTMLInputElement).value))"
-            /><span>{{ formatTime(state.music.duration) }}</span>
+            /><span>{{
+              state.music.duration > 0 ? formatTime(state.music.duration) : "--:--"
+            }}</span>
           </div>
           <div class="player-controls">
             <md-icon-button @click="changeMode" :aria-label="modeLabel"
@@ -423,7 +426,7 @@ function setTimer() {
           >搜索</md-filled-button
         >
       </form>
-      <p class="hint">匿名搜索，不提供账号登录。可用曲目与播放权限取决于音乐服务。</p>
+      <p class="hint">匿名搜索和点播，不提供账号登录。音频可用性与音质取决于音乐服务及音箱网络。</p>
       <md-text-button v-if="connected && keyword.trim()" @click="voicePlay"
         ><AppIcon slot="icon" name="mic" :size="18" />让音箱播放“{{
           keyword.trim()

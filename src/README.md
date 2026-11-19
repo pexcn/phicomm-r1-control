@@ -6,6 +6,7 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `App.vue`、`components/`、`views/`：应用外壳、共享组件和五个功能页。
 - `lib/client.ts`：WebSocket 生命周期、轮询、重连和旧连接消息隔离。
 - `lib/protocol.ts`：协议数据与地址校验。
+- `lib/music-playback.ts`：匿名点播的音频入口、设备播放状态与音源错误；不以 Unisound 存在或封面加载推断音频可用。
 - `lib/speaker.ts`：设备状态和操作；不实现音乐账号登录。
 - `lib/device-profiles.ts`：已保存设备的迁移、校验、地址去重与本地别名。
 - `components/DeviceSwitcher.vue`：桌面锚定菜单、手机底部面板及真实连接标记。
@@ -50,7 +51,7 @@ PWA 清单和图标在 `public/`。`scripts/build-pwa.mjs` 在正式构建后根
 
 唱片与唱针图片由 `upstream/original/newui/images/` 中的原件直接打包为本站静态资源，
 不加载原版业务脚本、不修改原件。原图尺寸改变时需复核唱针支点和针尖标定。
-旋转与唱针跟随设备上报状态；时长未知时落在外圈，播完或暂停时停转并移出唱针。
+旋转与唱针跟随设备上报状态；已确认播放但时长未知时落在外圈，播完、暂停、加载、缓冲或错误时停转并移出唱针。
 暂停保留当前转角，封面大图独立静止显示；启用减少动态效果时关闭旋转与摆臂过渡。
 
 Roboto 400/500/700 字重本地打包，中文使用系统字体回退；图标使用官方 Material Symbols。

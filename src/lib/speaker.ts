@@ -13,6 +13,7 @@ import {
   type Data,
   type Message,
 } from "./protocol.ts";
+import { reportedPlayerState } from "./music-playback.ts";
 import { load, save } from "./storage.ts";
 import { editDeviceProfile, readDeviceProfiles, type DeviceDraft } from "./device-profiles.ts";
 
@@ -71,6 +72,7 @@ export const state = reactive({
     album: "",
     cover: "",
     playing: false,
+    playerState: null as number | null,
     position: 0,
     duration: 0,
     volume: 0,
@@ -181,6 +183,7 @@ function resetSession(): void {
     album: "",
     cover: "",
     playing: false,
+    playerState: null as number | null,
     position: 0,
     duration: 0,
     volume: 0,
@@ -417,8 +420,10 @@ function receive(message: Message): void {
           cover: safeImage(song.albumUrl || song.cover),
           position: 0,
           duration: 0,
+          playerState: null,
         });
       }
+      if (payload.music_info !== undefined) state.music.playerState = reportedPlayerState(song);
       if (payload.play_state !== undefined) state.music.playing = flag(payload.play_state);
       else if (song.playing !== undefined) state.music.playing = flag(song.playing);
       if (payload.vol !== undefined) state.music.volume = numeric(payload.vol);

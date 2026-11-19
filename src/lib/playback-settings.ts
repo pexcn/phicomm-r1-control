@@ -1,3 +1,4 @@
+import { audioSourceError } from "./music-playback.ts";
 import { numeric, object, type Data } from "./protocol.ts";
 
 // Report measured metadata; bitrate alone cannot establish losslessness.
@@ -6,6 +7,8 @@ export function audioDetails(info: Data): [string, string][] {
   const format = object(music.Format);
   const api = object(music.api_data);
   const rows: [string, string][] = [];
+  const sourceError = audioSourceError(info);
+  if (sourceError) rows.push(["音源响应", sourceError]);
   if (typeof api.quality === "string" && api.quality) rows.push(["实际音质", api.quality]);
   if (typeof format.sampleMimeType === "string") rows.push(["格式", format.sampleMimeType]);
   const bitrate = numeric(api.br) || numeric(format.bitrate);

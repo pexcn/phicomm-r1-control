@@ -495,6 +495,52 @@ class NewWebTests(unittest.TestCase):
         finally:
             cdp.detach()
 
+    def test_anonymous_search_sends_public_audio_url_even_with_unisound(self):
+        self.context.route('https://r1.wxfsq.com/music**',lambda route:route.fulfill(json={'code':1,'data':{'list':[{'id':'661836412,kuwo','name':'Song of Wings','artist':'PROJECT ACES'}]}}))
+        self.start(1887)
+        for available in [True,False]:
+            self.mock_music(Unisound=available)
+            self.page.get_by_role('button',name='搜索音乐',exact=True).click()
+            self.page.get_by_label('歌曲、歌手或专辑',exact=True).fill('song of wings')
+            self.set_material_value('.search-form md-outlined-select','kuwo')
+            dialog = self.page.locator('.search-dialog')
+            dialog.get_by_role('button',name='搜索',exact=True).click()
+            dialog.locator('.search-results').get_by_text('Song of Wings',exact=True).wait_for()
+            dialog.locator('.search-results').get_by_role('button',name='播放',exact=True).click()
+            dialog.get_by_role('button',name='添加 Song of Wings',exact=True).click()
+            for method in [15,19]:
+                message = next(m for m in reversed(self.sent()) if m['type']=='send_message' and m.get('arg1')==method)
+                item = json.loads(message['obj'])['itemList'][0]
+                self.assertEqual(item['itemId'],'661836412,kuwo')
+                self.assertEqual(item['url'],'http://r1.wxfsq.com/music?url=661836412%2Ckuwo')
+            dialog.get_by_role('button',name='关闭',exact=True).click()
+        self.assertFalse(any(m['type']=='send_to_unisound' for m in self.sent()))
+
+    def test_music_failure_and_loading_override_play_intent_and_loaded_cover(self):
+        self.start(1887)
+        cover = self.page.evaluate('mockScreen')
+        self.mock_music(play_state=True,music_info={'state':4,'duration':0,'position':0,'albumUrl':cover,'Current_MusicData':{'id':'mock:track-1','api_data':{'code':-1,'msg':'登录状态已过期'}}})
+        self.page.locator('.page-heading').get_by_role('heading',name='播放失败',exact=True).wait_for()
+        self.page.locator('.playback-notice').filter(has_text='音箱报告播放失败').filter(has_text='音源接口返回 -1：登录状态已过期').wait_for()
+        self.page.wait_for_function("!document.querySelector('.turntable-cover').disabled")
+        self.assertFalse(self.page.locator('.turntable').evaluate('el=>el.classList.contains("is-playing")'))
+        self.assertEqual(self.page.locator('.seek-row > span').last.inner_text(),'--:--')
+        self.assertTrue(self.page.locator('#music-progress').evaluate('el=>el.disabled'))
+        self.mock_music(play_state=False,music_info={'state':3,'Current_MusicData':None})
+        self.page.locator('.page-heading').get_by_role('heading',name='正在加载',exact=True).wait_for()
+        self.mock_music(play_state=True,music_info={'state':6,'duration':180000})
+        self.page.locator('.page-heading').get_by_role('heading',name='正在缓冲',exact=True).wait_for()
+        self.assertFalse(self.page.locator('.turntable').evaluate('el=>el.classList.contains("is-playing")'))
+        self.mock_music(music_info={'state':1,'duration':180000,'position':1000})
+        self.page.locator('.page-heading').get_by_role('heading',name='正在播放',exact=True).wait_for()
+        self.assertTrue(self.page.locator('.turntable').evaluate('el=>el.classList.contains("is-playing")'))
+        self.mock_music(music_info={'state':None,'duration':0,'position':0})
+        self.page.locator('.page-heading').get_by_role('heading',name='等待音频',exact=True).wait_for()
+        self.page.locator('.playback-notice').wait_for()
+        self.mock_music(music_info={'state':1,'position':10000})
+        self.page.locator('.page-heading').get_by_role('heading',name='正在播放',exact=True).wait_for()
+        self.assertEqual(self.page.locator('.seek-row > span').last.inner_text(),'--:--')
+
     def test_reload_restores_last_successful_endpoint_and_reads_fresh_state(self):
         address = 'wss://speaker.example/room/ws?key=a%2Fb'
         self.start(1887, address)
