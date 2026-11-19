@@ -40,6 +40,14 @@ window.WebSocket = class {
     diag_age_ms: 12,
   };
   remoteMiPlay = { channel: 2, queue_target_ms: 900, sync_delay_ms: 20, running: true };
+  queue = {
+    playIndex: 0,
+    playList: [
+      { id: "track-1", title: "夜航", artist: "示例歌手", duration: 248000 },
+      { id: "track-2", title: "晚风", artist: "示例歌手", duration: 236000 },
+      { id: "track-3", title: "林间光", artist: "示例歌手", duration: 262000 },
+    ],
+  };
   constructor(url) {
     this.url = url;
     mockSockets.push(this);
@@ -59,6 +67,25 @@ window.WebSocket = class {
   send(raw) {
     const message = JSON.parse(raw);
     this.sent.push(message);
+    if (message.type === "send_message" && message.what === 4 && message.arg1 === 29) {
+      const { index } = JSON.parse(message.obj);
+      const remove = () => {
+        if (
+          window.mockQueueReject ||
+          !Number.isInteger(index) ||
+          index < 0 ||
+          index >= this.queue.playList.length ||
+          index === this.queue.playIndex
+        )
+          return;
+        this.queue.playList.splice(index, 1);
+        if (index < this.queue.playIndex) this.queue.playIndex--;
+      };
+      if (window.mockQueueDelayMs) setTimeout(remove, window.mockQueueDelayMs);
+      else remove();
+      return;
+    }
+
     if (message.type === "switch_player" || message.type === "switch_quality") {
       const key = message.type === "switch_player" ? "player" : "quality";
       if (!window.mockPlaybackReject)
@@ -200,14 +227,7 @@ window.WebSocket = class {
         },
       },
       max_vol: 30,
-      list: {
-        playIndex: 0,
-        playList: [
-          { id: "track-1", title: "夜航", artist: "示例歌手", duration: 248000 },
-          { id: "track-2", title: "晚风", artist: "示例歌手", duration: 236000 },
-          { id: "track-3", title: "林间光", artist: "示例歌手", duration: 262000 },
-        ],
-      },
+      list: this.queue,
       get_device_info: {
         nameValuePairs: {
           incremental: "3448",

@@ -151,7 +151,15 @@ function voicePlay() {
 async function remove(index: number) {
   const session = state.session;
   const song = state.queue[index];
-  if (!song) return;
+  if (!song || state.queueBusy) return;
+  if (state.queueIndex < 0 || index === state.queueIndex) {
+    notify(
+      state.queueIndex < 0
+        ? "尚未确认当前播放项，请刷新队列后再删除。"
+        : "EchoService 不允许删除当前播放项，暂停后也不能删除。",
+    );
+    return;
+  }
   if (
     (await confirmAction({
       title: "删除队列歌曲？",
@@ -161,7 +169,9 @@ async function remove(index: number) {
     })) &&
     state.session === session &&
     connected.value &&
-    state.queue[index]?.id === song.id
+    state.queue[index]?.id === song.id &&
+    state.queue[index]?.title === song.title &&
+    state.queue[index]?.artist === song.artist
   )
     editQueue("remove", index);
 }
@@ -280,7 +290,10 @@ function setTimer() {
           <div class="section-heading">
             <h2>播放队列</h2>
             <span class="muted">{{ state.queue.length }} 首</span
-            ><md-icon-button aria-label="刷新队列" @click="send({ type: 'list' })"
+            ><md-icon-button
+              aria-label="刷新队列"
+              :disabled="state.queueBusy"
+              @click="send({ type: 'list' })"
               ><AppIcon name="refresh" :size="20"
             /></md-icon-button>
           </div>
@@ -309,16 +322,31 @@ function setTimer() {
               </button>
               <div v-if="canEditQueue" class="track-actions">
                 <md-icon-button
-                  :disabled="index === 0"
+                  :disabled="state.queueBusy || index === 0"
                   :aria-label="`上移 ${song.title}`"
                   @click="editQueue('move', index, index - 1)"
                   ><AppIcon name="up" :size="18" /></md-icon-button
-                ><md-icon-button :aria-label="`删除 ${song.title}`" @click="remove(index)"
+                ><md-icon-button
+                  :disabled="state.queueBusy || state.queueIndex < 0 || index === state.queueIndex"
+                  :title="index === state.queueIndex ? '当前播放项不能删除' : '从队列删除'"
+                  :aria-label="`删除 ${song.title}`"
+                  @click="remove(index)"
                   ><AppIcon name="close" :size="18"
                 /></md-icon-button>
               </div>
             </li>
           </ol>
+          <p v-if="state.queue.length && canEditQueue" class="hint queue-note" role="status">
+            {{
+              state.queueBusy
+                ? "正在核对删除结果…"
+                : state.queueIndex < 0
+                  ? "尚未确认当前播放项，请刷新队列后再删除。"
+                  : state.queue.length === 1
+                    ? "当前播放项不能删除；设备不支持通过此接口清空队列。"
+                    : "当前播放项不能删除，先切换到另一首后可删除原歌曲。"
+            }}
+          </p>
           <p v-if="state.queue.length && !canEditQueue" class="hint queue-note">
             队列移动与删除需要 EchoService 1.8.87。
           </p>

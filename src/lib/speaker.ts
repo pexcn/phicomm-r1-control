@@ -80,6 +80,7 @@ export const state = reactive({
   lyrics: [] as { time: number; text: string }[],
   queue: [] as Track[],
   queueIndex: -1,
+  queueBusy: false,
   eq: {
     available: false,
     enabled: false,
@@ -189,6 +190,7 @@ function resetSession(): void {
   state.lyrics = [];
   state.queue = [];
   state.queueIndex = -1;
+  state.queueBusy = false;
   state.eq = {
     available: false,
     enabled: false,
@@ -607,12 +609,46 @@ export function changeMode(): void {
   });
 }
 
-export function editQueue(command: "move" | "remove", from: number, to?: number): void {
+export async function editQueue(
+  command: "move" | "remove",
+  from: number,
+  to?: number,
+): Promise<void> {
+  if (state.queueBusy) return;
+  const session = state.session;
   try {
     if (!canEditQueue.value) throw new Error("队列编辑需要当前连接确认 EchoService ≥ 1.8.87。");
-    if (send(queueEdit(state.version, command, from, to))) send({ type: "list" });
+    const message = queueEdit(state.version, command, from, to);
+    if (command === "move") {
+      if (send(message)) send({ type: "list" });
+      return;
+    }
+    if (state.queueIndex < 0) throw new Error("尚未确认当前播放项，请刷新队列后再删除。");
+    if (from === state.queueIndex)
+      throw new Error("EchoService 不允许删除当前播放项，暂停后也不能删除。");
+    if (!state.queue[from]) throw new Error("队列已变化，请刷新后重新选择。");
+    const signature = (rows: Track[]) =>
+      JSON.stringify(rows.map(({ id, title, artist }) => [id, title, artist]));
+    const expected = signature(state.queue.filter((_, index) => index !== from));
+    state.queueBusy = true;
+    if (!send(message)) throw new Error("连接已断开，请重新连接。");
+    // The relay ACK does not report QueueEdit's result. Read the actual queue;
+    // EchoService may finish the edit after the first list request is handled.
+    for (let attempt = 0; attempt < 4; attempt++) {
+      if (attempt) await new Promise((resolve) => setTimeout(resolve, 350));
+      if (session !== state.session || !connected.value) return;
+      await requestDevice({ type: "list" }, 3000);
+      if (session !== state.session || !connected.value) return;
+      if (signature(state.queue) === expected) {
+        notify("队列删除已由音箱回读确认。");
+        return;
+      }
+    }
+    throw new Error("音箱尚未确认删除，队列已按设备实际状态刷新。");
   } catch (error) {
-    notify((error as Error).message);
+    if (session === state.session) notify((error as Error).message);
+  } finally {
+    if (session === state.session) state.queueBusy = false;
   }
 }
 
