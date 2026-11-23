@@ -19,6 +19,7 @@ const loaded = ref(false);
 const failed = ref(false);
 const viewerOpen = ref(false);
 const viewer = ref<HTMLDialogElement>();
+let closingAnimations: Animation[] | null = null;
 const canZoom = computed(() => Boolean(props.cover) && loaded.value && !failed.value);
 const ended = computed(() => props.duration > 0 && props.position >= props.duration);
 const rotating = computed(() => props.playing && !ended.value);
@@ -32,7 +33,39 @@ function openCover() {
   viewer.value.showModal();
 }
 function closeCover() {
+  closingAnimations = null;
   viewer.value?.close();
+}
+async function dismissCover() {
+  const dialog = viewer.value;
+  if (!dialog?.open || closingAnimations) return;
+  const animations = dialog
+    .getAnimations({ subtree: true })
+    .filter(
+      (animation) =>
+        typeof CSSAnimation !== "undefined" &&
+        animation instanceof CSSAnimation &&
+        animation.animationName.startsWith("reveal-cover") &&
+        typeof animation.currentTime === "number" &&
+        animation.currentTime > 0,
+    );
+  if (!animations.length) {
+    closeCover();
+    return;
+  }
+  closingAnimations = animations;
+  // Reverse from the current frame so an early dismissal does not jump to full size.
+  try {
+    for (const animation of animations) {
+      animation.reverse();
+      animation.updatePlaybackRate(-1.6);
+    }
+    await Promise.allSettled(animations.map((animation) => animation.finished));
+  } catch {
+    // An inactive timeline can prevent reversal.
+  } finally {
+    if (closingAnimations === animations) closeCover();
+  }
 }
 function artworkLoaded(event: Event) {
   if ((event.target as HTMLImageElement).src === props.cover) loaded.value = true;
@@ -96,10 +129,11 @@ onBeforeUnmount(closeCover);
     ref="viewer"
     class="cover-viewer"
     aria-label="歌曲封面大图"
-    @click.self="closeCover"
+    @click.self="dismissCover"
+    @cancel.prevent="dismissCover"
     @close="viewerOpen = false"
   >
-    <md-icon-button class="cover-viewer-close" aria-label="关闭封面大图" @click="closeCover">
+    <md-icon-button class="cover-viewer-close" aria-label="关闭封面大图" @click="dismissCover">
       <AppIcon name="close" />
     </md-icon-button>
     <figure v-if="viewerOpen" class="cover-viewer-content">

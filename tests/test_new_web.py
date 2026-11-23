@@ -782,7 +782,18 @@ class NewWebTests(unittest.TestCase):
         self.assertAlmostEqual(ratio['natural'], ratio['display'], places=2)
         self.assertEqual(ratio['animations'], 0)
         self.assertEqual(self.page.evaluate('getComputedStyle(document.body).overflow'), 'hidden')
+        viewer.evaluate("""async el => {
+          const motions = el.getAnimations({subtree: true}).filter(
+            animation => animation.animationName?.startsWith('reveal-cover'));
+          await Promise.all(motions.map(animation => animation.finished));
+          el.addEventListener('cancel', () => {
+            window.dismissedCoverWithMotion = Promise.all(motions.map(animation => animation.ready))
+              .then(() => el.open && motions.length === 2 &&
+                motions.every(animation => animation.playbackRate < 0));
+          }, {once: true});
+        }""")
         self.page.keyboard.press('Escape')
+        self.assertTrue(self.page.evaluate('window.dismissedCoverWithMotion'))
         viewer.wait_for(state='hidden')
         self.assertTrue(cover.evaluate("el=>el.matches(':focus')"))
         self.page.emulate_media(reduced_motion='reduce')
