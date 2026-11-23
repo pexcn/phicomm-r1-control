@@ -1092,7 +1092,12 @@ class NewWebTests(unittest.TestCase):
         self.page.locator('.sidebar nav a[href="#/device"]').click()
         disclosure = self.page.locator('details.advanced')
         summary = disclosure.locator('summary')
+        self.assertEqual(summary.evaluate('el=>getComputedStyle(el).webkitTapHighlightColor'), 'rgba(0, 0, 0, 0)')
+        self.assertEqual(summary.locator('md-ripple').count(), 1)
         summary.focus()
+        self.page.keyboard.press('Shift+Tab')
+        self.page.keyboard.press('Tab')
+        self.assertTrue(summary.evaluate('el=>el.matches(":focus-visible") && getComputedStyle(el).outlineStyle === "solid"'))
         self.page.keyboard.press('Enter')
         self.assertTrue(disclosure.evaluate('el=>el.open'))
         if self.page.evaluate("CSS.supports('interpolate-size: allow-keywords') && CSS.supports('interactivity: inert') && CSS.supports('selector(::details-content)')"):

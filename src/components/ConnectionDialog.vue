@@ -137,7 +137,11 @@ function closed() {
       <div v-if="error" role="alert" class="notice error">{{ error }}</div>
       <details class="connection-help motion-details">
         <summary>
-          HTTPS 下无法连接？<AppIcon class="disclosure-chevron" name="down" :size="18" />
+          <md-ripple />HTTPS 下无法连接？<AppIcon
+            class="disclosure-chevron"
+            name="down"
+            :size="18"
+          />
         </summary>
         <p>
           部分浏览器需允许本站访问本地网络。若浏览器不支持，可使用自己的 WSS 反向代理；GitHub Pages

@@ -227,7 +227,7 @@ const fields = [
         </dl>
         <details class="motion-details">
           <summary>
-            完整诊断数据<AppIcon class="disclosure-chevron" name="down" :size="18" />
+            <md-ripple />完整诊断数据<AppIcon class="disclosure-chevron" name="down" :size="18" />
           </summary>
           <pre>{{ JSON.stringify(diag, null, 2) }}</pre>
         </details>

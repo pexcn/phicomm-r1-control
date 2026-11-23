@@ -7,6 +7,7 @@
 }
 html {
   scrollbar-gutter: stable;
+  -webkit-tap-highlight-color: transparent;
 }
 /* Include teleported dialogs, nested confirmations and the native cover viewer. */
 html:has(md-dialog[data-modal-active], .cover-viewer[open]),
@@ -25,15 +26,6 @@ input,
 select,
 textarea {
   font: inherit;
-}
-button,
-a,
-md-icon-button,
-md-filled-button,
-md-filled-tonal-button,
-md-outlined-button,
-md-text-button {
-  -webkit-tap-highlight-color: transparent;
 }
 button {
   cursor: pointer;
