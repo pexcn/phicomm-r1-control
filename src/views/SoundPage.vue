@@ -98,6 +98,7 @@ onBeforeUnmount(() => clearTimeout(timer));
         <div class="volume-row">
           <AppIcon name="volume" /><AppSlider
             aria-label="播放音量"
+            drag-only
             :format-value="(value) => sliderPercent(value, state.music.maxVolume)"
             :min="0"
             :max="state.music.maxVolume"
@@ -158,6 +159,7 @@ onBeforeUnmount(() => clearTimeout(timer));
                 }}</label
                 ><AppSlider
                   :id="`eq-band-${band.id}`"
+                  drag-only
                   variant="compact"
                   :format-value="(value) => sliderDecibels(value / 100)"
                   :aria-label="`EQ 频段 ${band.id}`"

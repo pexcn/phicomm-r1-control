@@ -11,10 +11,19 @@ const props = withDefaults(
     max?: number;
     step?: number;
     disabled?: boolean;
+    dragOnly?: boolean;
     variant?: "standard" | "compact" | "progress";
     formatValue?: (value: number) => string;
   }>(),
-  { min: 0, max: 100, step: 1, disabled: false, variant: "standard", formatValue: String },
+  {
+    min: 0,
+    max: 100,
+    step: 1,
+    disabled: false,
+    dragOnly: false,
+    variant: "standard",
+    formatValue: String,
+  },
 );
 const emit = defineEmits<{ input: [event: Event]; change: [event: Event] }>();
 const slider = ref<MdSlider>();
@@ -59,6 +68,22 @@ async function placeLabel() {
     bounds.bottom - rect.bottom >= indicator.offsetHeight + 12;
 }
 function startPointer(event: PointerEvent) {
+  if (props.dragOnly) {
+    const handle = slider.value?.shadowRoot?.querySelector(".handle.end")?.getBoundingClientRect();
+    if (
+      !event.isPrimary ||
+      event.button !== 0 ||
+      !handle ||
+      event.clientX < handle.left ||
+      event.clientX > handle.right ||
+      event.clientY < handle.top ||
+      event.clientY > handle.bottom
+    ) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+  }
   if (props.disabled || !event.isPrimary || event.button !== 0) return;
   pointer = event.pointerId;
   cancelled = false;
@@ -133,7 +158,7 @@ onBeforeUnmount(() => {
     ref="slider"
     v-bind="$attrs"
     class="app-slider"
-    :class="`slider-${variant}`"
+    :class="[`slider-${variant}`, { 'slider-drag-only': dragOnly }]"
     :min="min"
     :max="max"
     :step="step"

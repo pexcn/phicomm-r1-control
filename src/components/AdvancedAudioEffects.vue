@@ -178,6 +178,7 @@ onBeforeUnmount(() => {
         >
         <AppSlider
           :aria-label="effect.valueLabel"
+          drag-only
           :format-value="
             (value) =>
               effect.id === 'loudness'
@@ -234,6 +235,7 @@ onBeforeUnmount(() => {
         >
         <AppSlider
           :aria-label="channel.label"
+          drag-only
           variant="compact"
           :format-value="(value) => sliderDecibels(value - 231)"
           :min="211"

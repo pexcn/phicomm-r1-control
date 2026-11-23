@@ -279,6 +279,7 @@ function setTimer() {
             <AppIcon name="volume" /><label>音量</label
             ><AppSlider
               id="music-volume"
+              drag-only
               :format-value="(value) => sliderPercent(value, state.music.maxVolume)"
               aria-label="音量"
               :min="0"

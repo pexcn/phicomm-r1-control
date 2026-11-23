@@ -69,6 +69,25 @@
   block-size: 48px;
   transform: none;
 }
+:host(.slider-drag-only) .container {
+  touch-action: pan-y;
+}
+:host(.slider-drag-only) input {
+  /* Touch browsers can move a range on tap even after pointerdown is canceled. */
+  pointer-events: none;
+  cursor: default;
+}
+:host(.slider-drag-only) input::-webkit-slider-thumb {
+  pointer-events: auto;
+  cursor: ew-resize;
+}
+:host(.slider-drag-only) input::-moz-range-thumb {
+  inline-size: 48px;
+  block-size: 48px;
+  transform: none;
+  pointer-events: auto;
+  cursor: ew-resize;
+}
 :host(.app-slider[data-active]) .handleNub {
   width: 2px;
 }
