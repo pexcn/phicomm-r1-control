@@ -58,6 +58,9 @@ function skipToContent() {
   focusMain();
   main.value?.scrollIntoView({ block: "start" });
 }
+function dismissSnackbar(element: Element) {
+  (element as HTMLElement).inert = true;
+}
 onBeforeUnmount(() => {
   dispose();
   window.removeEventListener("hashchange", hashChange);
@@ -117,11 +120,15 @@ onBeforeUnmount(() => {
         <AppIcon name="info" /><span>{{ state.error }}</span
         ><md-text-button @click="openConnectionDialog(activeDevice?.id)">检查连接</md-text-button>
       </div>
-      <MusicPage v-if="page === 'music'" />
-      <ScreenPage v-else-if="page === 'screen'" />
-      <SoundPage v-else-if="page === 'sound'" />
-      <BluetoothPage v-else-if="page === 'bluetooth'" />
-      <DevicePage v-else />
+      <Transition name="page-view" @leave="(_, done) => done()">
+        <div :key="page">
+          <MusicPage v-if="page === 'music'" />
+          <ScreenPage v-else-if="page === 'screen'" />
+          <SoundPage v-else-if="page === 'sound'" />
+          <BluetoothPage v-else-if="page === 'bluetooth'" />
+          <DevicePage v-else />
+        </div>
+      </Transition>
     </main>
   </div>
   <nav class="bottom-nav" aria-label="手机导航">
@@ -130,17 +137,20 @@ onBeforeUnmount(() => {
       :key="item.id"
       :href="`#/${item.id}`"
       :aria-current="page === item.id ? 'page' : undefined"
-      ><MaterialState /><span><AppIcon :name="item.icon" /></span>{{ item.label }}</a
+      ><MaterialState /><span class="navigation-icon"><AppIcon :name="item.icon" /></span
+      >{{ item.label }}</a
     >
   </nav>
   <ConnectionDialog /><DeviceManagerDialog /><SettingsDialog /><ConfirmDialog />
-  <div v-if="state.toast" class="snackbar" role="status">
-    {{ state.toast
-    }}<button @click="state.toast = ''" aria-label="关闭提示">
-      <MaterialState />
-      <AppIcon name="close" :size="18" />
-    </button>
-  </div>
+  <Transition name="snackbar" @before-leave="dismissSnackbar">
+    <div v-if="state.toast" class="snackbar" role="status">
+      {{ state.toast
+      }}<button @click="state.toast = ''" aria-label="关闭提示">
+        <MaterialState />
+        <AppIcon name="close" :size="18" />
+      </button>
+    </div>
+  </Transition>
 </template>
 
 <style scoped>

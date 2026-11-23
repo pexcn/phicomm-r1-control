@@ -64,6 +64,15 @@ const timerOpen = ref(false);
 const sleepMinutes = ref(30);
 const queueOpen = ref(false);
 const queueHeading = ref<HTMLElement>();
+const queueRows = computed(() => {
+  const counts = new Map<string, number>();
+  return state.queue.map((song) => {
+    const identity = song.id || JSON.stringify([song.title, song.artist]);
+    const occurrence = (counts.get(identity) ?? 0) + 1;
+    counts.set(identity, occurrence);
+    return { song, key: `${identity}:${occurrence}` };
+  });
+});
 const localOpen = ref(false);
 const lightOpen = ref(false);
 watch(
@@ -283,6 +292,8 @@ function setTimer() {
               @click="playback"
             >
               <AppIcon
+                :key="Number(state.music.playing)"
+                class="playback-symbol"
                 :name="state.music.playing ? 'pause' : 'play'"
                 :size="32" /></md-filled-icon-button
             ><md-icon-button aria-label="下一首" @click="send({ type: 'next' })"
@@ -304,77 +315,79 @@ function setTimer() {
         >
           <MaterialState /><AppIcon name="queue" /><span
             >播放队列 <small>{{ state.queue.length }} 首</small></span
-          ><AppIcon :name="queueOpen ? 'up' : 'down'" />
+          ><AppIcon class="disclosure-chevron" name="down" />
         </button>
-        <article
-          id="playback-queue"
-          class="card queue-card"
-          :class="{ 'mobile-expanded': queueOpen }"
-        >
-          <div class="section-heading">
-            <h2 ref="queueHeading" tabindex="-1">播放队列</h2>
-            <span class="muted">{{ state.queue.length }} 首</span
-            ><md-icon-button
-              aria-label="刷新队列"
-              :disabled="state.queueBusy"
-              @click="send({ type: 'list' })"
-              ><AppIcon name="refresh" :size="20"
-            /></md-icon-button>
-          </div>
-          <div v-if="!state.queue.length" class="small-empty">
-            <AppIcon name="queue" :size="36" />
-            <p>队列还是空的</p>
-            <p class="hint">搜索音乐，或从手机推送到音箱。</p>
-          </div>
-          <ol v-else class="track-list">
-            <li
-              v-for="(song, index) in state.queue"
-              :key="song.id + ':' + index"
-              :class="{ selected: state.queueIndex === index }"
-            >
-              <button
-                class="track-main"
-                @click="send({ type: 'play', index })"
-                :aria-label="`播放 ${song.title}`"
-              >
-                <MaterialState />
-                <span class="track-number">{{ String(index + 1).padStart(2, "0") }}</span
-                ><span class="track-text"
-                  ><strong>{{ song.title }}</strong
-                  ><small>{{ song.artist || "未知歌手" }}</small></span
-                ><span v-if="song.duration" class="hint">{{ formatTime(song.duration) }}</span>
-              </button>
-              <div v-if="canEditQueue" class="track-actions">
-                <md-icon-button
-                  :disabled="state.queueBusy || index === 0"
-                  :aria-label="`上移 ${song.title}`"
-                  @click="editQueue('move', index, index - 1)"
-                  ><AppIcon name="up" :size="18" /></md-icon-button
+        <div class="queue-disclosure" :class="{ expanded: queueOpen }">
+          <div class="queue-clip">
+            <article id="playback-queue" class="card queue-card">
+              <div class="section-heading">
+                <h2 ref="queueHeading" tabindex="-1">播放队列</h2>
+                <span class="muted">{{ state.queue.length }} 首</span
                 ><md-icon-button
-                  :disabled="state.queueBusy || state.queueIndex < 0 || index === state.queueIndex"
-                  :title="index === state.queueIndex ? '当前播放项不能删除' : '从队列删除'"
-                  :aria-label="`删除 ${song.title}`"
-                  @click="remove(index)"
-                  ><AppIcon name="close" :size="18"
+                  aria-label="刷新队列"
+                  :disabled="state.queueBusy"
+                  @click="send({ type: 'list' })"
+                  ><AppIcon name="refresh" :size="20"
                 /></md-icon-button>
               </div>
-            </li>
-          </ol>
-          <p v-if="state.queue.length && canEditQueue" class="hint queue-note" role="status">
-            {{
-              state.queueBusy
-                ? "正在核对删除结果…"
-                : state.queueIndex < 0
-                  ? "尚未确认当前播放项，请刷新队列后再删除。"
-                  : state.queue.length === 1
-                    ? "当前播放项不能删除；设备不支持通过此接口清空队列。"
-                    : "当前播放项不能删除，先切换到另一首后可删除原歌曲。"
-            }}
-          </p>
-          <p v-if="state.queue.length && !canEditQueue" class="hint queue-note">
-            队列移动与删除需要 EchoService 1.8.87。
-          </p>
-        </article>
+              <div v-if="!state.queue.length" class="small-empty">
+                <AppIcon name="queue" :size="36" />
+                <p>队列还是空的</p>
+                <p class="hint">搜索音乐，或从手机推送到音箱。</p>
+              </div>
+              <TransitionGroup v-else tag="ol" name="queue-row" class="track-list">
+                <li
+                  v-for="({ song, key }, index) in queueRows"
+                  :key="key"
+                  :class="{ selected: state.queueIndex === index }"
+                >
+                  <button
+                    class="track-main"
+                    @click="send({ type: 'play', index })"
+                    :aria-label="`播放 ${song.title}`"
+                  >
+                    <MaterialState />
+                    <span class="track-number">{{ String(index + 1).padStart(2, "0") }}</span
+                    ><span class="track-text"
+                      ><strong>{{ song.title }}</strong
+                      ><small>{{ song.artist || "未知歌手" }}</small></span
+                    ><span v-if="song.duration" class="hint">{{ formatTime(song.duration) }}</span>
+                  </button>
+                  <div v-if="canEditQueue" class="track-actions">
+                    <md-icon-button
+                      :disabled="state.queueBusy || index === 0"
+                      :aria-label="`上移 ${song.title}`"
+                      @click="editQueue('move', index, index - 1)"
+                      ><AppIcon name="up" :size="18" /></md-icon-button
+                    ><md-icon-button
+                      :disabled="
+                        state.queueBusy || state.queueIndex < 0 || index === state.queueIndex
+                      "
+                      :title="index === state.queueIndex ? '当前播放项不能删除' : '从队列删除'"
+                      :aria-label="`删除 ${song.title}`"
+                      @click="remove(index)"
+                      ><AppIcon name="close" :size="18"
+                    /></md-icon-button>
+                  </div>
+                </li>
+              </TransitionGroup>
+              <p v-if="state.queue.length && canEditQueue" class="hint queue-note" role="status">
+                {{
+                  state.queueBusy
+                    ? "正在核对删除结果…"
+                    : state.queueIndex < 0
+                      ? "尚未确认当前播放项，请刷新队列后再删除。"
+                      : state.queue.length === 1
+                        ? "当前播放项不能删除；设备不支持通过此接口清空队列。"
+                        : "当前播放项不能删除，先切换到另一首后可删除原歌曲。"
+                }}
+              </p>
+              <p v-if="state.queue.length && !canEditQueue" class="hint queue-note">
+                队列移动与删除需要 EchoService 1.8.87。
+              </p>
+            </article>
+          </div>
+        </div>
       </div>
       <div class="quick-grid">
         <button class="card quick-card" @click="localOpen = true">
@@ -454,7 +467,7 @@ function setTimer() {
       <p v-if="searchError" role="alert" class="notice error">{{ searchError }}</p>
       <p v-if="state.toast" role="status" class="notice">{{ state.toast }}</p>
       <p v-if="searched && !results.length" class="small-empty">没有找到结果，换个关键词试试。</p>
-      <ol class="search-results">
+      <ol v-if="results.length" class="search-results motion-reveal">
         <li v-for="(song, index) in results" :key="song.id + index">
           <div class="track-text">
             <strong>{{ song.title }}</strong

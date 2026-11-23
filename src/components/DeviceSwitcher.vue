@@ -17,6 +17,8 @@ import {
 
 const media = window.matchMedia("(max-width: 760px)");
 const mobile = ref(media.matches);
+const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+const reduceMotion = ref(motionPreference.matches);
 let afterClose: (() => void) | undefined;
 let drag: {
   id: number;
@@ -75,11 +77,16 @@ function mediaChanged() {
   mobile.value = media.matches;
 }
 media.addEventListener("change", mediaChanged);
+function motionChanged(event: MediaQueryListEvent) {
+  reduceMotion.value = event.matches;
+}
+motionPreference.addEventListener("change", motionChanged);
 onBeforeUnmount(() => {
   window.removeEventListener("blur", resetDrag);
   resetDrag();
   afterClose = undefined;
   media.removeEventListener("change", mediaChanged);
+  motionPreference.removeEventListener("change", motionChanged);
   state.devicePickerOpen = false;
 });
 const label = computed(() =>
@@ -164,16 +171,13 @@ watch(
       <span class="status-dot"></span>
       <AppIcon class="connection-status-icon" :name="statusIcon" :size="20" />
       <span class="connection-label">{{ label }}</span>
-      <AppIcon
-        v-if="state.devices.length"
-        :name="state.devicePickerOpen ? 'up' : 'down'"
-        :size="16"
-      />
+      <AppIcon v-if="state.devices.length" class="disclosure-chevron" name="down" :size="16" />
     </button>
     <md-menu
       v-if="!mobile"
       id="device-menu"
       :open="state.devicePickerOpen"
+      :quick="reduceMotion"
       anchor="device-switcher-anchor"
       positioning="popover"
       anchor-corner="end-end"

@@ -233,7 +233,7 @@ async function remove(row: Data) {
             <p>{{ scanState === "finished" ? "本轮未发现可配对设备" : "发现更多连接" }}</p>
             <p class="hint">请让目标设备进入蓝牙配对模式。</p>
           </div>
-          <ul class="simple-list">
+          <ul v-if="seen.length" class="simple-list motion-reveal">
             <li v-for="row in seen" :key="String(row.Address)">
               <div class="track-text">
                 <strong>{{ row.Name || "蓝牙设备" }}</strong

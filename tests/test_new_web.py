@@ -1032,6 +1032,46 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate('scrollY'), 0)
         self.assertTrue(self.page.get_by_role('main', name='音效').evaluate("el=>el.matches(':focus')"))
 
+    def test_material_motion_tracks_navigation_queue_and_reduced_motion(self):
+        self.page.set_viewport_size({'width': 390, 'height': 844})
+        self.start(1887)
+        self.page.locator('#connection-dialog dialog').wait_for(state='hidden')
+        self.page.evaluate("""() => {
+          window.motionEvents = [];
+          document.addEventListener('animationstart', event =>
+            motionEvents.push(event.animationName + ':' + event.target.className), true);
+          document.addEventListener('transitionrun', event =>
+            motionEvents.push(event.propertyName + ':' + event.target.className), true);
+        }""")
+        toggle = self.page.locator('.mobile-queue-toggle')
+        panel = self.page.locator('.queue-disclosure')
+        toggle.click()
+        self.assertEqual(toggle.get_attribute('aria-expanded'), 'true')
+        self.page.wait_for_function("motionEvents.some(event=>event.startsWith('grid-template-rows:queue-disclosure'))")
+        first = panel.locator('.track-list li').first
+        row = first.element_handle()
+        self.page.evaluate("""() => {
+          const socket = mockSockets.at(-1);
+          const list = socket.queue.playList;
+          [list[0], list[1]] = [list[1], list[0]];
+          socket.reply({type:'list',data:socket.queue});
+        }""")
+        self.page.wait_for_function("motionEvents.some(event=>event.startsWith('transform:') && event.includes('queue-row-move'))")
+        self.assertTrue(panel.locator('.track-list li').nth(1).evaluate('(el,previous)=>el===previous', row))
+        toggle.click()
+        self.assertEqual(toggle.get_attribute('aria-expanded'), 'false')
+        self.assertFalse(panel.get_by_role('heading', name='播放队列').is_visible())
+        self.page.locator('.bottom-nav a[href="#/sound"]').click()
+        self.page.wait_for_function("motionEvents.some(event=>event.startsWith('material-enter:page-view-enter-active'))")
+        self.assertTrue(self.page.get_by_role('main', name='音效').evaluate("el=>el.matches(':focus')"))
+        self.page.emulate_media(reduced_motion='reduce')
+        self.page.evaluate('motionEvents.length = 0')
+        self.page.locator('.bottom-nav a[href="#/music"]').click()
+        toggle.click()
+        self.assertEqual(toggle.get_attribute('aria-expanded'), 'true')
+        self.assertEqual(panel.locator('.queue-card').evaluate('el=>getComputedStyle(el).animationName'), 'none')
+        self.assertFalse(self.page.evaluate("motionEvents.some(event=>event.startsWith('material-enter:'))"))
+
     def test_queue_long_titles_fit_without_horizontal_scroll(self):
         self.start(1887)
         self.page.evaluate('''() => mockSockets.at(-1).reply({type:'list',data:{playIndex:0,

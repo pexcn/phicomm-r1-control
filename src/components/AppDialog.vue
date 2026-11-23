@@ -48,23 +48,35 @@ onMounted(() => {
   const close = control.getCloseAnimation.bind(control);
   function transition(opening: boolean): ReturnType<MdDialog["getOpenAnimation"]> {
     const native = control!.shadowRoot?.querySelector("dialog");
-    const current = native ? getComputedStyle(native).transform : "none";
+    const presentation = native ? getComputedStyle(native) : null;
+    const current = presentation?.transform ?? "none";
     const rest = current === "none" ? "translateY(0)" : current;
     const offscreen = props.mode === "sheet" ? "translateY(100%)" : "translateY(24px)";
+    const duration = opening ? 300 : 200;
+    const easing = presentation
+      ?.getPropertyValue(
+        opening
+          ? "--md-sys-motion-easing-emphasized-decelerate"
+          : "--md-sys-motion-easing-emphasized-accelerate",
+      )
+      .trim();
     return {
       dialog: [
         [
           [
-            { transform: opening ? offscreen : rest, opacity: opening ? 0 : 1 },
+            {
+              transform: opening ? offscreen : rest,
+              opacity: opening ? 0 : (presentation?.opacity ?? 1),
+            },
             { transform: opening ? "translateY(0)" : offscreen, opacity: opening ? 1 : 0 },
           ],
-          { duration: opening ? 300 : 200, easing: "cubic-bezier(0.2, 0, 0, 1)" },
+          { duration, easing: easing || undefined },
         ],
       ],
       scrim: [
         [
           [{ opacity: opening ? 0 : 0.32 }, { opacity: opening ? 0.32 : 0 }],
-          { duration: opening ? 300 : 200, easing: "linear" },
+          { duration, easing: opening ? "ease-out" : "ease-in" },
         ],
       ],
     };
