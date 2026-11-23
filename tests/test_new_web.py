@@ -233,6 +233,24 @@ class NewWebTests(unittest.TestCase):
 
     def test_color_scheme_is_independent_of_mode_and_persists_with_favicon(self):
         self.start(1887)
+        def assert_playback_colors(container, icon, progress):
+            colors = self.page.locator('.play-button').evaluate('''el => {
+              const control = el.shadowRoot.querySelector('button');
+              const slider = document.querySelector('#music-progress').shadowRoot;
+              return {
+                container: getComputedStyle(control, '::before').backgroundColor,
+                icon: getComputedStyle(el.querySelector('svg')).fill,
+                brand: Array.from(document.querySelectorAll('.brand-icon'), badge => [
+                  getComputedStyle(badge).backgroundColor,
+                  getComputedStyle(badge.querySelector('svg')).fill,
+                ]),
+                progress: getComputedStyle(slider.querySelector('.track'), '::after').backgroundColor,
+              };
+            }''')
+            self.assertEqual(colors, {
+                'container': container, 'icon': icon,
+                'brand': [[container, icon], [container, icon]], 'progress': progress,
+            })
         def assert_connection_color(expected):
             chip = self.page.locator('.connection-chip.online')
             chip.wait_for()
@@ -242,6 +260,7 @@ class NewWebTests(unittest.TestCase):
               getComputedStyle(el.querySelector('.app-icon')).color,
             ]''')
             self.assertEqual(colors,[expected]*3)
+        assert_playback_colors('rgb(216, 238, 224)', 'rgb(20, 60, 40)', 'rgb(0, 122, 80)')
         self.page.get_by_role('button', name='打开设置', exact=True).click()
         green = self.page.get_by_role('radio', name='翡翠绿', exact=True)
         blue = self.page.get_by_role('radio', name='晴空蓝', exact=True)
@@ -253,6 +272,7 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate("JSON.parse(localStorage.getItem('phicomm-r1:web:theme'))"), 'system')
         self.assertEqual(self.page.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()"), '#415f91')
         assert_connection_color('rgb(65, 95, 145)')
+        assert_playback_colors('rgb(220, 228, 245)', 'rgb(39, 49, 65)', 'rgb(65, 95, 145)')
         self.assertIn('fill="#415f91"', self.page.locator('link[rel="icon"]').evaluate("el=>decodeURIComponent(el.href.split(',')[1])"))
         self.page.get_by_role('button', name='完成', exact=True).click()
         self.page.reload()
@@ -260,6 +280,7 @@ class NewWebTests(unittest.TestCase):
         self.page.emulate_media(color_scheme='dark')
         self.page.wait_for_function("getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() === '#aac7ff'")
         assert_connection_color('rgb(170, 199, 255)')
+        assert_playback_colors('rgb(61, 71, 88)', 'rgb(217, 227, 248)', 'rgb(170, 199, 255)')
         self.assertEqual(self.page.locator('#theme-toggle').get_by_role('button').get_attribute('aria-label'), '跟随系统')
         self.page.locator('#theme-toggle').click()
         self.page.wait_for_function("document.querySelector('#theme-toggle').getAttribute('aria-busy') !== 'true'")

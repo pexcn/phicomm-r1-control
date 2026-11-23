@@ -150,6 +150,10 @@ strong {
   color: var(--on-accent);
   flex-shrink: 0;
 }
+:root:is([data-color-scheme="green"], [data-color-scheme="blue"]) .brand-icon {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
 .sidebar nav {
   display: grid;
   gap: 8px;

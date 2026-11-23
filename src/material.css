@@ -112,6 +112,10 @@ md-outlined-button:active:not([disabled]) {
   --md-filled-icon-button-container-shape: 32px;
   transition: --md-filled-icon-button-container-shape 280ms var(--md-sys-motion-easing-standard);
 }
+:root:is([data-color-scheme="green"], [data-color-scheme="blue"]) .play-button {
+  --md-sys-color-primary: var(--md-sys-color-secondary-container);
+  --md-sys-color-on-primary: var(--md-sys-color-on-secondary-container);
+}
 .play-button:active:not([disabled]) {
   --md-filled-icon-button-container-shape: 16px;
 }
