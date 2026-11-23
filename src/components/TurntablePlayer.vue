@@ -270,6 +270,25 @@ onBeforeUnmount(closeCover);
     transform: rotate(360deg);
   }
 }
+@keyframes reveal-cover {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+@keyframes reveal-cover-backdrop {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cover-viewer[open] .cover-viewer-content {
+    animation: reveal-cover 240ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  .cover-viewer[open]::backdrop {
+    animation: reveal-cover-backdrop 200ms ease-out both;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .turntable-rotor {
     animation: none;
