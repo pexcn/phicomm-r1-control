@@ -507,7 +507,12 @@ function setTimer() {
           :aria-pressed="sleepMinutes === minutes"
           @click="sleepMinutes = minutes"
         >
-          <MaterialState /><AppIcon v-if="sleepMinutes === minutes" name="check" :size="18" />
+          <MaterialState /><AppIcon
+            v-if="sleepMinutes === minutes"
+            class="motion-selection-mark"
+            name="check"
+            :size="18"
+          />
           {{ minutes }} 分钟
         </button>
       </div>

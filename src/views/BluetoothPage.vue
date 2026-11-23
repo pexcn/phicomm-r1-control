@@ -226,6 +226,12 @@ async function remove(row: Data) {
                       ? "音箱正在搜索，完成后可重新搜索本轮设备。"
                       : "点击“搜索设备”查看本轮发现的设备。"
             }}
+            <md-circular-progress
+              v-if="searching"
+              class="waiting-indicator"
+              indeterminate
+              aria-hidden="true"
+            />
           </p>
           <p v-if="scanError" class="notice error" role="alert">{{ scanError }}</p>
           <div v-if="!seen.length" class="small-empty">

@@ -311,8 +311,8 @@ async function reboot(serviceOnly: boolean) {
       </div>
       <AutoRestartCard />
       <MiPlayDialog :open="miPlayOpen" @close="miPlayOpen = false" />
-      <details class="card advanced">
-        <summary>高级操作<AppIcon name="down" /></summary>
+      <details class="card advanced motion-details">
+        <summary>高级操作<AppIcon class="disclosure-chevron" name="down" /></summary>
         <div class="advanced-content">
           <form class="rename-form" @submit.prevent="rename">
             <md-outlined-text-field

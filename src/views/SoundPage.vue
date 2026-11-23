@@ -142,6 +142,7 @@ onBeforeUnmount(() => clearTimeout(timer));
               >
                 <MaterialState :disabled="!state.eq.enabled" /><AppIcon
                   v-if="state.eq.current === preset.id"
+                  class="motion-selection-mark"
                   name="check"
                   :size="18"
                 />{{ preset.name }}

@@ -123,9 +123,15 @@ function play(value: string) {
               ? `找到 ${files.length} 个音频文件，当前显示 ${filtered.length} 个`
               : "填写目录后点击扫描。目录下的子目录也会扫描。"
         }}
+        <md-circular-progress
+          v-if="busy"
+          class="waiting-indicator"
+          indeterminate
+          aria-hidden="true"
+        />
       </p>
       <p v-if="truncated && scanned" class="hint">本次仅检查前 2000 个文件，可缩小目录后重试。</p>
-      <ul class="simple-list local-file-list">
+      <ul class="simple-list local-file-list" :class="{ 'motion-reveal': scanned && files.length }">
         <li v-for="file in filtered" :key="file">
           <div class="track-text">
             <strong>{{ file.split("/").at(-1) }}</strong

@@ -140,6 +140,7 @@ const fields = [
       <md-outlined-text-field
         v-if="target === 'remote'"
         id="miplay-ip"
+        class="motion-reveal"
         label="远端 IPv4 地址"
         :value="ip"
         @input="ip = ($event.target as HTMLInputElement).value"
@@ -149,7 +150,10 @@ const fields = [
       >
       <p v-if="error" class="notice error" role="alert">{{ error }}</p>
       <p v-if="status" class="hint" role="status">{{ status }}</p>
-      <p v-if="busy" class="hint" role="status">正在等待目标音箱…</p>
+      <p v-if="busy" class="hint" role="status">
+        正在等待目标音箱…
+        <md-circular-progress class="waiting-indicator" indeterminate aria-hidden="true" />
+      </p>
       <template v-if="diag">
         <div>
           <h3>输出声道</h3>
@@ -163,6 +167,7 @@ const fields = [
             >
               <MaterialState :disabled="busy || channel === null" /><AppIcon
                 v-if="channel === mode"
+                class="motion-selection-mark"
                 name="check"
                 :size="18"
               />{{ label }}
@@ -220,8 +225,10 @@ const fields = [
             </div></template
           >
         </dl>
-        <details>
-          <summary>完整诊断数据</summary>
+        <details class="motion-details">
+          <summary>
+            完整诊断数据<AppIcon class="disclosure-chevron" name="down" :size="18" />
+          </summary>
           <pre>{{ JSON.stringify(diag, null, 2) }}</pre>
         </details>
       </template>

@@ -118,7 +118,7 @@ function applyColor() {
           @change="change(65, Number(($event.target as HTMLInputElement).value))"
         />
       </div>
-      <div v-if="[0, 1, 3].includes(mode)">
+      <div v-if="[0, 1, 3].includes(mode)" class="motion-reveal">
         <label>颜色渐变速度 · {{ numeric(state.info.music_light_chroma, 4) }}</label
         ><AppSlider
           aria-label="氛围灯渐变速度"
@@ -130,7 +130,7 @@ function applyColor() {
           @change="change(66, Number(($event.target as HTMLInputElement).value))"
         />
       </div>
-      <div v-if="colorAllowed" class="light-color">
+      <div v-if="colorAllowed" class="light-color motion-reveal">
         <input type="color" aria-label="选择灯光颜色" v-model="color" :disabled="!available" />
         <md-outlined-text-field
           label="灯光颜色"

@@ -1147,19 +1147,8 @@ md-dialog {
   padding: 0;
 }
 .advanced summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 20px 24px;
-  cursor: pointer;
-  list-style: none;
   font: var(--type-title-small);
-}
-.advanced summary::-webkit-details-marker {
-  display: none;
-}
-.advanced[open] summary > svg {
-  transform: rotate(180deg);
 }
 .advanced-content {
   padding: 4px 24px 24px;

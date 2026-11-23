@@ -153,8 +153,23 @@ md-outlined-select {
   width: 180px;
 }
 
-[aria-expanded="true"] > .disclosure-chevron {
+[aria-expanded="true"] > .disclosure-chevron,
+.motion-details[open] > summary .disclosure-chevron {
   rotate: 180deg;
+}
+.motion-details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+.motion-details > summary::-webkit-details-marker {
+  display: none;
+}
+.waiting-indicator {
+  display: none;
 }
 @media (max-width: 1024px) {
   .navigation-icon {
@@ -195,11 +210,13 @@ md-outlined-select {
     animation: material-enter var(--md-sys-motion-duration-medium1)
       var(--md-sys-motion-easing-emphasized-decelerate);
   }
-  .motion-reveal {
+  .motion-reveal,
+  .motion-details[open] > :not(summary) {
     animation: material-enter var(--md-sys-motion-duration-short4)
       var(--md-sys-motion-easing-emphasized-decelerate);
   }
-  .playback-symbol {
+  .playback-symbol,
+  .motion-selection-mark {
     animation: material-symbol-enter var(--md-sys-motion-duration-short3)
       var(--md-sys-motion-easing-emphasized-decelerate);
   }
@@ -221,6 +238,8 @@ md-outlined-select {
     translate: 0 8px;
   }
   .sidebar nav a,
+  .segmented button,
+  .preset-option,
   .track-list li {
     transition: background-color var(--md-sys-motion-duration-short3) ease-out;
   }
@@ -236,6 +255,41 @@ md-outlined-select {
   }
   .disclosure-chevron {
     transition: rotate var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  }
+  .waiting-indicator {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-inline-start: 6px;
+    --md-circular-progress-size: 16px;
+    --md-circular-progress-active-indicator-width: 2px;
+    --motion-enter-offset: 0;
+    animation: material-enter var(--md-sys-motion-duration-short2) ease-out 180ms both;
+  }
+  @supports (interpolate-size: allow-keywords) and (interactivity: inert) and
+    selector(::details-content) {
+    .motion-details::details-content {
+      interpolate-size: allow-keywords;
+      block-size: 0;
+      opacity: 0;
+      overflow: clip;
+      transition:
+        block-size var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard),
+        opacity var(--md-sys-motion-duration-short3) ease-out,
+        content-visibility var(--md-sys-motion-duration-short4) allow-discrete;
+    }
+    .motion-details[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+      transition-duration:
+        var(--md-sys-motion-duration-medium1), var(--md-sys-motion-duration-short4),
+        var(--md-sys-motion-duration-medium1);
+    }
+    .motion-details[open] > :not(summary) {
+      animation: none;
+    }
+    .motion-details:not([open]) > :not(summary) {
+      interactivity: inert;
+    }
   }
   @media (max-width: 760px) {
     .queue-disclosure {

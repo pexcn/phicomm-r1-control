@@ -120,6 +120,7 @@ function status(device: DeviceProfile) {
     : "已保存";
 }
 function run(action: () => void) {
+  // Menu items defer closing to this handler so it can queue the action first.
   afterClose = action;
   state.devicePickerOpen = false;
 }
@@ -194,6 +195,7 @@ watch(
         v-for="device in state.devices"
         :key="device.id"
         class="picker-item"
+        keep-open
         :class="{ 'current-device': current(device) }"
         :selected="current(device)"
         :typeahead-text="profileName(device)"
@@ -207,16 +209,16 @@ watch(
         <AppIcon v-if="current(device)" slot="end" class="picker-check" name="check" :size="20" />
       </md-menu-item>
       <div class="picker-divider" role="separator"></div>
-      <md-menu-item class="picker-add" @click="add"
+      <md-menu-item class="picker-add" keep-open @click="add"
         ><AppIcon slot="start" name="plus" :size="20" />
         <div slot="headline">添加音箱</div></md-menu-item
       >
-      <md-menu-item @click="manage"
+      <md-menu-item keep-open @click="manage"
         ><AppIcon slot="start" name="settings" :size="20" />
         <div slot="headline">管理设备</div></md-menu-item
       >
       <div class="picker-divider" role="separator"></div>
-      <md-menu-item :disabled="state.status === 'disconnected'" @click="run(disconnect)"
+      <md-menu-item keep-open :disabled="state.status === 'disconnected'" @click="run(disconnect)"
         ><AppIcon slot="start" name="unlink" :size="20" />
         <div slot="headline">断开连接</div></md-menu-item
       >

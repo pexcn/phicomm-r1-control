@@ -112,6 +112,7 @@ function saveApi() {
           >
             <MaterialState :disabled="isTransitioning" /><AppIcon
               v-if="mode === option.id"
+              class="motion-selection-mark"
               name="check"
               :size="18"
             />
@@ -148,7 +149,7 @@ function saveApi() {
             <md-focus-ring :for="`theme-color-${scheme.id}`" />
           </label>
         </div>
-        <div v-if="colorScheme.id === 'custom'" class="custom-color-editor">
+        <div v-if="colorScheme.id === 'custom'" class="custom-color-editor motion-reveal">
           <div class="custom-color-fields">
             <label class="custom-color-picker">
               <input
@@ -233,8 +234,8 @@ function saveApi() {
   cursor: pointer;
 }
 .color-scheme-option:has(input:checked) {
-  padding: 15px;
-  border: 2px solid var(--accent);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
   background: var(--soft);
 }
 .color-scheme-option:has(input:disabled) {
@@ -271,9 +272,24 @@ function saveApi() {
   background: var(--accent);
   color: var(--on-accent);
   opacity: 0;
+  scale: 0.75;
 }
 .color-scheme-option:has(input:checked) .color-scheme-check {
   opacity: 1;
+  scale: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .color-scheme-option {
+    transition:
+      background-color var(--md-sys-motion-duration-short3) ease-out,
+      border-color var(--md-sys-motion-duration-short3) ease-out,
+      box-shadow var(--md-sys-motion-duration-short3) ease-out;
+  }
+  .color-scheme-check {
+    transition:
+      opacity var(--md-sys-motion-duration-short3) ease-out,
+      scale var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-emphasized-decelerate);
+  }
 }
 .appearance-note {
   margin-top: 12px;
@@ -341,9 +357,6 @@ function saveApi() {
   }
   .custom-color-option {
     grid-column: 1 / -1;
-  }
-  .color-scheme-option:has(input:checked) {
-    padding: 11px;
   }
   .color-scheme-swatch {
     width: 30px;

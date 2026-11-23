@@ -135,8 +135,10 @@ function closed() {
       <p class="hint">名称和地址仅保存在此浏览器。切换控制对象不会停止原音箱播放。</p>
       <p v-if="requiresReconnect" class="hint">修改当前地址后需要重新连接。</p>
       <div v-if="error" role="alert" class="notice error">{{ error }}</div>
-      <details class="connection-help">
-        <summary>HTTPS 下无法连接？</summary>
+      <details class="connection-help motion-details">
+        <summary>
+          HTTPS 下无法连接？<AppIcon class="disclosure-chevron" name="down" :size="18" />
+        </summary>
         <p>
           部分浏览器需允许本站访问本地网络。若浏览器不支持，可使用自己的 WSS 反向代理；GitHub Pages
           不提供设备代理，也不会为音箱添加 TLS。

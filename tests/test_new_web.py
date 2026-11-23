@@ -894,6 +894,10 @@ class NewWebTests(unittest.TestCase):
         self.page.locator('.quick-card').filter(has_text='本地音乐').click()
         dialog = self.page.locator('#local-music-dialog')
         dialog.get_by_role('button', name='扫描目录', exact=True).click()
+        progress = dialog.locator('.waiting-indicator')
+        self.assertEqual(progress.evaluate('el=>getComputedStyle(el).animationDelay'), '0.18s')
+        self.page.emulate_media(reduced_motion='reduce')
+        self.assertFalse(progress.is_visible())
         request = next(m for m in reversed(self.sent()) if m['type']=='shell' and '__R1_LOCAL_BEGIN__' in m['shell'])
         dialog.get_by_role('button', name='关闭', exact=True).click()
         self.page.get_by_role('button', name=DEVICE_PICKER).click()
@@ -1071,6 +1075,32 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(toggle.get_attribute('aria-expanded'), 'true')
         self.assertEqual(panel.locator('.queue-card').evaluate('el=>getComputedStyle(el).animationName'), 'none')
         self.assertFalse(self.page.evaluate("motionEvents.some(event=>event.startsWith('material-enter:'))"))
+
+    def test_native_disclosure_animates_without_exposing_closed_controls(self):
+        self.start(1887)
+        self.page.locator('.sidebar nav a[href="#/device"]').click()
+        disclosure = self.page.locator('details.advanced')
+        summary = disclosure.locator('summary')
+        summary.focus()
+        self.page.keyboard.press('Enter')
+        self.assertTrue(disclosure.evaluate('el=>el.open'))
+        if self.page.evaluate("CSS.supports('interpolate-size: allow-keywords') && CSS.supports('interactivity: inert') && CSS.supports('selector(::details-content)')"):
+            self.assertIn('block-size', disclosure.evaluate("el=>getComputedStyle(el,'::details-content').transitionProperty"))
+            self.assertTrue(disclosure.evaluate("""el => {
+              el.querySelector('summary').click();
+              const form = el.querySelector('.advanced-content');
+              form.querySelector('md-outlined-text-field').focus();
+              return !el.open && getComputedStyle(form).interactivity === 'inert'
+                 && !form.contains(document.activeElement);
+            }"""))
+        else:
+            self.assertEqual(disclosure.locator('.advanced-content').evaluate('el=>getComputedStyle(el).animationName'), 'material-enter')
+            self.page.keyboard.press('Enter')
+        self.page.emulate_media(reduced_motion='reduce')
+        summary.click()
+        self.assertTrue(disclosure.evaluate('el=>el.open'))
+        self.assertEqual(disclosure.locator('.advanced-content').evaluate('el=>getComputedStyle(el).animationName'), 'none')
+        self.assertNotIn('block-size', disclosure.evaluate("el=>getComputedStyle(el,'::details-content').transitionProperty"))
 
     def test_queue_long_titles_fit_without_horizontal_scroll(self):
         self.start(1887)
