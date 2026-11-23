@@ -34,6 +34,7 @@ function currentPage(): Page {
 const page = ref<Page>(currentPage());
 const title = computed(() => pages.find((item) => item.id === page.value)!.label);
 const upstreamUrl = new URL("upstream/", document.baseURI).href;
+const main = ref<HTMLElement>();
 
 function hashChange() {
   page.value = currentPage();
@@ -41,9 +42,21 @@ function hashChange() {
 window.addEventListener("hashchange", hashChange);
 watch([page, () => state.session], () => respondToConfirmation());
 watch([page, connected], () => readPanel(page.value));
+watch(
+  page,
+  () => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    focusMain();
+  },
+  { flush: "post" },
+);
 onMounted(restoreConnection);
 function focusMain() {
-  document.getElementById("main-content")?.focus();
+  main.value?.focus({ preventScroll: true });
+}
+function skipToContent() {
+  focusMain();
+  main.value?.scrollIntoView({ block: "start" });
 }
 onBeforeUnmount(() => {
   dispose();
@@ -52,7 +65,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <a class="skip-link" href="#main-content" @click.prevent="focusMain">跳到内容</a>
+  <a class="skip-link" href="#main-content" @click.prevent="skipToContent">跳到内容</a>
   <aside class="sidebar">
     <a class="brand" href="#/music" aria-label="R1 Control 首页"
       ><md-focus-ring /><span class="brand-icon"><AppIcon name="speaker" /></span
@@ -91,7 +104,7 @@ onBeforeUnmount(() => {
         /></md-icon-button>
       </div>
     </header>
-    <main id="main-content" tabindex="-1">
+    <main id="main-content" ref="main" tabindex="-1" :aria-label="title">
       <div v-if="pwa.updateAvailable" class="notice pwa-update" role="status">
         <span>新版本已准备好，可在完成当前操作后更新。</span>
         <md-text-button @click="applyPwaUpdate">更新并重新加载</md-text-button>

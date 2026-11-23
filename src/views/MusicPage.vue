@@ -2,9 +2,9 @@
 import { useConfirmation } from "../lib/confirmation";
 import AppDialog from "../components/AppDialog.vue";
 import AppSlider from "../components/AppSlider.vue";
-import { sliderPercent } from "../lib/slider-values";
+import VolumeSlider from "../components/VolumeSlider.vue";
 import MaterialState from "../components/MaterialState.vue";
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
 import TurntablePlayer from "../components/TurntablePlayer.vue";
@@ -27,7 +27,6 @@ import {
   sleep,
   state,
   track,
-  volume,
   type Track,
 } from "../lib/speaker";
 
@@ -64,6 +63,7 @@ let requestNumber = 0;
 const timerOpen = ref(false);
 const sleepMinutes = ref(30);
 const queueOpen = ref(false);
+const queueHeading = ref<HTMLElement>();
 const localOpen = ref(false);
 const lightOpen = ref(false);
 watch(
@@ -84,6 +84,22 @@ watch(searchOpen, (open) => {
   }
 });
 onBeforeUnmount(() => request?.abort());
+
+function jumpToQueue() {
+  queueHeading.value?.focus();
+  queueHeading.value?.scrollIntoView({ block: "nearest" });
+}
+async function toggleQueue(event: MouseEvent) {
+  const trigger = event.currentTarget as HTMLButtonElement;
+  queueOpen.value = !queueOpen.value;
+  if (!queueOpen.value) return;
+  await nextTick();
+  const heading = queueHeading.value;
+  const bottomNav = document.querySelector(".bottom-nav")?.getBoundingClientRect();
+  if (heading && bottomNav && heading.getBoundingClientRect().bottom > bottomNav.top) {
+    trigger.scrollIntoView({ block: "start" });
+  }
+}
 
 async function search() {
   if (!keyword.value.trim()) return;
@@ -271,27 +287,32 @@ function setTimer() {
                 :size="32" /></md-filled-icon-button
             ><md-icon-button aria-label="下一首" @click="send({ type: 'next' })"
               ><AppIcon name="next" :size="28" /></md-icon-button
-            ><md-icon-button aria-label="展开播放队列" @click="queueOpen = !queueOpen"
+            ><md-icon-button
+              class="desktop-queue-jump"
+              aria-label="跳到播放队列"
+              @click="jumpToQueue"
               ><AppIcon name="queue"
             /></md-icon-button>
           </div>
-          <div class="volume-row">
-            <AppIcon name="volume" /><label>音量</label
-            ><AppSlider
-              id="music-volume"
-              drag-only
-              :format-value="(value) => sliderPercent(value, state.music.maxVolume)"
-              aria-label="音量"
-              :min="0"
-              :max="state.music.maxVolume"
-              :value="state.music.volume"
-              @change="volume(Number(($event.target as HTMLInputElement).value))"
-            /><span>{{ Math.round((state.music.volume / state.music.maxVolume) * 100) }}%</span>
-          </div>
+          <VolumeSlider id="music-volume" show-label />
         </article>
-        <article class="card queue-card" :class="{ 'mobile-expanded': queueOpen }">
+        <button
+          class="mobile-queue-toggle card"
+          :aria-expanded="queueOpen"
+          aria-controls="playback-queue"
+          @click="toggleQueue"
+        >
+          <MaterialState /><AppIcon name="queue" /><span
+            >播放队列 <small>{{ state.queue.length }} 首</small></span
+          ><AppIcon :name="queueOpen ? 'up' : 'down'" />
+        </button>
+        <article
+          id="playback-queue"
+          class="card queue-card"
+          :class="{ 'mobile-expanded': queueOpen }"
+        >
           <div class="section-heading">
-            <h2>播放队列</h2>
+            <h2 ref="queueHeading" tabindex="-1">播放队列</h2>
             <span class="muted">{{ state.queue.length }} 首</span
             ><md-icon-button
               aria-label="刷新队列"
@@ -355,11 +376,6 @@ function setTimer() {
           </p>
         </article>
       </div>
-      <button class="mobile-queue-toggle card" @click="queueOpen = !queueOpen">
-        <MaterialState /> <AppIcon name="queue" /><span
-          >播放队列 <small>{{ state.queue.length }} 首</small></span
-        ><AppIcon :name="queueOpen ? 'up' : 'arrow'" />
-      </button>
       <div class="quick-grid">
         <button class="card quick-card" @click="localOpen = true">
           <MaterialState /><AppIcon name="music" :size="28" /><span
@@ -444,7 +460,10 @@ function setTimer() {
             <strong>{{ song.title }}</strong
             ><small>{{ song.artist }}</small>
           </div>
-          <md-text-button :disabled="!canEditQueue" @click="playResult(song, false)"
+          <md-text-button
+            :disabled="!canEditQueue"
+            :aria-label="`播放 ${song.title}${song.artist ? ` · ${song.artist}` : ''}`"
+            @click="playResult(song, false)"
             >播放</md-text-button
           ><md-icon-button
             :disabled="!canEditQueue"

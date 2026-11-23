@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import AppDialog from "../components/AppDialog.vue";
 import AppSlider from "../components/AppSlider.vue";
-import { sliderPercent, sliderDecibels } from "../lib/slider-values";
+import GainValueEditor from "../components/GainValueEditor.vue";
+import VolumeSlider from "../components/VolumeSlider.vue";
+import { sliderDecibels } from "../lib/slider-values";
 import { computed, onBeforeUnmount, ref } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
 import AdvancedAudioEffects from "../components/AdvancedAudioEffects.vue";
-import { connected, notify, send, state, volume } from "../lib/speaker";
+import { connected, notify, send, state } from "../lib/speaker";
 import { load, save } from "../lib/storage";
 
 type Preset = { name: string; bands: { id: number; level: number }[] };
@@ -20,6 +22,11 @@ const presetName = ref("");
 const saving = ref(false);
 let timer: ReturnType<typeof setTimeout>;
 const configured = computed(() => connected.value && state.eq.available);
+function frequencyLabel(frequency: number) {
+  return frequency >= 1000000
+    ? `${(frequency / 1000000).toFixed(1)} kHz`
+    : `${Math.round(frequency / 1000)} Hz`;
+}
 function command(message: { type: string; [key: string]: unknown }) {
   if (!send(message)) return;
   clearTimeout(timer);
@@ -95,17 +102,7 @@ onBeforeUnmount(() => clearTimeout(timer));
           <h2>播放音量</h2>
           <p class="hint">设备音量 {{ state.music.volume }} / {{ state.music.maxVolume }}</p>
         </div>
-        <div class="volume-row">
-          <AppIcon name="volume" /><AppSlider
-            aria-label="播放音量"
-            drag-only
-            :format-value="(value) => sliderPercent(value, state.music.maxVolume)"
-            :min="0"
-            :max="state.music.maxVolume"
-            :value="state.music.volume"
-            @change="volume(Number(($event.target as HTMLInputElement).value))"
-          /><strong>{{ Math.round((state.music.volume / state.music.maxVolume) * 100) }}%</strong>
-        </div>
+        <VolumeSlider label="播放音量" />
       </article>
       <div class="sound-grid">
         <article class="card">
@@ -152,11 +149,7 @@ onBeforeUnmount(() => clearTimeout(timer));
             </div>
             <div class="eq-bands">
               <div v-for="band in state.eq.bands" :key="band.id" class="eq-band">
-                <label>{{
-                  band.frequency >= 1000000
-                    ? (band.frequency / 1000000).toFixed(1) + " kHz"
-                    : Math.round(band.frequency / 1000) + " Hz"
-                }}</label
+                <label>{{ frequencyLabel(band.frequency) }}</label
                 ><AppSlider
                   :id="`eq-band-${band.id}`"
                   drag-only
@@ -175,7 +168,18 @@ onBeforeUnmount(() => clearTimeout(timer));
                       level: Number(($event.target as HTMLInputElement).value),
                     })
                   "
-                /><span>{{ (band.level / 100).toFixed(1) }} dB</span>
+                />
+                <GainValueEditor
+                  :label="`EQ ${frequencyLabel(band.frequency)} 增益`"
+                  :value="band.level"
+                  :min="state.eq.min"
+                  :max="state.eq.max"
+                  :divisor="100"
+                  unit="dB"
+                  :disabled="!state.eq.enabled"
+                  @apply="(level) => command({ type: 'set_eq_bandlevel', band: band.id, level })"
+                  >{{ (band.level / 100).toFixed(2).replace(/0$/, "") }} dB</GainValueEditor
+                >
               </div>
             </div>
             <div class="card-footer">

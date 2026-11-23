@@ -4,9 +4,10 @@ import type { MdDialog } from "@material/web/dialog/dialog.js";
 import AppIcon from "./AppIcon.vue";
 
 defineOptions({ inheritAttrs: false });
-const props = withDefaults(defineProps<{ mode?: "basic" | "adaptive" | "sheet" }>(), {
-  mode: "basic",
-});
+const props = withDefaults(
+  defineProps<{ mode?: "basic" | "adaptive" | "sheet"; describeContent?: boolean }>(),
+  { mode: "basic" },
+);
 const dialog = ref<MdDialog>();
 // Keep the background locked until the closing animation finishes.
 const modalActive = ref(false);
@@ -29,6 +30,16 @@ function dismiss() {
   dialog.value?.shadowRoot
     ?.querySelector("dialog")
     ?.dispatchEvent(new Event("cancel", { cancelable: true }));
+}
+function opened() {
+  modalActive.value = true;
+  if (!props.describeContent) return;
+  const native = dialog.value?.shadowRoot?.querySelector("dialog");
+  const content = native?.querySelector<HTMLElement>(".content");
+  if (!native || !content) return;
+  // Resolve the description within the native dialog's shadow root.
+  content.id = "dialog-description";
+  native.setAttribute("aria-describedby", content.id);
 }
 onMounted(() => {
   const control = dialog.value;
@@ -73,7 +84,7 @@ onMounted(() => {
       :data-modal-active="modalActive ? '' : undefined"
       :quick="reducedMotion || $attrs.quick === true"
       :class="{ 'dialog-fullscreen': fullscreen, 'dialog-sheet': mode === 'sheet' }"
-      @open="modalActive = true"
+      @open="opened"
       @closed="modalActive = false"
     >
       <div slot="headline" class="app-dialog-heading">

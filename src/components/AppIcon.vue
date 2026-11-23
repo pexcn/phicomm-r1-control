@@ -9,6 +9,7 @@ import sun from "@material-symbols/svg-400/outlined/light_mode.svg?raw";
 import moon from "@material-symbols/svg-400/outlined/dark_mode.svg?raw";
 import system from "@material-symbols/svg-400/outlined/brightness_auto.svg?raw";
 import plus from "@material-symbols/svg-400/outlined/add.svg?raw";
+import minus from "@material-symbols/svg-400/outlined/remove.svg?raw";
 import close from "@material-symbols/svg-400/outlined/close.svg?raw";
 import search from "@material-symbols/svg-400/outlined/search.svg?raw";
 import play from "@material-symbols/svg-400/outlined/play_arrow.svg?raw";
@@ -60,6 +61,7 @@ const icons: Record<string, string> = Object.fromEntries(
     moon,
     system,
     plus,
+    minus,
     close,
     search,
     play,

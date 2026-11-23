@@ -11,7 +11,8 @@ import {
 <template>
   <AppDialog
     id="confirm-dialog"
-    role="alertdialog"
+    type="alert"
+    describe-content
     :aria-label="confirmation?.title"
     :open="confirmationOpen"
     @closed="confirmationClosed"

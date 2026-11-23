@@ -23,12 +23,10 @@ watch(
 );
 onMounted(() => {
   startScreen();
-  window.addEventListener("keydown", keyboard);
   document.addEventListener("visibilitychange", visibility);
 });
 onBeforeUnmount(() => {
   stopScreen();
-  window.removeEventListener("keydown", keyboard);
   document.removeEventListener("visibilitychange", visibility);
 });
 function visibility() {
@@ -37,21 +35,12 @@ function visibility() {
 function keyboard(event: KeyboardEvent) {
   if (
     !connected.value ||
-    state.connectionDialog ||
-    state.settingsDialog ||
-    state.devicePickerOpen ||
-    state.deviceManagerDialog
-  )
-    return;
-  if (
-    event
-      .composedPath()
-      .some(
-        (node) =>
-          node instanceof HTMLElement &&
-          (node.matches('input,textarea,select,button,[contenteditable="true"]') ||
-            node.tagName.startsWith("MD-")),
-      )
+    event.defaultPrevented ||
+    event.isComposing ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.shiftKey
   )
     return;
   const codes: Record<string, number> = {
@@ -256,7 +245,14 @@ function quality(event: Event) {
               <h2>遥控</h2>
               <AppIcon name="phone" />
             </div>
-            <div class="remote-body">
+            <div
+              class="remote-body"
+              role="group"
+              aria-label="键盘遥控"
+              aria-describedby="remote-keyboard-hint"
+              tabindex="0"
+              @keydown.self="keyboard"
+            >
               <div class="direction-pad">
                 <button class="direction up" @click="key(19)" aria-label="音箱向上">
                   <MaterialState /> <AppIcon name="up" /></button
@@ -280,6 +276,9 @@ function quality(event: Event) {
                 >
               </div>
             </div>
+            <p id="remote-keyboard-hint" class="hint">
+              聚焦遥控区后，可用方向键移动、Enter 确定、Esc 返回。
+            </p>
           </article>
           <article class="card">
             <div class="section-heading">

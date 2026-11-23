@@ -4,6 +4,7 @@ import functools
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import struct
 import threading
@@ -15,6 +16,7 @@ from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
+DEVICE_PICKER = re.compile(r'^选择或连接音箱，')
 
 
 def screen_png(width=720, height=480):
@@ -119,7 +121,7 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()"), '#55dfa5')
         self.page.reload()
         self.assertEqual(self.page.evaluate('document.documentElement.dataset.theme'), 'dark')
-        self.page.get_by_role('button', name='选择或连接音箱').click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         self.assertEqual(self.page.get_by_label('音箱地址', exact=True).input_value(), '')
         self.assertEqual(self.page.evaluate("localStorage.getItem('r1_last_ip')"), 'legacy')
         self.assertEqual(self.page.locator('a[href$="/project/upstream/"]').count(), 1)
@@ -589,6 +591,35 @@ class NewWebTests(unittest.TestCase):
         self.assertFalse(slider.evaluate('el=>el.hasAttribute("data-active")'))
         self.assertEqual(len([m for m in self.sent() if m['type']=='set_eq_bandlevel']), count)
 
+    def test_touch_adjustments_preserve_device_steps_and_units(self):
+        self.page.set_viewport_size({'width':320,'height':844})
+        self.start(1887)
+        self.page.get_by_role('button', name='音量加一档', exact=True).click()
+        self.page.get_by_role('button', name='音量减一档', exact=True).click()
+        self.assertEqual([m['input'] for m in self.sent() if m['type']=='input'],
+                         ['keyevent 24', 'keyevent 25'])
+        self.page.locator('.bottom-nav a[href="#/sound"]').click()
+        adjustments = [
+            ('.eq-band', '0.25', {'type':'set_eq_bandlevel','band':0,'level':25}),
+            ('.effect-card', '55', {'type':'set_bass_strength','strength':550}),
+            ('.effect-card >> nth=1', '-5', {'type':'set_loudness_gain','gain':-500}),
+            ('.mixer-card', '6', {'type':'setMixerValue','controlName':'DAC Digital Volume L','value':237}),
+        ]
+        for selector, value, message in adjustments:
+            trigger = self.page.locator(selector).locator('.gain-value').first
+            trigger.click()
+            dialog = self.page.locator('md-dialog[open]').filter(has_text='每档')
+            field = dialog.get_by_role('spinbutton')
+            apply = dialog.get_by_role('button', name='应用', exact=True)
+            field.fill('99999')
+            apply.click()
+            dialog.get_by_role('alert').filter(has_text='请输入').wait_for()
+            self.assertNotIn(message,self.sent())
+            field.fill(value)
+            apply.click()
+            dialog.wait_for(state='detached')
+            self.assertIn(message,self.sent())
+
     def test_slider_touch_labels_fit_mobile_dialog_and_keep_light_units(self):
         self.page.set_viewport_size({'width':320,'height':844})
         self.start()
@@ -648,7 +679,7 @@ class NewWebTests(unittest.TestCase):
             dialog = self.page.locator('.search-dialog')
             dialog.get_by_role('button',name='搜索',exact=True).click()
             dialog.locator('.search-results').get_by_text('Song of Wings',exact=True).wait_for()
-            dialog.locator('.search-results').get_by_role('button',name='播放',exact=True).click()
+            dialog.locator('.search-results').get_by_role('button',name=re.compile(r'^播放 ')).click()
             dialog.get_by_role('button',name='添加 Song of Wings',exact=True).click()
             for method in [15,19]:
                 message = next(m for m in reversed(self.sent()) if m['type']=='send_message' and m.get('arg1')==method)
@@ -787,7 +818,7 @@ class NewWebTests(unittest.TestCase):
         self.start(1887)
         self.page.get_by_role('button', name='上移 晚风', exact=True).click()
         self.assertIn({'type': 'send_message', 'what': 4, 'arg1': 28, 'arg2': -1, 'obj': '{"from":1,"to":0}'}, self.sent())
-        self.page.get_by_role('button', name='选择或连接音箱').click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         self.page.get_by_role('menuitem', name='添加音箱', exact=True).click()
         self.page.evaluate('window.mockVersion=1873')
         self.page.get_by_label('音箱地址', exact=True).fill('wss://speaker.example/room/ws?key=a%2Fb')
@@ -799,8 +830,17 @@ class NewWebTests(unittest.TestCase):
 
     def test_screen_navigation_touch_and_cleanup(self):
         self.start()
+        self.page.locator('#connection-dialog dialog').wait_for(state='hidden')
         self.page.goto(self.base + '#/screen')
         self.page.get_by_role('img', name='音箱实时屏幕，可点击与滑动').wait_for()
+        remote = self.page.get_by_role('group', name='键盘遥控')
+        remote.focus()
+        self.page.keyboard.press('ArrowDown')
+        self.assertIn({'type':'input','input':'keyevent 20'},self.sent())
+        before = len([m for m in self.sent() if m['type']=='input'])
+        self.page.get_by_role('main').focus()
+        self.page.keyboard.press('ArrowDown')
+        self.assertEqual(len([m for m in self.sent() if m['type']=='input']), before)
         self.page.get_by_role('button', name='音箱返回', exact=True).click()
         self.page.get_by_role('button', name='音箱 Home', exact=True).click()
         self.page.get_by_role('button', name='音箱菜单', exact=True).click()
@@ -817,8 +857,11 @@ class NewWebTests(unittest.TestCase):
         self.page.evaluate('mockSockets.at(-1).sent.length=0')
         image.click(position={'x': box['width']/2, 'y': box['height']/2})
         self.assertIn({'type': 'input', 'input': 'tap 360 240'}, self.sent())
-        self.page.locator('.sidebar nav a[href="#/music"]').click()
+        self.page.locator('.sidebar nav a[href="#/music"]').focus()
+        self.page.keyboard.press('Enter')
+        self.page.wait_for_function("location.hash === '#/music'")
         self.page.wait_for_function('mockSockets.at(-1).sent.some(message=>message.type==="stop_screencap")')
+        self.assertFalse(any(m.get('input') == 'keyevent 23' for m in self.sent()))
         self.assertIn({'type': 'stop_screencap'}, self.sent())
 
     def test_local_music_scan_filter_and_direct_play_on_1873(self):
@@ -848,7 +891,7 @@ class NewWebTests(unittest.TestCase):
         dialog.get_by_role('button', name='扫描目录', exact=True).click()
         request = next(m for m in reversed(self.sent()) if m['type']=='shell' and '__R1_LOCAL_BEGIN__' in m['shell'])
         dialog.get_by_role('button', name='关闭', exact=True).click()
-        self.page.get_by_role('button', name='选择或连接音箱').click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         self.page.get_by_role('menuitem', name='添加音箱', exact=True).click()
         self.page.get_by_label('音箱地址', exact=True).fill('192.0.2.20')
         self.page.locator('#connection-dialog').get_by_role('button', name='连接', exact=True).click()
@@ -956,6 +999,33 @@ class NewWebTests(unittest.TestCase):
         panel.get_by_role('button',name='重新读取 DSP',exact=True).click()
         self.page.wait_for_function("document.querySelector('.advanced-audio md-switch').disabled && document.querySelector('.dsp-card md-switch').disabled")
         self.assertEqual(panel.get_by_text('设备未提供此音效配置。',exact=True).count(),2)
+
+    def test_navigation_starts_at_top_and_queue_controls_match_the_layout(self):
+        self.page.set_viewport_size({'width':768,'height':500})
+        self.start(1887)
+        reference = self.page.locator('.sidebar-footer a')
+        reference.scroll_into_view_if_needed()
+        self.assertLessEqual(reference.bounding_box()['y'] + reference.bounding_box()['height'], 500)
+        self.page.get_by_role('button', name='跳到播放队列', exact=True).click()
+        self.assertTrue(self.page.locator('#playback-queue h2').evaluate("el=>el.matches(':focus')"))
+        self.page.set_viewport_size({'width':390,'height':844})
+        queue = self.page.locator('#playback-queue')
+        trigger = self.page.locator('.mobile-queue-toggle')
+        self.assertFalse(queue.is_visible())
+        self.assertFalse(self.page.locator('.desktop-queue-jump').is_visible())
+        trigger.click()
+        self.assertTrue(queue.is_visible())
+        self.assertEqual(trigger.get_attribute('aria-expanded'), 'true')
+        self.assertLess(queue.locator('h2').bounding_box()['y'], 844-80)
+        trigger.click()
+        self.assertFalse(queue.is_visible())
+        self.assertEqual(trigger.get_attribute('aria-expanded'), 'false')
+        self.page.evaluate('scrollTo(0, 500)')
+        self.assertGreater(self.page.evaluate('scrollY'), 0)
+        self.page.locator('.bottom-nav a[href="#/sound"]').click()
+        self.page.get_by_role('heading', name='音效', exact=True).wait_for()
+        self.assertEqual(self.page.evaluate('scrollY'), 0)
+        self.assertTrue(self.page.get_by_role('main', name='音效').evaluate("el=>el.matches(':focus')"))
 
     def test_queue_long_titles_fit_without_horizontal_scroll(self):
         self.start(1887)
@@ -1083,14 +1153,14 @@ class NewWebTests(unittest.TestCase):
         }''', {'value': value, 'event': event})
 
     def add_saved_device(self, address='192.0.2.20', name='卧室音箱', connect=False):
-        self.page.get_by_role('button', name='选择或连接音箱', exact=True).click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         self.page.get_by_role('menuitem', name='添加音箱', exact=True).click()
         self.page.get_by_label('设备名称（可选）', exact=True).fill(name)
         self.page.get_by_label('音箱地址', exact=True).fill(address)
         self.page.locator('#connection-dialog').get_by_role('button', name='连接' if connect else '保存', exact=True).click()
 
     def open_device_manager(self):
-        self.page.get_by_role('button', name='选择或连接音箱', exact=True).click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         self.page.get_by_role('menuitem', name='管理设备', exact=True).click()
         self.page.get_by_role('dialog', name='管理设备', exact=True).wait_for()
 
@@ -1098,7 +1168,7 @@ class NewWebTests(unittest.TestCase):
         self.start(1887)
         self.add_saved_device()
         self.assertEqual(self.page.evaluate('mockSockets.length'), 1)
-        self.page.get_by_role('button', name='选择或连接音箱', exact=True).click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         menu = self.page.locator('#device-menu')
         self.assertEqual(menu.locator('.current-device').count(), 1)
         menu.locator('md-menu-item').filter(has_text='卧室音箱').click()
@@ -1108,12 +1178,12 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(self.page.locator('.connection-label').inner_text(), '卧室音箱')
         old_sent = self.page.evaluate('mockSockets[0].sent')
         self.assertFalse(any(m.get('what')==4 and m.get('arg1')==2 for m in old_sent))
-        self.page.get_by_role('button', name='选择或连接音箱', exact=True).click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         menu.locator('md-menu-item').filter(has_text='卧室音箱').click()
         self.page.wait_for_function('!document.querySelector("#device-menu").open')
         self.page.wait_for_function('getComputedStyle(document.querySelector("#device-menu").shadowRoot.querySelector(".menu")).display === "none"')
         self.assertEqual(self.page.evaluate('mockSockets.length'), 2)
-        self.page.get_by_role('button', name='选择或连接音箱', exact=True).click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         self.page.get_by_role('menuitem', name='添加音箱', exact=True).wait_for()
         self.page.keyboard.press('Escape')
         self.page.wait_for_function('document.querySelector(".connection-chip").getAttribute("aria-expanded") === "false"')
@@ -1122,7 +1192,7 @@ class NewWebTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate('mockSockets[0].url'), 'ws://192.0.2.20:8080/')
         self.assertEqual(self.page.locator('.connection-label').inner_text(), '卧室音箱')
 
-        self.page.get_by_role('button', name='选择或连接音箱', exact=True).click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         self.page.get_by_role('menuitem', name='断开连接', exact=True).click()
         self.page.get_by_role('main').get_by_role('button', name='连接音箱', exact=True).wait_for()
         self.page.reload()
@@ -1193,7 +1263,9 @@ class NewWebTests(unittest.TestCase):
         self.page.get_by_role('heading', name='屏幕', exact=True).wait_for()
         self.page.set_viewport_size({'width':320, 'height':844})
         self.page.locator('#device-sheet').wait_for(state='attached')
-        self.page.get_by_role('button', name='选择或连接音箱', exact=True).click()
+        connected = self.page.get_by_role('button', name='选择或连接音箱，客厅音箱，已连接', exact=True)
+        self.assertTrue(connected.locator('.connection-status-icon').is_visible())
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         sheet = self.page.locator('#device-sheet').get_by_role('dialog')
         sheet.wait_for()
         self.page.wait_for_function('!document.querySelector("#device-sheet").shadowRoot.querySelector("dialog").getAnimations().some(a=>a.playState==="running")')
@@ -1206,7 +1278,7 @@ class NewWebTests(unittest.TestCase):
         self.page.keyboard.press('Escape')
         sheet.wait_for(state='hidden')
         self.assertEqual([m for m in self.sent() if m['type']=='send_message'],commands)
-        self.page.get_by_role('button', name='选择或连接音箱', exact=True).click()
+        self.page.get_by_role('button', name=DEVICE_PICKER).click()
         self.page.locator('#device-sheet .sheet-device').filter(has_text='卧室音箱').click()
         self.page.wait_for_function('mockSockets.length===2 && mockSockets.at(-1).readyState===1')
         self.assertEqual(self.page.locator('.connection-label').inner_text(),'卧室音箱')
@@ -1274,6 +1346,8 @@ class NewWebTests(unittest.TestCase):
         self.start(1887)
         self.page.get_by_role('button',name='删除 晚风',exact=True).click()
         confirm = self.page.locator('#confirm-dialog')
+        alert = confirm.get_by_role('alertdialog', name='删除队列歌曲？')
+        self.assertEqual(alert.evaluate("el=>el.getRootNode().getElementById(el.getAttribute('aria-describedby')).querySelector('slot').assignedElements()[0].textContent"), '从队列删除“晚风”？')
         confirm.get_by_role('button',name='删除歌曲',exact=True).wait_for()
         before = len(self.sent())
         self.page.keyboard.press('Escape')
@@ -1414,7 +1488,7 @@ class NewWebTests(unittest.TestCase):
             cdp.detach()
         settings.get_by_role('button',name='关闭设置',exact=True).click()
         self.page.wait_for_function("!document.querySelector('#settings-dialog').shadowRoot.querySelector('dialog').open")
-        self.page.get_by_role('button',name='选择或连接音箱',exact=True).click()
+        self.page.get_by_role('button',name=DEVICE_PICKER).click()
         sheet = self.page.locator('#device-sheet')
         sheet.get_by_role('button',name='关闭设备列表',exact=True).click(trial=True)
         position = self.page.evaluate('scrollY')
@@ -1454,7 +1528,7 @@ class NewWebTests(unittest.TestCase):
         settings.get_by_role('button',name='关闭设置',exact=True).click()
         self.page.wait_for_function("!document.querySelector('#settings-dialog').open")
         self.page.emulate_media(reduced_motion='no-preference')
-        anchor = self.page.get_by_role('button',name='选择或连接音箱',exact=True)
+        anchor = self.page.get_by_role('button',name=DEVICE_PICKER)
         anchor.click()
         sheet = self.page.locator('#device-sheet')
         handle = sheet.get_by_role('button',name='点按或向下拖动关闭设备列表',exact=True)
@@ -1591,7 +1665,7 @@ class NewWebTests(unittest.TestCase):
         self.page.get_by_role('button',name='刷新',exact=True).click()
         nearby.get_by_role('status').filter(has_text='搜索已结束').wait_for()
         self.assertEqual(nearby.locator('.simple-list li').count(),1)
-        nearby.get_by_role('button',name='配对',exact=True).click()
+        nearby.get_by_role('button',name='配对 本轮耳机 · AA:BB:CC:DD:EE:03',exact=True).click()
         self.assertIn({'type':'BT_createBond','mac':'AA:BB:CC:DD:EE:03'},self.sent())
         self.page.evaluate("mockSockets.at(-1).bluetooth.Scan_Devices=[{Name:'其他控制端缓存',Address:'AA:BB:CC:DD:EE:04'}]")
         self.page.get_by_role('button',name='刷新',exact=True).click()
@@ -1663,7 +1737,7 @@ class NewWebTests(unittest.TestCase):
         self.page.evaluate('window.mockHoldBluetoothScanStart=true')
         nearby.get_by_role('button',name='搜索设备',exact=True).click()
         nearby.get_by_role('status').filter(has_text='正在请求音箱开始搜索').wait_for()
-        self.page.get_by_role('button',name='选择或连接音箱',exact=True).click()
+        self.page.get_by_role('button',name=DEVICE_PICKER).click()
         self.page.locator('#device-menu md-menu-item').filter(has_text='卧室音箱').click()
         self.page.wait_for_function('mockSockets.length===2 && mockSockets.at(-1).readyState===1')
         self.page.get_by_text('书房音箱',exact=True).wait_for()

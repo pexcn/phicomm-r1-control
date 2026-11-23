@@ -130,6 +130,7 @@ strong {
   padding: 24px 12px 24px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
   z-index: 10;
 }
 .brand {
@@ -144,6 +145,7 @@ strong {
   white-space: nowrap;
   font: var(--type-title-large);
   min-height: 48px;
+  flex-shrink: 0;
   border-radius: var(--md-sys-shape-corner-small);
 }
 .brand-icon {
@@ -262,11 +264,15 @@ strong {
 .connection-chip.online .status-dot {
   background: currentColor;
 }
+.connection-status-icon.app-icon {
+  display: none;
+}
 .mobile-brand,
 .bottom-nav {
   display: none;
 }
 main {
+  scroll-margin-top: 64px;
   max-width: 1620px;
   margin: 0 auto;
   padding: 32px 32px 48px;
@@ -380,7 +386,7 @@ main:focus {
   display: inline-flex;
   border-radius: 20px;
   padding: 4px 12px;
-  color: var(--accent);
+  color: var(--md-sys-color-on-secondary-container);
   background: var(--soft);
   font: var(--type-label-medium);
 }
@@ -577,12 +583,19 @@ md-dialog {
 .volume-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 4px;
   color: var(--muted);
   font: var(--type-body-medium);
 }
-.volume-row > span,
-.volume-row > strong {
+.volume-row .volume-label {
+  margin-right: 4px;
+  white-space: nowrap;
+}
+.volume-row md-icon-button {
+  width: 48px;
+  height: 48px;
+}
+.volume-row .volume-percent {
   min-width: 4ch;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -775,6 +788,14 @@ md-dialog {
   text-align: center;
   font: var(--type-body-medium);
 }
+[data-theme="light"] .screen-placeholder md-text-button {
+  --md-sys-color-primary: var(--md-sys-color-inverse-primary);
+}
+.remote-body:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 4px;
+  border-radius: var(--md-sys-shape-corner-medium);
+}
 .device-navigation {
   min-height: 64px;
   display: grid;
@@ -919,12 +940,6 @@ md-dialog {
   width: 64px;
   color: var(--muted);
   font: var(--type-body-medium);
-}
-.eq-band span {
-  width: 62px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  font: var(--type-body-small);
 }
 .card-footer {
   display: flex;
@@ -1520,11 +1535,10 @@ md-dialog {
     padding: 6px 0 18px;
     gap: clamp(18px, 6vw, 36px);
   }
-  .volume-row {
-    gap: 10px;
-    font: var(--type-body-medium);
-  }
   .queue-card {
+    display: none;
+  }
+  .desktop-queue-jump {
     display: none;
   }
   .queue-card.mobile-expanded {
@@ -1541,6 +1555,7 @@ md-dialog {
     gap: 14px;
     text-align: left;
     padding: 16px 20px;
+    scroll-margin-top: 76px;
   }
   .mobile-queue-toggle > span {
     flex: 1;
@@ -1625,10 +1640,6 @@ md-dialog {
     flex-shrink: 0;
     white-space: nowrap;
     font: var(--type-body-medium);
-  }
-  .eq-band span {
-    width: 54px;
-    font: var(--type-body-small);
   }
   .bluetooth-hero {
     gap: 16px;
@@ -1761,12 +1772,20 @@ md-dialog {
   }
 }
 @media (max-width: 420px) {
+  .volume-row .volume-icon,
+  .volume-row .volume-label {
+    display: none;
+  }
   .segmented button {
     padding-inline: 6px;
     gap: 4px;
   }
-  .connection-label {
+  .connection-label,
+  .connection-chip .status-dot {
     display: none;
+  }
+  .connection-status-icon.app-icon {
+    display: block;
   }
   .connection-chip {
     padding: 6px;

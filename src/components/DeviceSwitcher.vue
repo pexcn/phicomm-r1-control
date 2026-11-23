@@ -89,6 +89,17 @@ const label = computed(() =>
       ? "连接音箱"
       : connectionLabel.value,
 );
+const statusIcon = computed(() =>
+  connected.value ? "link" : state.status === "disconnected" ? "unlink" : "refresh",
+);
+const accessibleLabel = computed(() => {
+  const name = activeDevice.value
+    ? profileName(activeDevice.value)
+    : connected.value
+      ? deviceName.value
+      : "";
+  return `选择或连接音箱，${name ? `${name}，` : ""}${connectionLabel.value}`;
+});
 function toggle() {
   if (!state.devices.length) openConnectionDialog();
   else state.devicePickerOpen = !state.devicePickerOpen;
@@ -142,15 +153,17 @@ watch(
       class="connection-chip"
       :class="{ online: connected }"
       @click="toggle"
-      aria-label="选择或连接音箱"
+      :aria-label="accessibleLabel"
       :aria-haspopup="state.devices.length ? (mobile ? 'dialog' : 'menu') : 'dialog'"
       :aria-expanded="state.devicePickerOpen"
       :aria-controls="
         state.devices.length ? (mobile ? 'device-sheet' : 'device-menu') : 'connection-dialog'
       "
     >
-      <MaterialState /><span class="status-dot"></span
-      ><span class="connection-label">{{ label }}</span>
+      <MaterialState />
+      <span class="status-dot"></span>
+      <AppIcon class="connection-status-icon" :name="statusIcon" :size="20" />
+      <span class="connection-label">{{ label }}</span>
       <AppIcon
         v-if="state.devices.length"
         :name="state.devicePickerOpen ? 'up' : 'down'"

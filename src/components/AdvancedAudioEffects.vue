@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppSlider from "./AppSlider.vue";
+import GainValueEditor from "./GainValueEditor.vue";
 import { sliderPercent, sliderDecibels } from "../lib/slider-values";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { action, flag, object, type Data, type Message } from "../lib/protocol";
@@ -170,11 +171,20 @@ onBeforeUnmount(() => {
         />
       </div>
       <p v-if="!effect.available" class="hint">设备未提供此音效配置。</p>
-      <template v-else
-        ><label
+      <template v-else>
+        <GainValueEditor
+          :label="effect.valueLabel"
+          :value="effect.value"
+          :min="effect.min"
+          :max="effect.max"
+          :step="effect.step"
+          :divisor="effect.divisor"
+          :unit="effect.unit"
+          :disabled="busy || !effect.enabled"
+          @apply="(value) => tune(effect.id, null, value)"
           >{{ effect.valueLabel }} ·
           {{ (effect.value / effect.divisor).toFixed(effect.id === "loudness" ? 1 : 0) }}
-          {{ effect.unit }}</label
+          {{ effect.unit }}</GainValueEditor
         >
         <AppSlider
           :aria-label="effect.valueLabel"
@@ -229,10 +239,19 @@ onBeforeUnmount(() => {
       </div>
       <p v-if="!mixerSupported" class="hint">需要 EchoService 1.8.76 及以上。</p>
       <div v-for="channel in channels" :key="channel.id">
-        <label
-          >{{ channel.label }} ·
-          {{ mixerAvailable(channel.id) ? `${mixerValue(channel.id) - 231} dB` : "未上报" }}</label
+        <GainValueEditor
+          v-if="mixerAvailable(channel.id)"
+          :label="channel.label"
+          :value="mixerValue(channel.id)"
+          :min="211"
+          :max="251"
+          :offset="231"
+          unit="dB"
+          :disabled="busy"
+          @apply="(value) => setMixer(channel.id, value)"
+          >{{ channel.label }} · {{ mixerValue(channel.id) - 231 }} dB</GainValueEditor
         >
+        <p v-else class="hint">{{ channel.label }} · 未上报</p>
         <AppSlider
           :aria-label="channel.label"
           drag-only

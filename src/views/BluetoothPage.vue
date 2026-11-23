@@ -239,7 +239,11 @@ async function remove(row: Data) {
                 <strong>{{ row.Name || "蓝牙设备" }}</strong
                 ><small>{{ row.Address }}</small>
               </div>
-              <md-text-button @click="command('BT_createBond', row)">配对</md-text-button>
+              <md-text-button
+                :aria-label="`配对 ${row.Name ? `${row.Name} · ` : ''}${row.Address}`"
+                @click="command('BT_createBond', row)"
+                >配对</md-text-button
+              >
             </li>
           </ul>
         </article>
