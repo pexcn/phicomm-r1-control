@@ -30,12 +30,11 @@ Vue 3、TypeScript、Vite 与 `@material/web` 实现的 R1 音箱控制器。
 - `components/AutoRestartCard.vue`：设备端每日自动重启配置、保存确认与回读。
 - `components/AdvancedAudioEffects.vue`、`lib/audio-effects.ts`：低音、响度、DSP 和 DAC 分路音量。
 - `components/PlaybackSettingsCard.vue`、`lib/playback-settings.ts`：音箱默认音乐源、引擎、首选音质和实际音频格式；音乐源与网页搜索独立。
-- `components/MiPlayDialog.vue`、`lib/miplay.ts`：当前／远端音箱的声道、同步延迟、队列目标和诊断快照；目标变化后丢弃旧回包。
 - `lib/pwa.ts`、`components/PwaSettings.vue`：浏览器安装事件、离线就绪状态与手动更新。
 
 弹窗使用 `AppDialog` 的 `#headline` 插槽；内容和操作区保留原生 `slot="content"`、
 `slot="actions"`，仍由 Material Web 管理滚动、焦点、Escape 和遮罩关闭。
-`mode="adaptive"` 的设置、搜索、本地音乐、设备管理和 MiPlay 在 760px 以下全屏显示，
+`mode="adaptive"` 的设置、搜索、本地音乐和设备管理在 760px 以下全屏显示，
 桌面保留普通弹窗；`mode="sheet"` 使用从底部进出的动画。减少动态效果时跳过弹窗动画。
 设备面板手柄支持点按、键盘关闭和向下拖动；短拖动回弹，取消手势不关闭，关闭后恢复触发控件焦点。
 仅手柄和设备屏幕遥控区域接管触摸手势，其余界面允许浏览器缩放。

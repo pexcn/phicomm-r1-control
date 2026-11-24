@@ -74,25 +74,14 @@
 - 再次搜索、离开页面、断线、切换音箱或关闭蓝牙时清空本轮结果；旧请求的延迟回包不应用到新搜索。
   已配对设备仍由音箱状态独立更新。清理页面结果不删除配对，也不停止其他控制端可能发起的扫描。
 
-## MiPlay 与投放服务
+## 投放服务
 
-- 协议由经典版 `createMiPlayAdvDialog` 和 EchoService 1.8.87 `server` /
-  `MiPlayHost` / `MiPlayRuntime` 交叉核对，不经过 Unisound。仅设备上报 `miplay_open` 时开放入口。
-- 服务使用 `Set_MiPlay_Open`；蓝牙后台启动许可使用 `Set_Bluetooth_Open`，
-  后者沿用经典版 1.8.87 门槛，不等同于蓝牙适配器开关。
+- 蓝牙后台启动许可使用 `Set_Bluetooth_Open`，沿用经典版 1.8.87 门槛，
+  与蓝牙适配器开关分开控制。
+- DLNA、AirPlay 和服务常开分别使用 `Set_DLNA_Open`、`Set_AirPlay_Open` 和
+  `Set_Service_Normally_Open`，写入后通过 `get_info` 核对设备状态。
 - 投放连接模式使用 `what=64,arg1=1/2,arg2=-1` 进入／退出，1.8.20 起支持，
   `get_info.device_state=3` 表示进入，其他已知状态表示退出。
-- 诊断使用 `Get_MiPlay_Diag`；远端使用 `Get_MiPlay_Remote_Diag` 加 `ip`，
-  解析回包 `data.diag` 内的 JSON，检查远端错误码和代理错误。仅接受有效 IPv4。
-- 声道使用 `Set_MiPlay_Channel` 的 `mode=0/1/2`，对应立体声、左、右；
-  远端使用 `Set_MiPlay_Remote_Channel`，同时发送 `mode` 与 `channel` 兼容字段。
-- 队列使用 `Set_MiPlay_Tuning` / `Set_MiPlay_Remote_Tuning` 的
-  `queue_target_ms`（400–1500 整数 ms）；同步延迟使用
-  `Set_MiPlay_Sync_Delay` / `Set_MiPlay_Remote_Sync_Delay` 的
-  `sync_delay_ms`（-500–500 整数 ms），正值晚播，负值早播。
-- 必须读到有效字段才开放该参数；写入后查询同一目标并核对，不以代理 ACK 代替实际生效。
-  目标变化、关闭弹层、换机后停止后续操作。诊断为手动刷新的带读取时间快照，
-  展示设备提供的数据年龄与有效标记；不作声学同步保证，不自动校准。
 
 ## 暂未移植的 Unisound 功能
 

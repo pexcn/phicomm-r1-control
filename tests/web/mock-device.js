@@ -35,19 +35,9 @@ window.WebSocket = class {
     ExoPlayer_Quality: 1,
     Support_Flac: true,
     music_source: "qq",
-    miplay_open: true,
     bluetooth_open: true,
     device_state: 0,
   };
-  miPlay = {
-    channel: 0,
-    queue_target_ms: 800,
-    sync_delay_ms: 0,
-    running: true,
-    diag_valid: true,
-    diag_age_ms: 12,
-  };
-  remoteMiPlay = { channel: 2, queue_target_ms: 900, sync_delay_ms: 20, running: true };
   queue = {
     playIndex: 0,
     playList: [
@@ -130,7 +120,6 @@ window.WebSocket = class {
     }
     if (
       [
-        "Set_MiPlay_Open",
         "Set_Bluetooth_Open",
         "Set_DLNA_Open",
         "Set_AirPlay_Open",
@@ -138,7 +127,6 @@ window.WebSocket = class {
       ].includes(message.type)
     ) {
       const key = {
-        Set_MiPlay_Open: "miplay_open",
         Set_Bluetooth_Open: "bluetooth_open",
         Set_DLNA_Open: "dlna_open",
         Set_AirPlay_Open: "airplay_open",
@@ -155,32 +143,6 @@ window.WebSocket = class {
     }
     if (message.type === "send_message" && message.what === 64)
       this.preferences.device_state = message.arg1 === 1 ? 3 : 0;
-    if (/^(Get|Set)_MiPlay_(Remote_)?(Diag|Channel|Tuning|Sync_Delay)$/.test(message.type)) {
-      const remote = message.type.includes("Remote_");
-      const diag = remote ? this.remoteMiPlay : this.miPlay;
-      if (message.type.startsWith("Set_") && !window.mockMiPlayUnchanged) {
-        const key = message.type.endsWith("Channel")
-          ? "channel"
-          : message.type.endsWith("Tuning")
-            ? "queue_target_ms"
-            : "sync_delay_ms";
-        diag[key] = key === "channel" ? message.mode : message[key];
-      }
-      if (window.mockHoldMiPlay && message.type.startsWith("Set_")) return;
-      const value = { ...diag };
-      if (window.mockMiPlayMissingSync) delete value.sync_delay_ms;
-      this.reply({
-        type: message.type,
-        type_id: message.type_id,
-        code: 200,
-        data: message.type.startsWith("Get_")
-          ? remote
-            ? { ip: message.ip, diag: JSON.stringify({ code: 200, data: value }) }
-            : value
-          : {},
-      });
-      return;
-    }
     if (message.type === "set_bass_enable")
       this.audio.bass.sound_effects_bass_enable = message.enable;
     if (message.type === "set_loudness_enable")
@@ -240,7 +202,7 @@ window.WebSocket = class {
         Service_Normally_Open: true,
         Current_PlayerType: 2,
         ...this.preferences,
-        ...(mockVersion < 1887 ? { miplay_open: undefined, bluetooth_open: undefined } : {}),
+        ...(mockVersion < 1887 ? { bluetooth_open: undefined } : {}),
         ...this.light,
         music_info: {
           id: "mock:track-1",

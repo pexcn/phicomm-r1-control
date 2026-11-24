@@ -5,7 +5,6 @@ import { computed, ref } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import EmptyState from "../components/EmptyState.vue";
 import AutoRestartCard from "../components/AutoRestartCard.vue";
-import MiPlayDialog from "../components/MiPlayDialog.vue";
 import { action, endpoint, flag, formatVersion, object } from "../lib/protocol";
 import {
   connected,
@@ -23,7 +22,6 @@ import {
 
 const confirmAction = useConfirmation();
 const newName = ref("");
-const miPlayOpen = ref(false);
 const serviceBusy = ref(false);
 const restartingAdbd = ref(false);
 async function rebootAdbd() {
@@ -66,12 +64,6 @@ const tools = [
   { name: "原作者经典版", path: "upstream/", icon: "external" },
 ];
 const serviceOptions = [
-  {
-    label: "MiPlay",
-    key: "miplay_open",
-    type: "Set_MiPlay_Open",
-    description: "接收 MiPlay 音频投放",
-  },
   {
     label: "蓝牙后台服务",
     key: "bluetooth_open",
@@ -256,11 +248,6 @@ async function reboot(serviceOnly: boolean) {
               @change="castMode"
             />
           </div>
-          <md-outlined-button
-            :disabled="state.info.miplay_open === undefined"
-            @click="miPlayOpen = true"
-            >MiPlay 控制与诊断</md-outlined-button
-          >
           <p class="hint">开关状态以设备回报为准；未上报的服务不可操作。</p>
         </article>
         <div class="device-side">
@@ -310,7 +297,6 @@ async function reboot(serviceOnly: boolean) {
         </div>
       </div>
       <AutoRestartCard />
-      <MiPlayDialog :open="miPlayOpen" @close="miPlayOpen = false" />
       <details class="card advanced motion-details">
         <summary><md-ripple />高级操作<AppIcon class="disclosure-chevron" name="down" /></summary>
         <div class="advanced-content">
