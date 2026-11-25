@@ -156,7 +156,8 @@ class PwaTests(unittest.TestCase):
         original = self.page.evaluate('caches.keys()')
         self.release('broken')
         # A successful HTTP response with mismatched bytes must also fail atomically.
-        icon = self.site / 'icons/app-512.png'
+        manifest = json.loads((self.site / 'site.webmanifest').read_text())
+        icon = self.site / manifest['icons'][0]['src']
         icon.write_bytes(icon.read_bytes() + b'changed-during-deploy')
         self.page.evaluate('''async () => {
           const registration = await navigator.serviceWorker.getRegistration();
